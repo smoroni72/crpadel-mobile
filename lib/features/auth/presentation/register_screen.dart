@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/network/api_client.dart';
@@ -71,7 +72,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ],
         ),
       );
-      if (mounted) Navigator.pop(context);
+      if (mounted) context.pop();
     } catch (error) {
       if (!mounted) return;
       final message = error is ApiException

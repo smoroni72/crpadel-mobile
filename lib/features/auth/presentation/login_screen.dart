@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/routes.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 import 'auth_controller.dart';
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -104,20 +104,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           : const Text('Accedi'),
                     ),
                     TextButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ForgotPasswordScreen(),
-                        ),
-                      ),
+                      onPressed: () =>
+                          context.pushNamed(AppRoutes.forgotPassword),
                       child: const Text('Hai dimenticato la password?'),
                     ),
                     const Divider(height: 32),
                     OutlinedButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const RegisterScreen(),
-                        ),
-                      ),
+                      onPressed: () => context.pushNamed(AppRoutes.register),
                       child: const Text('Crea un account'),
                     ),
                   ],
