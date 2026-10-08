@@ -2,7 +2,6 @@ import 'package:crpadel_mobile/app/app.dart';
 import 'package:crpadel_mobile/app/bottom_bar.dart';
 import 'package:crpadel_mobile/app/router.dart';
 import 'package:crpadel_mobile/app/routes.dart';
-import 'package:crpadel_mobile/features/auth/data/auth_repository.dart';
 import 'package:crpadel_mobile/features/auth/data/fake_auth_repository.dart';
 import 'package:crpadel_mobile/features/auth/presentation/login_screen.dart';
 import 'package:crpadel_mobile/features/auth/presentation/register_screen.dart';
@@ -13,6 +12,8 @@ import 'package:crpadel_mobile/features/profile/presentation/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/app_overrides.dart';
 
 void main() {
   group('appRedirect', () {
@@ -92,7 +93,8 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [authRepositoryProvider.overrideWithValue(repository)],
+          overrides: FakeBackend(auth: repository).overrides,
+          retry: (_, _) => null,
           child: const CrPadelApp(),
         ),
       );
