@@ -97,6 +97,12 @@ abstract final class AppTheme {
             fontWeight: FontWeight.w600,
           ),
         );
+    // Lo stile del testo dei pulsanti sostituisce quello predefinito invece
+    // di unirsi: deve portarsi dietro il font del brand.
+    final buttonText = textTheme.labelLarge?.copyWith(
+      fontFamily: brand.bodyFont,
+      fontWeight: FontWeight.w600,
+    );
     return base.copyWith(
       scaffoldBackgroundColor: c.background,
       textTheme: textTheme,
@@ -142,7 +148,7 @@ abstract final class AppTheme {
           foregroundColor: c.onPrimary,
           elevation: 0,
           shape: controlShape,
-          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+          textStyle: buttonText,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -151,14 +157,14 @@ abstract final class AppTheme {
           foregroundColor: c.text,
           side: BorderSide(color: c.border),
           shape: controlShape,
-          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+          textStyle: buttonText,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: c.primaryText,
           minimumSize: const Size(44, 44),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+          textStyle: buttonText,
         ),
       ),
       chipTheme: ChipThemeData(
