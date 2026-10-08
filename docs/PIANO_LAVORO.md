@@ -12,10 +12,25 @@ Obiettivo: preparare la base prima delle funzionalità.
 - [ ] Aggiungere `put`, `patch` e `delete` all'`ApiClient`. Se il refresh fallisce: logout forzato e ritorno al login.
 - [ ] Configurare `freezed`, `json_serializable`, `build_runner`.
 - [ ] Localizzazione italiana (`flutter_localizations`, `intl`, locale `it_IT`).
-- [ ] Font come asset locali; tema aggiornato con i token di `docs/SPEC_SCHERMATE.md`.
-- [ ] Logo e icona dell'app (da chiedere a Stefano: oggi il logo è ospitato su Base44).
+- [ ] Font predefiniti come asset locali; tema aggiornato con i token di `docs/SPEC_SCHERMATE.md`.
+- [ ] Predisposizione multi-circolo (senza la funzione completa): tema costruito da un `BrandConfig` (per ora solo quello predefinito CRPadel) con i colori in una `ThemeExtension`; circolo corrente come provider letto dall'`ApiClient` per `X-Club-Slug`; nel redirect del router il controllo "circolo scelto", oggi sempre soddisfatto da `CLUB_SLUG`.
+- [ ] Logo e icona dell'app: **in attesa**, li fornisce Stefano. Fino ad allora resta il segnaposto "CR".
 
 Accettazione: login, registrazione e recupero password funzionano come prima; le 4 tab navigano; `flutter analyze` e `flutter test` puliti.
+
+## Fase 0b – Multi-circolo e brand
+
+Dipende dalla lacuna n. 8. Si sviluppa con il fake (`FAKE_APP_CONFIG=true`) e si collega al backend quando l'endpoint esiste.
+
+- [ ] All'avvio: se c'è un circolo salvato, si usa subito il tema in cache e si aggiorna la configurazione in background (`If-None-Match`).
+- [ ] Primo avvio: si legge l'elenco dei circoli aderenti.
+  - Elenco vuoto o endpoint non disponibile (404): l'app parte con i valori predefiniti CRPadel e il circolo `CLUB_SLUG`, come oggi.
+  - Uno o più circoli: schermata "Scegli il circolo" con la lista e una ricerca per nome o città; la scelta si salva sul dispositivo.
+  - Errore di rete: messaggio e "Riprova", senza ripiegare in silenzio sul circolo predefinito.
+- [ ] Applicazione del brand: colori (con ripiego sul predefinito se un valore manca o ha contrasto insufficiente), logo, immagine della splash Flutter, font scaricati e verificati.
+- [ ] Cambio circolo dal Profilo, senza nuovo login (gli utenti sono globali, le iscrizioni per circolo).
+
+Accettazione: con il fake si verifica il flusso con zero, uno e più circoli; un brand personalizzato cambia colori, logo e font; senza rete al riavvio l'app usa la configurazione in cache.
 
 ## Fase 1 – Home in sola lettura
 

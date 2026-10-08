@@ -19,7 +19,8 @@ Il backend si trova in `../CrPadel` (repository `smoroni72/crpadel-base44`). **I
 - HTTP: il `ApiClient` esistente (`lib/core/network/api_client.dart`, Dio). Gestisce Bearer, cookie di refresh persistente, header `X-Club-Slug` e retry su 401. Non cambiare questa logica senza un motivo esplicito.
 - Modelli: `freezed` + `json_serializable`.
 - Lingua: solo italiano. `flutter_localizations` + `intl` con locale `it_IT`. Fuso orario dei dati: Europe/Rome.
-- Font: Space Grotesk (titoli), Inter (testo), JetBrains Mono (orari, punteggi, numeri). Inseriti come asset locali, non scaricati a runtime.
+- Font: Space Grotesk (titoli), Inter (testo), JetBrains Mono (orari, punteggi, numeri) sono i font predefiniti, inseriti come asset locali e sempre disponibili come ripiego. Un circolo può indicarne altri nella sua configurazione: si scaricano una volta, si verificano con lo sha256, si salvano su disco e si caricano con `FontLoader`. Solo font con licenza OFL.
+- Multi-circolo: una sola app "CRPadel" sugli store (nome, icona e scheda fissi). Colori, logo, splash Flutter e font arrivano dalla configurazione del circolo scelto; senza circoli sul backend l'app usa i valori predefiniti CRPadel. Il tema si costruisce sempre da un `BrandConfig`, mai da costanti sparse.
 
 ## Struttura
 
@@ -56,7 +57,8 @@ Non inventare endpoint chiamandoli come se fossero reali.
 
 ## Sicurezza
 
-- Nessun segreto, token o password nel repository. URL e circolo arrivano da `--dart-define` (`API_BASE_URL`, `CLUB_SLUG`).
+- Nessun segreto, token o password nel repository. L'URL arriva da `--dart-define` (`API_BASE_URL`). `CLUB_SLUG` è il circolo predefinito, usato quando il backend non ha un elenco di circoli; altrimenti il circolo è quello scelto dall'utente.
+- La configurazione del circolo è pubblica e non contiene segreti. Asset (logo, splash, font) accettati solo in https, solo dallo storage CRPadel e con limiti di dimensione.
 - Non loggare token o dati personali.
 
 ## Verifiche prima di ogni commit
