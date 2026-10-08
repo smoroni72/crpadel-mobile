@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/routes.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/brand_mark.dart';
 import 'auth_controller.dart';
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -91,7 +92,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     if (error != null) ...[
                       const SizedBox(height: 12),
-                      Text(error, style: const TextStyle(color: AppTheme.red)),
+                      Text(
+                        error,
+                        style: TextStyle(color: context.colors.primaryText),
+                      ),
                     ],
                     const SizedBox(height: 20),
                     ElevatedButton(
@@ -104,20 +108,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           : const Text('Accedi'),
                     ),
                     TextButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ForgotPasswordScreen(),
-                        ),
-                      ),
+                      onPressed: () =>
+                          context.pushNamed(AppRoutes.forgotPassword),
                       child: const Text('Hai dimenticato la password?'),
                     ),
                     const Divider(height: 32),
                     OutlinedButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const RegisterScreen(),
-                        ),
-                      ),
+                      onPressed: () => context.pushNamed(AppRoutes.register),
                       child: const Text('Crea un account'),
                     ),
                   ],
@@ -135,34 +132,19 @@ class _LoginHeader extends StatelessWidget {
   const _LoginHeader();
 
   @override
-  Widget build(BuildContext context) => const Column(
-    children: [
-      CircleAvatar(
-        radius: 42,
-        backgroundColor: AppTheme.navy,
-        child: Text(
-          'CR',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 30,
-            fontWeight: FontWeight.w800,
-          ),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        const BrandMark(size: 84),
+        const SizedBox(height: 18),
+        Text('Benvenuto in CRPadel', style: theme.textTheme.headlineMedium),
+        const SizedBox(height: 6),
+        Text(
+          'Accedi per prenotare e giocare',
+          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
         ),
-      ),
-      SizedBox(height: 18),
-      Text(
-        'Benvenuto in CRPadel',
-        style: TextStyle(
-          fontSize: 26,
-          fontWeight: FontWeight.w800,
-          color: AppTheme.navy,
-        ),
-      ),
-      SizedBox(height: 6),
-      Text(
-        'Accedi per prenotare e giocare',
-        style: TextStyle(color: Colors.black54),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }

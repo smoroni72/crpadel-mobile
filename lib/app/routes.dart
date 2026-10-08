@@ -1,0 +1,30 @@
+/// Nomi e percorsi delle route. Si naviga sempre per nome
+/// (`context.goNamed(AppRoutes.home)`), mai componendo percorsi a mano.
+abstract final class AppRoutes {
+  static const splash = 'splash';
+  static const chooseClub = 'scegli-circolo';
+  static const login = 'login';
+  static const register = 'registrazione';
+  static const forgotPassword = 'recupero-password';
+
+  static const home = 'home';
+  static const book = 'prenota';
+  static const matches = 'partite';
+  static const profile = 'profilo';
+}
+
+abstract final class AppPaths {
+  static const splash = '/splash';
+  static const chooseClub = '/scegli-circolo';
+  static const login = '/login';
+  static const register = 'registrazione';
+  static const forgotPassword = 'recupero-password';
+
+  static const home = '/home';
+  static const book = '/prenota';
+  static const matches = '/partite';
+  static const profile = '/profilo';
+
+  /// Percorsi raggiungibili senza aver fatto l'accesso.
+  static bool isPublic(String location) => location.startsWith(login);
+}

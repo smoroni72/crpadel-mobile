@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Completa la prenotazione</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+body{margin:0}
+a{color:#C42B20;text-decoration:none}a:hover{color:#9E2219}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: Inter, sans-serif; color: #1C2840; display: flex; flex-direction: column; overflow: hidden">
+  <div style="padding: 16px 16px 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #EDEFF3">
+    <span style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700">Completa la prenotazione</span>
+    <a href="A-Prenota.dc.html" aria-label="Chiudi" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #1C2840"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+  </div>
+  <div style="flex: 1; overflow: hidden; padding: 16px 20px; display: flex; flex-direction: column; gap: 18px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 13px; font-weight: 600; color: #5C6884">Tipo di impegno</span>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; background: #F3F5F9; border-radius: 14px; padding: 4px">
+        <button style="height: 44px; border-radius: 10px; border: none; background: #FFFFFF; color: #1C2840; font-size: 13px; font-weight: 600">Partita · 90'</button>
+        <button style="height: 44px; border-radius: 10px; border: none; background: transparent; color: #5C6884; font-size: 13px; font-weight: 500">Lezione · 60'</button>
+        <button style="height: 44px; border-radius: 10px; border: none; background: transparent; color: #5C6884; font-size: 13px; font-weight: 500">Allenamento</button>
+      </div>
+    </div>
+    <div style="background: #F9FAFB; border: 1px solid #DADEE7; border-radius: 16px; padding: 4px 16px">
+      <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #EDEFF3; font-size: 14px"><span style="color: #5C6884">Campo</span><span style="font-weight: 600">Campo 2 · indoor</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #EDEFF3; font-size: 14px"><span style="color: #5C6884">Quando</span><span style="font-weight: 600">Gio 8 ott · 20:00–21:30</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 10px 0; font-size: 14px"><span style="color: #5C6884">Prenotato da</span><span style="font-weight: 600">Stefano Moroni (tu)</span></div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 600">Giocatori</span><span style="font-size: 12px; color: #5C6884">facoltativo · 1/4</span></div>
+      <label style="display: flex; justify-content: space-between; align-items: center; min-height: 44px; font-size: 14px"><span>Gioco anch'io</span><input type="checkbox" style="width: 22px; height: 22px; accent-color: #E6392D"></label>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <span style="font-size: 11px; font-weight: 600; color: #5C6884; letter-spacing: 0.06em">SQUADRA A</span>
+        <span style="font-size: 11px; font-weight: 600; color: #5C6884; letter-spacing: 0.06em">SQUADRA B</span>
+        <div style="height: 48px; border-radius: 12px; background: #F3F5F9; display: flex; align-items: center; gap: 8px; padding: 0 10px; font-size: 13px; font-weight: 600"><span style="width: 28px; height: 28px; border-radius: 14px; background: #1B2A4A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 11px">LR</span>Luca Rossi</div>
+        <button style="height: 48px; border-radius: 12px; border: 1.5px dashed #C3C9D6; background: #FFFFFF; color: #5C6884; font-size: 13px; font-weight: 600">+ Aggiungi</button>
+        <button style="height: 48px; border-radius: 12px; border: 1.5px dashed #C3C9D6; background: #FFFFFF; color: #5C6884; font-size: 13px; font-weight: 600">+ Aggiungi</button>
+        <button style="height: 48px; border-radius: 12px; border: 1.5px dashed #C3C9D6; background: #FFFFFF; color: #5C6884; font-size: 13px; font-weight: 600">+ Aggiungi</button>
+      </div>
+      <span style="font-size: 12px; color: #5C6884">Con meno di 4 giocatori la partita resta aperta: chi vuole giocare invia una richiesta e sei tu ad approvarla.</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 13px; font-weight: 600; color: #5C6884">Tipo di partita</span>
+      <div style="display: flex; gap: 8px">
+        <button style="height: 40px; padding: 0 16px; border-radius: 999px; border: none; background: #1B2A4A; color: #FFFFFF; font-size: 13px; font-weight: 600">Ranking</button>
+        <button style="height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #DADEE7; background: #FFFFFF; color: #1C2840; font-size: 13px">Amichevole</button>
+      </div>
+    </div>
+  </div>
+  <div style="padding: 12px 20px 28px; border-top: 1px solid #EDEFF3">
+    <a href="Main.dc.html" style="height: 52px; border-radius: 14px; background: #E6392D; color: #FFFFFF; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">Conferma prenotazione</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

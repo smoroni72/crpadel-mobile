@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Prenota – un campo alla volta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+body{margin:0}
+a{color:#C42B20;text-decoration:none}a:hover{color:#9E2219}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F9FAFB; font-family: Inter, sans-serif; color: #1C2840; display: flex; flex-direction: column; overflow: hidden">
+  <div style="padding: 16px 16px 8px; display: flex; align-items: center; justify-content: space-between">
+    <span style="font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700">Prenota</span>
+    <div style="display: flex; align-items: center; gap: 2px">
+      <button aria-label="Giorno precedente" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #DADEE7; background: #FFFFFF; font-size: 18px; color: #1C2840">‹</button>
+      <span style="font-weight: 600; font-size: 14px; padding: 0 10px">Gio 8 ott</span>
+      <button aria-label="Giorno successivo" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #DADEE7; background: #FFFFFF; font-size: 18px; color: #1C2840">›</button>
+    </div>
+  </div>
+  <div style="padding: 4px 16px 8px; display: flex; gap: 8px; align-items: center">
+    <a href="A-Prenota-Liberi.dc.html" style="height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #DADEE7; background: #FFFFFF; color: #1C2840; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h18M6 12h12M10 19h4"></path></svg>Solo campi liberi alle 19:00</a>
+  </div>
+  <div style="display: flex; gap: 8px; padding: 6px 0 10px 16px; overflow: hidden; white-space: nowrap">
+    <button style="flex: none; height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid #DADEE7; background: #FFFFFF; color: #1C2840; font-size: 13px; font-weight: 600">Campo 1</button>
+    <button style="flex: none; height: 40px; padding: 0 14px; border-radius: 12px; border: none; background: #1B2A4A; color: #FFFFFF; font-size: 13px; font-weight: 600">Campo 2 · indoor</button>
+    <button style="flex: none; height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid #DADEE7; background: #FFFFFF; color: #1C2840; font-size: 13px; font-weight: 600">Campo 3</button>
+    <button style="flex: none; height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid #DADEE7; background: #FFFFFF; color: #1C2840; font-size: 13px; font-weight: 600">Campo 4</button>
+    <button style="flex: none; height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid #DADEE7; background: #FFFFFF; color: #1C2840; font-size: 13px; font-weight: 600">Campo 5</button>
+  </div>
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px 8px">
+    <button aria-label="Campo precedente" style="height: 44px; padding: 0 10px; border: none; background: transparent; color: #5C6884; font-size: 13px; font-weight: 600">‹ Campo 1</button>
+    <div style="display: flex; gap: 6px; align-items: center" aria-label="Campo 2 di 6">
+      <span style="width: 6px; height: 6px; border-radius: 3px; background: #C3C9D6"></span>
+      <span style="width: 18px; height: 6px; border-radius: 3px; background: #E6392D"></span>
+      <span style="width: 6px; height: 6px; border-radius: 3px; background: #C3C9D6"></span>
+      <span style="width: 6px; height: 6px; border-radius: 3px; background: #C3C9D6"></span>
+      <span style="width: 6px; height: 6px; border-radius: 3px; background: #C3C9D6"></span>
+      <span style="width: 6px; height: 6px; border-radius: 3px; background: #C3C9D6"></span>
+    </div>
+    <button aria-label="Campo successivo" style="height: 44px; padding: 0 10px; border: none; background: transparent; color: #5C6884; font-size: 13px; font-weight: 600">Campo 3 ›</button>
+  </div>
+  <div style="flex: 1; overflow: hidden; padding: 0 16px; display: flex; gap: 8px">
+    <div style="width: 44px; display: flex; flex-direction: column; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #5C6884">
+      <span style="height: 40px">17:00</span><span style="height: 40px">17:30</span><span style="height: 40px">18:00</span><span style="height: 40px">18:30</span><span style="height: 40px">19:00</span><span style="height: 40px">19:30</span><span style="height: 40px">20:00</span><span style="height: 40px">20:30</span><span style="height: 40px">21:00</span><span style="height: 40px">21:30</span>
+    </div>
+    <div style="flex: 1; height: 400px; position: relative; background: #EEF7F1; border-radius: 12px; background-image: repeating-linear-gradient(180deg, transparent 0 39px, #D7EBDD 39px 40px)">
+      <div style="position: absolute; left: 4px; right: 4px; top: 2px; height: 76px; box-sizing: border-box; border-radius: 10px; background: #E1ECFA; padding: 8px 12px; display: flex; justify-content: space-between"><span style="font-size: 13px; font-weight: 600; color: #174C94">Lezione</span><span style="font-size: 12px; color: #5C6884">17:00–18:00</span></div>
+      <div style="position: absolute; left: 4px; right: 4px; top: 122px; height: 116px; box-sizing: border-box; border-radius: 10px; background: #1B2A4A; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px"><div style="display: flex; justify-content: space-between"><span style="font-size: 13px; font-weight: 600; color: #FFFFFF">La tua partita</span><span style="font-size: 12px; color: #B9C3D9">18:30–20:00</span></div><span style="font-size: 12px; color: #B9C3D9">3/4 giocatori · 1 richiesta da approvare</span></div>
+      <a href="A-Prenota-Conferma.dc.html" style="position: absolute; left: 4px; right: 4px; top: 242px; height: 116px; box-sizing: border-box; border-radius: 10px; border: 2px dashed #E6392D; background: #FFFFFF; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; color: #1C2840"><div style="display: flex; justify-content: space-between"><span style="font-size: 13px; font-weight: 600; color: #C42B20">Libero · tocca per prenotare</span><span style="font-size: 12px; color: #5C6884">20:00–21:30</span></div></a>
+    </div>
+  </div>
+  <div style="display: flex; gap: 12px; flex-wrap: wrap; padding: 4px 16px 12px 68px; font-size: 11px; color: #5C6884">
+    <span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #CFE8D7"></span>Libero</span>
+    <span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #1B2A4A"></span>Tuo</span>
+    <span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #FBE3E1"></span>Partita</span>
+    <span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #FBEFD5"></span>Prenotato</span>
+    <span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #E1ECFA"></span>Lezione</span>
+  </div>
+  <nav style="display: flex; justify-content: space-around; padding: 10px 8px 24px; background: #FFFFFF; border-top: 1px solid #DADEE7; font-size: 11px; font-weight: 600">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #5C6884; min-width: 64px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
+    <a href="A-Prenota.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #E6392D; min-width: 64px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>Prenota</a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #5C6884; min-width: 64px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M5 8c4 2 10 2 14 0M5 16c4-2 10-2 14 0"></path></svg>Partite</a>
+    <a href="A-Profilo.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #5C6884; min-width: 64px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Profilo</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

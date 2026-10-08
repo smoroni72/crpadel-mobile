@@ -1,23 +1,18 @@
-class AppUser {
-  const AppUser({
-    required this.id,
-    required this.email,
-    required this.fullName,
-    required this.emailVerified,
-    this.clubRole,
-  });
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  final String id;
-  final String email;
-  final String fullName;
-  final bool emailVerified;
-  final String? clubRole;
+part 'app_user.freezed.dart';
+part 'app_user.g.dart';
 
-  factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
-    id: json['id'] as String,
-    email: json['email'] as String,
-    fullName: json['full_name'] as String,
-    emailVerified: json['email_verified'] as bool? ?? false,
-    clubRole: json['club_role'] as String?,
-  );
+@freezed
+abstract class AppUser with _$AppUser {
+  const factory AppUser({
+    required String id,
+    required String email,
+    required String fullName,
+    @Default(false) bool emailVerified,
+    String? clubRole,
+  }) = _AppUser;
+
+  factory AppUser.fromJson(Map<String, dynamic> json) =>
+      _$AppUserFromJson(json);
 }

@@ -1,28 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/network/api_client.dart';
 import '../data/auth_repository.dart';
 import '../domain/app_user.dart';
-
-final apiClientProvider = FutureProvider<ApiClient>(
-  (ref) => ApiClient.create(),
-);
-
-final authRepositoryProvider = FutureProvider<AuthRepository>((ref) async {
-  return AuthRepository(await ref.watch(apiClientProvider.future));
-});
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, AppUser?>(
   AuthController.new,
 );
 
 class AuthController extends AsyncNotifier<AppUser?> {
+  AuthRepository get _repository => ref.read(authRepositoryProvider);
+
   @override
   Future<AppUser?> build() async {
+    final repository = ref.watch(authRepositoryProvider);
+    final subscription = repository.sessionExpired.listen(
+      (_) => state = const AsyncData(null),
+    );
+    ref.onDispose(subscription.cancel);
     try {
-      return await (await ref.watch(
-        authRepositoryProvider.future,
-      )).restoreSession();
+      return await repository.restoreSession();
     } catch (_) {
       return null;
     }
@@ -30,11 +26,7 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<void> login(String email, String password) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () async => (await ref.read(
-        authRepositoryProvider.future,
-      )).login(email, password),
-    );
+    state = await AsyncValue.guard(() => _repository.login(email, password));
   }
 
   Future<String> register({
@@ -43,24 +35,19 @@ class AuthController extends AsyncNotifier<AppUser?> {
     required String fullName,
     required DateTime birthDate,
     required String gender,
-  }) async {
-    return (await ref.read(authRepositoryProvider.future)).register(
-      email: email,
-      password: password,
-      fullName: fullName,
-      birthDate: birthDate,
-      gender: gender,
-    );
-  }
+  }) => _repository.register(
+    email: email,
+    password: password,
+    fullName: fullName,
+    birthDate: birthDate,
+    gender: gender,
+  );
 
-  Future<String> forgotPassword(String email) async {
-    return (await ref.read(
-      authRepositoryProvider.future,
-    )).forgotPassword(email);
-  }
+  Future<String> forgotPassword(String email) =>
+      _repository.forgotPassword(email);
 
   Future<void> logout() async {
-    await (await ref.read(authRepositoryProvider.future)).logout();
+    await _repository.logout();
     state = const AsyncData(null);
   }
 }
