@@ -1,0 +1,44 @@
+# Le stesse verifiche di CLAUDE.md, su ogni push verso main e su ogni PR.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.35.4
+          cache: true
+
+      - name: Dipendenze
+        run: flutter pub get
+
+      - name: Codice generato aggiornato
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          git diff --exit-code -- lib test
+
+      - name: Formattazione
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analisi
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
