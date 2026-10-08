@@ -1,43 +1,14 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:crpadel_mobile/core/network/api_client.dart';
 import 'package:crpadel_mobile/core/network/token_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef _Handler = (int, Object?) Function(RequestOptions options);
-
-class _FakeAdapter implements HttpClientAdapter {
-  _FakeAdapter(this.handler);
-  final _Handler handler;
-  final requests = <RequestOptions>[];
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) async {
-    requests.add(options);
-    final (status, body) = handler(options);
-    return ResponseBody.fromString(
-      jsonEncode(body),
-      status,
-      headers: {
-        Headers.contentTypeHeader: [Headers.jsonContentType],
-      },
-    );
-  }
-
-  @override
-  void close({bool force = false}) {}
-}
+import '../../helpers/fake_http.dart';
 
 void main() {
   late InMemoryTokenStorage storage;
 
-  ApiClient buildClient(_FakeAdapter adapter) {
+  ApiClient buildClient(FakeAdapter adapter) {
     final dio = Dio(BaseOptions(baseUrl: 'https://api.test/api/v1'))
       ..httpClientAdapter = adapter;
     return ApiClient(dio, storage, clubSlug: 'crpadel');
@@ -46,7 +17,7 @@ void main() {
   setUp(() => storage = InMemoryTokenStorage());
 
   test('invia circolo e Bearer; il circolo si può cambiare', () async {
-    final adapter = _FakeAdapter((_) => (200, {'data': []}));
+    final adapter = FakeAdapter((_) => (200, {'data': []}));
     final api = buildClient(adapter);
     await api.setAccessToken('token-1');
 
@@ -60,7 +31,7 @@ void main() {
   });
 
   test('put, patch e delete usano il metodo giusto', () async {
-    final adapter = _FakeAdapter((_) => (200, {'data': null}));
+    final adapter = FakeAdapter((_) => (200, {'data': null}));
     final api = buildClient(adapter);
 
     await api.put('/x');
@@ -72,7 +43,7 @@ void main() {
   });
 
   test('su 401 rinnova il token e ripete la richiesta', () async {
-    final adapter = _FakeAdapter((options) {
+    final adapter = FakeAdapter((options) {
       if (options.path == '/auth/refresh') {
         return (200, {'access_token': 'nuovo'});
       }
@@ -96,7 +67,7 @@ void main() {
   test(
     'se il refresh fallisce cancella il token e segnala la scadenza',
     () async {
-      final adapter = _FakeAdapter(
+      final adapter = FakeAdapter(
         (options) => (401, {'error': 'Sessione non valida'}),
       );
       final api = buildClient(adapter);
@@ -118,7 +89,7 @@ void main() {
   );
 
   test('un 401 sulle rotte di accesso non tenta il refresh', () async {
-    final adapter = _FakeAdapter(
+    final adapter = FakeAdapter(
       (_) => (401, {'error': 'Credenziali non valide'}),
     );
     final api = buildClient(adapter);

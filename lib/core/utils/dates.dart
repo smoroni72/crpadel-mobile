@@ -27,6 +27,10 @@ abstract final class Dates {
   static String timeRange(DateTime start, DateTime end) =>
       '${time(start)}–${time(end)}';
 
+  /// "12/12", per scadenze vicine.
+  static String dayMonth(DateTime date) =>
+      DateFormat('dd/MM', locale).format(date);
+
   /// "12/12/2026"
   static String numeric(DateTime date) =>
       DateFormat('dd/MM/yyyy', locale).format(date);
@@ -41,8 +45,11 @@ abstract final class Dates {
   }
 
   /// "2026-10-08", il formato delle date nelle query dell'API.
+  /// Non dipende dalla lingua: si usa anche prima di caricare i dati locali.
   static String api(DateTime date) =>
-      DateFormat('yyyy-MM-dd', locale).format(date);
+      '${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
 
   static String _capitalize(String value) =>
       value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
