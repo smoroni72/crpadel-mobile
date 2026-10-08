@@ -35,4 +35,16 @@ void main() {
     expect(theme.colorScheme.primary, const Color(0xFF0A7D3B));
     expect(theme.textTheme.headlineMedium?.fontFamily, 'Inter');
   });
+
+  test('i pulsanti usano il font del brand', () {
+    final theme = AppTheme.light();
+    final styles = [
+      theme.elevatedButtonTheme.style,
+      theme.outlinedButtonTheme.style,
+      theme.textButtonTheme.style,
+    ];
+    for (final style in styles) {
+      expect(style?.textStyle?.resolve({})?.fontFamily, 'Inter');
+    }
+  });
 }

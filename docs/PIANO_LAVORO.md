@@ -34,11 +34,11 @@ Accettazione: con il fake si verifica il flusso con zero, uno e più circoli; un
 
 ## Fase 1 – Home in sola lettura
 
-- [ ] Modelli e repository: prenotazioni, partite, pacchetti.
-- [ ] Riferimento pacchetto (visibile solo se presente).
-- [ ] "Le tue prenotazioni" con le prossime prenotazioni.
-- [ ] "Partite del giorno" con selettore giorni avanti/indietro e card per stato.
-- [ ] Stati vuoti, caricamento, errore; pull-to-refresh.
+- [x] Modelli e repository: prenotazioni, partite, pacchetti.
+- [x] Riferimento pacchetto (visibile solo se presente). Mostra il nome del piano al posto della fascia oraria finché manca la lacuna n. 2.
+- [x] "Le tue prenotazioni" con le prossime prenotazioni.
+- [x] "Partite del giorno" con selettore giorni avanti/indietro e card per stato. Il pulsante **Chiedi** si collega nella Fase 3 (richieste di partecipazione).
+- [x] Stati vuoti, caricamento, errore; pull-to-refresh.
 
 Accettazione: con un utente di staging la Home mostra i dati reali; cambiando giorno si aggiornano le partite; test dei repository e widget test della Home.
 

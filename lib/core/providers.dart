@@ -6,3 +6,6 @@ import 'network/api_client.dart';
 final apiClientProvider = Provider<ApiClient>(
   (ref) => throw UnimplementedError('apiClientProvider va sovrascritto'),
 );
+
+/// Ora corrente; nei test si sostituisce con un orario fisso.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
