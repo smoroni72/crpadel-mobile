@@ -12,7 +12,9 @@ class CrPadelApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
     title: 'CRPadel',
     debugShowCheckedModeBanner: false,
-    theme: AppTheme.light,
+    theme: AppTheme.light(),
+    darkTheme: AppTheme.dark(),
+    themeMode: ThemeMode.system,
     locale: const Locale('it', 'IT'),
     supportedLocales: const [Locale('it', 'IT')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,

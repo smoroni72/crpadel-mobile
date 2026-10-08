@@ -9,21 +9,25 @@ class BrandMark extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    decoration: BoxDecoration(
-      color: AppTheme.navy,
-      borderRadius: BorderRadius.circular(size / 4),
-    ),
-    alignment: Alignment.center,
-    child: Text(
-      'CR',
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: size * 0.375,
-        fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: colors.navy,
+        borderRadius: BorderRadius.circular(size / 4),
       ),
-    ),
-  );
+      alignment: Alignment.center,
+      child: Text(
+        'CR',
+        style: TextStyle(
+          color: colors.onNavy,
+          fontSize: size * 0.375,
+          fontWeight: FontWeight.w700,
+          fontFamily: context.fonts.heading,
+        ),
+      ),
+    );
+  }
 }

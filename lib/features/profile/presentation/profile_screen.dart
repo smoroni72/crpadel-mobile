@@ -11,6 +11,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).value;
+    final colors = context.colors;
     return Scaffold(
       appBar: AppBar(title: const Text('Profilo')),
       body: ListView(
@@ -18,10 +19,10 @@ class ProfileScreen extends ConsumerWidget {
         children: [
           CircleAvatar(
             radius: 42,
-            backgroundColor: AppTheme.navy,
+            backgroundColor: colors.navy,
             child: Text(
               user?.fullName.substring(0, 1).toUpperCase() ?? 'G',
-              style: const TextStyle(color: Colors.white, fontSize: 30),
+              style: TextStyle(color: colors.onNavy, fontSize: 30),
             ),
           ),
           const SizedBox(height: 12),
