@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme/app_theme.dart';
@@ -12,6 +13,9 @@ class CrPadelApp extends ConsumerWidget {
     title: 'CRPadel',
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
+    locale: const Locale('it', 'IT'),
+    supportedLocales: const [Locale('it', 'IT')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
     routerConfig: ref.watch(routerProvider),
   );
 }

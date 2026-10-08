@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../core/utils/dates.dart';
 import 'auth_controller.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -139,7 +139,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   child: Text(
                     _birthDate == null
                         ? 'Seleziona'
-                        : DateFormat('dd/MM/yyyy').format(_birthDate!),
+                        : Dates.numeric(_birthDate!),
                   ),
                 ),
               ),
