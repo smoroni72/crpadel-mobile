@@ -6,14 +6,14 @@ Una fase alla volta, un branch e una Pull Request per fase. Una fase è chiusa q
 
 Obiettivo: preparare la base prima delle funzionalità.
 
-- [ ] Introdurre `go_router` con `StatefulShellRoute` (4 tab: Home, Prenota, Partite, Profilo) e redirect per l'autenticazione.
-- [ ] Dividere `lib/app/authenticated_shell.dart` nelle feature `home`, `bookings`, `matches`, `profile`, `subscriptions`; widget comuni in `lib/core/widgets`.
-- [ ] Spostare `apiClientProvider` e i provider infrastrutturali in `lib/core`. Creare l'`ApiClient` in `main()` e iniettarlo, invece di usare un `FutureProvider`.
-- [ ] Aggiungere `put`, `patch` e `delete` all'`ApiClient`. Se il refresh fallisce: logout forzato e ritorno al login.
-- [ ] Configurare `freezed`, `json_serializable`, `build_runner`.
-- [ ] Localizzazione italiana (`flutter_localizations`, `intl`, locale `it_IT`).
-- [ ] Font predefiniti come asset locali; tema aggiornato con i token di `docs/SPEC_SCHERMATE.md`.
-- [ ] Predisposizione multi-circolo (senza la funzione completa): tema costruito da un `BrandConfig` (per ora solo quello predefinito CRPadel) con i colori in una `ThemeExtension`; circolo corrente come provider letto dall'`ApiClient` per `X-Club-Slug`; nel redirect del router il controllo "circolo scelto", oggi sempre soddisfatto da `CLUB_SLUG`.
+- [x] Introdurre `go_router` con `StatefulShellRoute` (4 tab: Home, Prenota, Partite, Profilo) e redirect per l'autenticazione.
+- [x] Dividere `lib/app/authenticated_shell.dart` nelle feature `home`, `bookings`, `matches`, `profile`, `subscriptions`; widget comuni in `lib/core/widgets`.
+- [x] Spostare `apiClientProvider` e i provider infrastrutturali in `lib/core`. Creare l'`ApiClient` in `main()` e iniettarlo, invece di usare un `FutureProvider`.
+- [x] Aggiungere `put`, `patch` e `delete` all'`ApiClient`. Se il refresh fallisce: logout forzato e ritorno al login.
+- [x] Configurare `freezed`, `json_serializable`, `build_runner`.
+- [x] Localizzazione italiana (`flutter_localizations`, `intl`, locale `it_IT`).
+- [x] Font predefiniti come asset locali; tema chiaro e scuro con i token di `docs/SPEC_SCHERMATE.md`; barra in basso "a incavo".
+- [x] Predisposizione multi-circolo (senza la funzione completa): tema costruito da un `BrandConfig` (per ora solo quello predefinito CRPadel) con i colori in una `ThemeExtension`; circolo corrente come provider letto dall'`ApiClient` per `X-Club-Slug`; nel redirect del router il controllo "circolo scelto", oggi sempre soddisfatto da `CLUB_SLUG`.
 - [ ] Logo e icona dell'app: **in attesa**, li fornisce Stefano. Fino ad allora resta il segnaposto "CR".
 
 Accettazione: login, registrazione e recupero password funzionano come prima; le 4 tab navigano; `flutter analyze` e `flutter test` puliti.

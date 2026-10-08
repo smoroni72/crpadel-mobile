@@ -17,11 +17,11 @@ Il mockup completo, con le alternative scartate, è sul canvas "CrPadel Mobile �
 | Raggi | card 16–20, pulsanti e chip 12, pill 999 |
 | Tocco | target minimi 44×44 |
 
-Solo tema chiaro nella prima versione; i colori vanno comunque definiti come token del `ThemeData` per poter aggiungere il tema scuro.
+Tema chiaro e scuro: l'app segue l'impostazione del sistema. I colori sono token (`AppColors` in `lib/core/theme`); quelli del tema scuro sono una proposta con gli stessi ruoli e contrasto del testo almeno 4,5:1.
 
 ## Navigazione
 
-Barra in basso con 4 tab: **Home**, **Prenota**, **Partite**, **Profilo**. La shell attuale ha 5 tab (c'è anche "Circolo"): va portata a 4. I contenuti del circolo (news, tornei, galleria) sono fuori dalla prima versione.
+Barra in basso con 4 tab: **Home**, **Prenota**, **Partite**, **Profilo**. Stile "a incavo" (template B scelto): la tab attiva sale in un cerchio rosso che galleggia sopra un incavo della barra, con il nome sotto; le altre mostrano icona e nome. La shell attuale ha 5 tab (c'è anche "Circolo"): va portata a 4. I contenuti del circolo (news, tornei, galleria) sono fuori dalla prima versione.
 
 ## 1. Home (`01-dashboard.html`)
 
