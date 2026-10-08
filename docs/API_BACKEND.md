@@ -52,6 +52,7 @@ Finché non esistono, l'app usa implementazioni fake (vedi `CLAUDE.md`).
 | 5 | Registrazione token push e invio FCM | Notifiche | `POST /me/push-tokens`; invio lato server |
 | 6 | Deep link verifica email / reset password | Accesso | App Link Android, Universal Link iOS |
 | 7 | Refresh token via body | Robustezza mobile | Facoltativo: oggi il cookie jar funziona |
+| 9 | `GET /bookings` senza filtro "da data" | Home, "Le tue prenotazioni" | Facoltativo: parametro `from=YYYY-MM-DD`. Oggi l'app chiede le 100 più recenti e scarta le passate |
 | 8 | Elenco pubblico dei circoli e configurazione del brand | Multi-circolo (Fase 0b) | Vedi sotto. Da fare dopo che Edoardo chiude il lavoro in corso: non è bloccante, l'app usa il fake e i valori predefiniti |
 
 ### Lacuna 8 – proposta
