@@ -1,4 +1,5 @@
 import 'package:crpadel_mobile/app/app.dart';
+import 'package:crpadel_mobile/app/bottom_bar.dart';
 import 'package:crpadel_mobile/app/router.dart';
 import 'package:crpadel_mobile/app/routes.dart';
 import 'package:crpadel_mobile/features/auth/data/auth_repository.dart';
@@ -124,7 +125,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
 
-      final bar = find.byType(NavigationBar);
+      final bar = find.byType(AppBottomBar);
       await tester.tap(
         find.descendant(of: bar, matching: find.text('Prenota')),
       );
@@ -148,7 +149,7 @@ void main() {
       await pumpApp(tester, loggedIn: true);
       await tester.tap(
         find.descendant(
-          of: find.byType(NavigationBar),
+          of: find.byType(AppBottomBar),
           matching: find.text('Profilo'),
         ),
       );
