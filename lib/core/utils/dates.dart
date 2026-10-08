@@ -31,6 +31,15 @@ abstract final class Dates {
   static String numeric(DateTime date) =>
       DateFormat('dd/MM/yyyy', locale).format(date);
 
+  /// Legge "02/12/2026"; `null` se il testo non è una data esistente.
+  static DateTime? parseNumeric(String text) {
+    try {
+      return DateFormat('dd/MM/yyyy', locale).parseStrict(text.trim());
+    } on FormatException {
+      return null;
+    }
+  }
+
   /// "2026-10-08", il formato delle date nelle query dell'API.
   static String api(DateTime date) =>
       DateFormat('yyyy-MM-dd', locale).format(date);

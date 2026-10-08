@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../core/utils/date_input_formatter.dart';
 import '../../../core/utils/dates.dart';
 import 'auth_controller.dart';
 
@@ -18,7 +20,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  DateTime? _birthDate;
+  final _birthDate = TextEditingController();
+  bool _obscure = true;
   String? _gender;
   bool _saving = false;
 
@@ -27,26 +30,36 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _name.dispose();
     _email.dispose();
     _password.dispose();
+    _birthDate.dispose();
     super.dispose();
   }
 
   Future<void> _pickDate() async {
     final value = await showDatePicker(
       context: context,
-      initialDate: DateTime(1990),
-      firstDate: DateTime(1920),
+      initialDate: Dates.parseNumeric(_birthDate.text) ?? DateTime(1990),
+      firstDate: _firstBirthDate,
       lastDate: DateTime.now(),
     );
-    if (value != null) setState(() => _birthDate = value);
+    if (value != null) _birthDate.text = Dates.numeric(value);
+  }
+
+  static final _firstBirthDate = DateTime(1920);
+
+  String? _validateBirthDate(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'La data di nascita è obbligatoria';
+    }
+    final date = Dates.parseNumeric(value);
+    if (date == null) return 'Usa il formato gg/mm/aaaa';
+    if (date.isBefore(_firstBirthDate) || date.isAfter(DateTime.now())) {
+      return 'Data di nascita non valida';
+    }
+    return null;
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate() ||
-        _birthDate == null ||
-        _gender == null) {
-      setState(() {});
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     try {
       final message = await ref
@@ -55,7 +68,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             email: _email.text,
             password: _password.text,
             fullName: _name.text,
-            birthDate: _birthDate!,
+            birthDate: Dates.parseNumeric(_birthDate.text)!,
             gender: _gender!,
           );
       if (!mounted) return;
@@ -116,36 +129,47 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _password,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: _obscure,
+                decoration: InputDecoration(
                   labelText: 'Password',
                   helperText: 'Almeno 12 caratteri',
+                  suffixIcon: IconButton(
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                    tooltip: _obscure ? 'Mostra password' : 'Nascondi password',
+                    icon: Icon(
+                      _obscure
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
+                  ),
                 ),
                 validator: (value) => (value?.length ?? 0) < 12
                     ? 'La password deve contenere almeno 12 caratteri'
                     : null,
               ),
               const SizedBox(height: 14),
-              InkWell(
-                onTap: _pickDate,
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Data di nascita',
-                    errorText: _birthDate == null
-                        ? 'La data di nascita è obbligatoria'
-                        : null,
-                    suffixIcon: const Icon(Icons.calendar_today_outlined),
-                  ),
-                  child: Text(
-                    _birthDate == null
-                        ? 'Seleziona'
-                        : Dates.numeric(_birthDate!),
+              TextFormField(
+                controller: _birthDate,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9/]')),
+                  const DateInputFormatter(),
+                ],
+                decoration: InputDecoration(
+                  labelText: 'Data di nascita',
+                  hintText: 'gg/mm/aaaa',
+                  suffixIcon: IconButton(
+                    onPressed: _pickDate,
+                    tooltip: 'Apri il calendario',
+                    icon: const Icon(Icons.calendar_today_outlined),
                   ),
                 ),
+                validator: _validateBirthDate,
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 initialValue: _gender,
+                isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Sesso'),
                 items: const [
                   DropdownMenuItem(value: 'male', child: Text('Maschile')),

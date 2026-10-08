@@ -25,4 +25,11 @@ void main() {
     expect(Dates.numeric(DateTime(2026, 12, 2)), '02/12/2026');
     expect(Dates.api(DateTime(2026, 1, 5)), '2026-01-05');
   });
+
+  test('legge le date gg/mm/aaaa solo se esistono', () {
+    expect(Dates.parseNumeric('02/12/1990'), DateTime(1990, 12, 2));
+    expect(Dates.parseNumeric('31/02/1990'), isNull);
+    expect(Dates.parseNumeric('02/12'), isNull);
+    expect(Dates.parseNumeric(''), isNull);
+  });
 }
