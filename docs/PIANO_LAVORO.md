@@ -45,11 +45,11 @@ Accettazione: con un utente di staging la Home mostra i dati reali; cambiando gi
 
 ## Fase 2 – Prenotazione
 
-- [ ] Griglia un campo alla volta (`/bookings/schedule`) con tab, frecce, indicatore e swipe.
-- [ ] Schermata "Solo campi liberi" e orario preferito salvato sul dispositivo.
-- [ ] "Completa la prenotazione": tipo, istruttore, giocatori facoltativi, tipo di partita.
-- [ ] Conferma: `POST /bookings` + `POST /matches`; gestione del 409.
-- [ ] Annullamento di una propria prenotazione.
+- [x] Griglia un campo alla volta (`/bookings/schedule`) con tab, frecce, indicatore e swipe.
+- [x] Schermata "Solo campi liberi" e orario preferito salvato sul dispositivo.
+- [x] "Completa la prenotazione": tipo, istruttore, giocatori facoltativi, tipo di partita (tipi predefiniti finché manca la lacuna n. 11).
+- [x] Conferma: `POST /bookings` + `POST /matches`; gestione del 409.
+- [x] Annullamento di una propria prenotazione (dalla Home e dalla griglia).
 
 Accettazione: si prenota un campo libero su staging e compare in Home; uno slot occupato nel frattempo dà un messaggio chiaro; test del flusso con i fake.
 

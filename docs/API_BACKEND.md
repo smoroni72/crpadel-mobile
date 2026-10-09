@@ -21,7 +21,7 @@ Fonte: analisi del repository `../CrPadel` (API Fastify, `api/src/routes/*`, mig
 | Griglia campi | `GET /bookings/schedule?date=YYYY-MM-DD&opening_hour=7&closing_hour=23` → righe da 30', stato per campo `free` / `booked` / `match` / `lesson` / `training`, con `is_owner` e `can_use` |
 | Campi liberi | `GET /bookings/availability?from=&days=&slot_minutes=90` (slot su più giorni) |
 | Prenotare | `POST /bookings` con `court_id`, `date`, `time_slot` ("HH:MM-HH:MM"), `start_hour`, `end_hour` (decimali, es. 18.5), `booking_type` (`court` / `lesson` / `training`), `coach_id` (obbligatorio per lezione e allenamento), `notes` |
-| Aprire una partita | `POST /matches` con `booking_id`, `date`, `court_id`, `time_slot` uguali alla prenotazione (che deve essere propria e `confirmed`), `match_type` (`ranking` / `friendly`), `level`, `max_players`, giocatori |
+| Aprire una partita | `POST /matches` con `booking_id`, `date`, `court_id`, `time_slot` uguali alla prenotazione (che deve essere propria e `confirmed`), `match_type` (`ranking` / `friendly` / `tournament` / `other`, solo se attivo nel circolo), `activity_kind` (`match` predefinito, `lesson`, `technical`), `level`, `max_players`, giocatori (`club_player_id`, `name`) |
 | Rubrica giocatori | `GET /players/directory` |
 | Aggiungere giocatori | `POST /matches/:id/participants` (organizzatore) |
 | Partite del giorno | `GET /matches?date=YYYY-MM-DD`; le mie: `GET /matches?organizer_email=<email>` |
@@ -55,6 +55,7 @@ Finché non esistono, l'app usa implementazioni fake (vedi `CLAUDE.md`).
 | 8 | Elenco pubblico dei circoli, configurazione del brand e testi per circolo | Multi-circolo (Fase 0b), Home | Vedi sotto. Da fare dopo che Edoardo chiude il lavoro in corso: non è bloccante, l'app usa il fake e i valori predefiniti |
 | 9 | `GET /bookings` senza filtro "da data" | Home, "Le tue prenotazioni" | Facoltativo: parametro `from=YYYY-MM-DD`. Oggi l'app chiede le 100 più recenti e scarta le passate |
 | 10 | Eliminazione del proprio account | Profilo, pubblicazione su App Store | Endpoint per l'utente autenticato (es. `DELETE /me` con conferma della password) che anonimizza o cancella i dati. Oggi il pulsante "Elimina Account" del sito chiama la funzione `deleteUserAccount`, non ancora migrata da Base44: risponde 501 e non funziona nemmeno sul sito |
+| 11 | Tipi di partita attivi leggibili dai giocatori | Completa la prenotazione | Ogni circolo attiva i suoi tipi (`club_match_type_settings`), ma `GET /match-type-settings` è riservato agli admin. Proposta: `GET /match-types` per gli iscritti (solo attivi, codice ed etichetta), oppure i tipi dentro la configurazione del circolo (n. 8). Oggi l'app propone Ranking e Amichevole e mostra l'errore del server se il tipo non è attivo |
 
 ### Lacuna 8 – proposta
 
