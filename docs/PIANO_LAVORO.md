@@ -29,6 +29,7 @@ Dipende dalla lacuna n. 8. Si sviluppa con il fake (`FAKE_APP_CONFIG=true`) e si
   - Errore di rete: messaggio e "Riprova", senza ripiegare in silenzio sul circolo predefinito.
 - [ ] Applicazione del brand: colori (con ripiego sul predefinito se un valore manca o ha contrasto insufficiente), logo, immagine della splash Flutter, font scaricati e verificati.
 - [ ] Cambio circolo dal Profilo, senza nuovo login (gli utenti sono globali, le iscrizioni per circolo).
+- [ ] Testi personalizzati per circolo e moduli facoltativi della Home (News in evidenza, Prossimi tornei, Podio del ranking) dalla configurazione.
 
 Accettazione: con il fake si verifica il flusso con zero, uno e più circoli; un brand personalizzato cambia colori, logo e font; senza rete al riavvio l'app usa la configurazione in cache.
 
@@ -54,7 +55,7 @@ Accettazione: si prenota un campo libero su staging e compare in Home; uno slot 
 
 ## Fase 3 – Partite
 
-- [ ] Tab Partite a tutta pagina, filtro "Le mie", dettaglio partita.
+- [ ] Tab Partite a tutta pagina, filtro "Le mie", dettaglio partita (mockup `07-partite.html`, `08-dettaglio-partita.html`).
 - [ ] **Richiesta di partecipazione con approvazione** (lacuna backend n. 1): interfaccia repository + fake (`FAKE_MATCH_REQUESTS=true`).
 - [ ] Per l'organizzatore: richieste in attesa, approva / rifiuta.
 - [ ] Abbandona partita; inserisci risultato (fino a 3 set).
@@ -66,7 +67,9 @@ Accettazione: flusso completo di richiesta e approvazione verificabile con i fak
 - [ ] Profilo: fascia, posizione, statistiche (`/rankings?player_email=`, `/ranking-bands`).
 - [ ] Card pacchetti e lista se più di uno.
 - [ ] Dettaglio abbonamento: fasce, tipi ammessi, movimenti (lacuna n. 2: fake finché il backend non li espone).
+- [ ] Profilo con la struttura del sito: 4 riquadri statistiche, schede Prenotazioni / Partite / Lezioni.
 - [ ] Cambia password; Esci.
+- [ ] **Elimina account** con conferma (lacuna n. 10: fake `FAKE_ACCOUNT_DELETION=true` finché manca l'endpoint). Obbligatorio prima della pubblicazione su App Store.
 
 ## Fase 5 – Notifiche e deep link
 

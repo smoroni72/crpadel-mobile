@@ -1,6 +1,16 @@
 # Specifica delle schermate (mockup approvato "A · Club")
 
-Il mockup completo, con le alternative scartate, è sul canvas "CrPadel Mobile – proposte template" su claude.ai. Le schermate scelte sono copiate in `docs/mockup/`. Nomi, orari e numeri nel mockup sono dati di esempio.
+Il mockup è sul canvas "CRPadel App – mockup approvato" su claude.ai (pagina "App approvata"; le alternative scartate sono nella pagina "Proposte scartate"). Le schermate sono copiate in `docs/mockup/`, numerate nell'ordine del percorso; `01-dashboard-scuro.html` e `07-partite-scuro.html` mostrano il tema scuro. Nomi, orari e numeri nel mockup sono dati di esempio.
+
+## Rapporto con il sito (decisione del 9 ottobre 2026)
+
+Il sito (https://test.crpadel.it) e l'app condividono font (Space Grotesk, Inter, JetBrains Mono), colore rosso, raggi e il tema chiaro. L'app **non** ne copia la grafica 1:1:
+
+- restano la barra in basso "a incavo" e i colori dell'app, compreso il tema scuro blu notte (il sito usa un nero neutro);
+- la Home resta quella personale dell'app, non la pagina vetrina del sito (hero, "Tutto in un'unica piattaforma", "Pronto a giocare?"), che è pensata per i visitatori ed è legata a un solo cliente;
+- dal sito si riprendono alcune sezioni come moduli facoltativi della Home (vedi Home) e la struttura del Profilo.
+
+Testi, colori, logo e moduli della Home sono personalizzabili per circolo dalla configurazione del backend (lacuna n. 8).
 
 ## Stile
 
@@ -21,7 +31,7 @@ Tema chiaro e scuro: l'app segue l'impostazione del sistema. I colori sono token
 
 ## Navigazione
 
-Barra in basso con 4 tab: **Home**, **Prenota**, **Partite**, **Profilo**. Stile "a incavo" (template B scelto): la tab attiva sale in un cerchio rosso che galleggia sopra un incavo della barra, con il nome sotto; le altre mostrano icona e nome. La shell attuale ha 5 tab (c'è anche "Circolo"): va portata a 4. I contenuti del circolo (news, tornei, galleria) sono fuori dalla prima versione.
+Barra in basso con 4 tab: **Home**, **Prenota**, **Partite**, **Profilo**. Stile "a incavo" (template B scelto): la tab attiva sale in un cerchio rosso che galleggia sopra un incavo della barra, con il nome sotto; le altre mostrano icona e nome. Chat, galleria, lezioni e contatti del sito restano fuori dalla prima versione; news e tornei entrano solo come moduli della Home.
 
 ## 1. Home (`01-dashboard.html`)
 
@@ -33,6 +43,8 @@ Barra in basso con 4 tab: **Home**, **Prenota**, **Partite**, **Profilo**. Stile
   - aperta con meno di 4 giocatori: "Aperta · n/4 · livello" e pulsante **Chiedi** (invia richiesta di partecipazione; dopo l'invio diventa "Richiesta inviata");
   - piena o non disponibile: solo stato.
 - Pull-to-refresh.
+- **Moduli facoltativi**, sotto le sezioni personali, attivati e ordinati per circolo dalla configurazione (lacuna n. 8), con lo stile delle sezioni del sito: **News in evidenza** (titolo, categoria, riassunto), **Prossimi tornei**, **Podio del ranking** (primi tre). Senza configurazione non compaiono.
+- Testi personalizzabili per circolo: saluto, messaggi degli stati vuoti, contatti. Ogni testo mancante usa quello predefinito.
 
 ## 2. Prenota – un campo alla volta (`02-prenota.html`)
 
@@ -63,10 +75,14 @@ Pagina modale a schermo intero con chiusura ✕.
 
 ## 5. Profilo (`05-profilo.html`)
 
+Struttura allineata al Profilo del sito; il mockup 05 mostra ancora la versione precedente per le parti sotto le statistiche.
+
 - Avatar con iniziali, nome, fascia di ranking (pallino colorato) e posizione.
-- Statistiche: partite, vittorie, win rate.
+- Statistiche in 4 riquadri come sul sito: posizione, partite, vittorie, win rate.
+- Storico in schede: Prenotazioni, Partite, Lezioni (annullamento delle proprie prenotazioni e lezioni future).
 - **I tuoi pacchetti**: card navy completa (nome, stato, disponibili su totale, barra, scadenza, "Dettagli ›"). Sezione presente solo se ci sono pacchetti.
-- Voci: Dati personali, **Orario preferito** (fascia oraria; salvata sul dispositivo finché il backend non la supporta), Storico partite, Notifiche, Cambia password. Pulsante Esci.
+- Voci: Dati personali, **Orario preferito** (fascia oraria; salvata sul dispositivo finché il backend non la supporta), Notifiche, Cambia password, **Circolo** (cambio circolo, vedi multi-circolo). Pulsante Esci.
+- **Elimina account**, con conferma: obbligatorio per la pubblicazione su App Store (linea guida Apple 5.1.1). Dipende dalla lacuna n. 10.
 
 ## 6. Dettaglio abbonamento (`06-dettaglio-abbonamento.html`)
 
@@ -77,6 +93,18 @@ Pagina modale a schermo intero con chiusura ✕.
 - **Movimenti**: acquisto, riserva, consumo, rilascio, con data e variazione.
 - Se l'utente ha più pacchetti, si arriva qui da una lista nel Profilo.
 
-## Tab Partite
+## 7. Partite (`07-partite.html`)
 
-Non c'è un mockup dedicato: usa lo stesso schema delle "Partite del giorno" della Home a tutta pagina, con in più il filtro "Le mie partite" e il dettaglio partita (giocatori per squadra, richieste da approvare se sei l'organizzatore, abbandona, inserisci risultato).
+- Titolo "Partite", filtro segmentato **Tutte / Le mie**, selettore del giorno come in Home.
+- Card per stato come in Home. Sulle partite aperte altrui: **Chiedi**; dopo l'invio la card mostra **Richiesta inviata**. La propria partita ha il riquadro navy e porta al dettaglio.
+
+## 8. Dettaglio partita (`08-dettaglio-partita.html`)
+
+- Campo, tipo, giorno, orario, livello; stato ("Aperta · 3/4") e "Organizzi tu" se è il caso.
+- Squadra A / Squadra B con i posti liberi.
+- Per l'organizzatore: **Richieste in attesa** con **Approva / Rifiuta** (lacuna n. 1); chi viene approvato prende un posto libero. **Annulla prenotazione** (annulla anche la partita se è ancora aperta).
+- Per un partecipante: **Abbandona partita**. Dopo la partita, per l'organizzatore: **Inserisci risultato** (fino a 3 set).
+
+## 0. Scegli il circolo (`00-scegli-circolo.html`)
+
+Primo avvio, solo se il backend espone più circoli (Fase 0b). Ricerca per nome o città, elenco dei circoli aderenti con logo e città. La scelta si cambia dal Profilo.

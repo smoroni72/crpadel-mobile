@@ -52,8 +52,9 @@ Finché non esistono, l'app usa implementazioni fake (vedi `CLAUDE.md`).
 | 5 | Registrazione token push e invio FCM | Notifiche | `POST /me/push-tokens`; invio lato server |
 | 6 | Deep link verifica email / reset password | Accesso | App Link Android, Universal Link iOS |
 | 7 | Refresh token via body | Robustezza mobile | Facoltativo: oggi il cookie jar funziona |
+| 8 | Elenco pubblico dei circoli, configurazione del brand e testi per circolo | Multi-circolo (Fase 0b), Home | Vedi sotto. Da fare dopo che Edoardo chiude il lavoro in corso: non è bloccante, l'app usa il fake e i valori predefiniti |
 | 9 | `GET /bookings` senza filtro "da data" | Home, "Le tue prenotazioni" | Facoltativo: parametro `from=YYYY-MM-DD`. Oggi l'app chiede le 100 più recenti e scarta le passate |
-| 8 | Elenco pubblico dei circoli e configurazione del brand | Multi-circolo (Fase 0b) | Vedi sotto. Da fare dopo che Edoardo chiude il lavoro in corso: non è bloccante, l'app usa il fake e i valori predefiniti |
+| 10 | Eliminazione del proprio account | Profilo, pubblicazione su App Store | Endpoint per l'utente autenticato (es. `DELETE /me` con conferma della password) che anonimizza o cancella i dati. Oggi il pulsante "Elimina Account" del sito chiama la funzione `deleteUserAccount`, non ancora migrata da Base44: risponde 501 e non funziona nemmeno sul sito |
 
 ### Lacuna 8 – proposta
 
@@ -65,8 +66,11 @@ Oggi esistono `customers` (proprietario) → `clubs`, con `clubs.settings jsonb`
   - `club`: `id`, `slug`, `name`, `timezone`;
   - `brand`: `display_name`, `colors` (gli stessi token di `SPEC_SCHERMATE.md`: `primary`, `primary_text`, `navy`, `text`, `text_secondary`, `background`, `surface`, `border`, `divider`), `logo` e `splash` (`url`, `sha256`, colore di sfondo), `fonts` (`heading`, `body`, `mono`: famiglia, pesi, `url`, `sha256`);
   - `contacts`: email e telefono del circolo, link a privacy e termini;
+  - `texts`: testi personalizzati (nome visualizzato, slogan, saluto della Home, messaggi degli stati vuoti, link al regolamento), ognuno facoltativo;
+  - `home_modules`: elenco ordinato dei moduli facoltativi della Home (`news`, `tournaments`, `ranking_podium`);
   - `features`: interruttori per le sezioni facoltative;
   - `min_app_version`.
   I campi mancanti valgono "usa il predefinito CRPadel".
 - **Webapp**: editor del brand per l'owner, con anteprima e controllo del contrasto; upload di logo e splash nello storage esistente.
+- **Sito**: oggi logo, colori e testi di CR Padel sono scritti nel codice del sito. La stessa configurazione dovrebbe alimentare anche il sito, così app e sito restano allineati per ogni circolo.
 - **Email**: il mittente resta `noreply@crpadel.it`. Personalizzare il nome visualizzato ("<Circolo> via CRPadel"), il `Reply-To` (email del circolo) e logo e nome nel modello dell'email.
