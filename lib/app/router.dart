@@ -12,6 +12,7 @@ import '../features/bookings/presentation/complete_booking_controller.dart';
 import '../features/bookings/presentation/complete_booking_screen.dart';
 import '../features/bookings/presentation/free_courts_screen.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/matches/presentation/match_detail_screen.dart';
 import '../features/matches/presentation/matches_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import 'app_shell.dart';
@@ -64,6 +65,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, _) => const ForgotPasswordScreen(),
           ),
         ],
+      ),
+      // Sopra la barra in basso: si apre da Home e da Partite.
+      GoRoute(
+        path: AppPaths.matchDetail,
+        name: AppRoutes.matchDetail,
+        builder: (_, state) =>
+            MatchDetailScreen(matchId: state.pathParameters['id']!),
       ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, navigationShell) =>

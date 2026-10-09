@@ -1,3 +1,4 @@
+import '../../../core/network/api_client.dart';
 import '../domain/directory_player.dart';
 import '../domain/padel_match.dart';
 import 'matches_repository.dart';
@@ -76,6 +77,97 @@ class FakeMatchesRepository implements MatchesRepository {
   Future<List<DirectoryPlayer>> playersDirectory() async {
     if (error != null) throw error!;
     return directory;
+  }
+
+  final left = <String>[];
+  final results = <String, String>{};
+
+  PadelMatch _find(String id) {
+    if (error != null) throw error!;
+    return matches.firstWhere(
+      (m) => m.id == id,
+      orElse: () =>
+          throw const ApiException('Partita non trovata', statusCode: 404),
+    );
+  }
+
+  PadelMatch _replace(PadelMatch updated) {
+    matches = [for (final m in matches) m.id == updated.id ? updated : m];
+    return updated;
+  }
+
+  @override
+  Future<PadelMatch> byId(String id) async => _find(id);
+
+  @override
+  Future<PadelMatch> addParticipant(
+    String matchId, {
+    required String clubPlayerId,
+    required String team,
+  }) async {
+    final match = _find(matchId);
+    final player = directory.firstWhere((p) => p.id == clubPlayerId);
+    if (match.players.length >= match.maxPlayers) {
+      throw const ApiException('La partita è completa', statusCode: 409);
+    }
+    return _replace(
+      match.copyWith(
+        players: [
+          ...match.players,
+          MatchPlayer(
+            clubPlayerId: player.id,
+            name: player.fullName,
+            team: team,
+          ),
+        ],
+      ),
+    );
+  }
+
+  final joined = <String>[];
+
+  @override
+  Future<PadelMatch> join(String matchId, {required String team}) async {
+    final match = _find(matchId);
+    if (match.status != MatchStatus.open ||
+        match.players.length >= match.maxPlayers) {
+      throw const ApiException(
+        'La partita non accetta nuove iscrizioni',
+        statusCode: 409,
+      );
+    }
+    joined.add(matchId);
+    return _replace(
+      match.copyWith(
+        players: [
+          ...match.players,
+          MatchPlayer(name: 'Mario Rossi', userId: myUserId, team: team),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Future<PadelMatch> leave(String matchId) async {
+    final match = _find(matchId);
+    left.add(matchId);
+    return _replace(
+      match.copyWith(
+        players: [
+          for (final p in match.players)
+            if (p.userId != myUserId) p,
+        ],
+      ),
+    );
+  }
+
+  @override
+  Future<PadelMatch> submitResult(String matchId, String score) async {
+    final match = _find(matchId);
+    results[matchId] = score;
+    return _replace(
+      match.copyWith(scoreTeam1: score, status: MatchStatus.completed),
+    );
   }
 
   static bool _sameDay(DateTime a, DateTime b) =>

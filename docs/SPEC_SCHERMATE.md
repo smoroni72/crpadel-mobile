@@ -37,10 +37,10 @@ Barra in basso con 4 tab: **Home**, **Prenota**, **Partite**, **Profilo**. Stile
 
 - Intestazione: data di oggi e "Ciao, <nome>". Campanella notifiche (per ora senza funzione).
 - **Riferimento pacchetto**, piccolo: anello di avanzamento, "6/10 partite nel pacchetto", fascia e scadenza. Visibile **solo** se l'utente ha almeno un pacchetto o abbonamento attivo; tocco → Dettaglio abbonamento. Per un abbonamento a tempo (`unlimited`) mostra la scadenza al posto del conteggio.
-- **Le tue prenotazioni**: prossime prenotazioni future, card con riquadro data (giorno della settimana e numero), campo, orario e stato della partita collegata (giocatori, richieste in attesa). Link "Prenota" → tab Prenota.
+- **Le tue prenotazioni**: prossime prenotazioni future, card con riquadro data (giorno della settimana e numero), campo, orario e stato della partita collegata (giocatori). Link "Prenota" → tab Prenota.
 - **Partite del giorno**: selettore del giorno con frecce ‹ › e 5 giorni visibili; si può andare avanti e indietro senza limiti. Card per partita con riquadro orario:
   - passata/conclusa: squadre e punteggio;
-  - aperta con meno di 4 giocatori: "Aperta · n/4 · livello" e pulsante **Chiedi** (invia richiesta di partecipazione; dopo l'invio diventa "Richiesta inviata");
+  - aperta con meno di 4 giocatori: "Aperta · n/4 · livello" e pulsante **Partecipa** (si entra subito nella prima squadra con posto, senza approvazione);
   - piena o non disponibile: solo stato.
 - Pull-to-refresh.
 - **Moduli facoltativi**, sotto le sezioni personali, attivati e ordinati per circolo dalla configurazione (lacuna n. 8), con lo stile delle sezioni del sito: **News in evidenza** (titolo, categoria, riassunto), **Prossimi tornei**, **Podio del ranking** (primi tre). Senza configurazione non compaiono.
@@ -51,7 +51,7 @@ Barra in basso con 4 tab: **Home**, **Prenota**, **Partite**, **Profilo**. Stile
 - Intestazione "Prenota" con selettore del giorno ‹ Gio 8 ott ›.
 - Chip filtro "Solo campi liberi alle <orario preferito>" → schermata 3.
 - **Tab dei campi** scorrevoli orizzontalmente; il campo selezionato è navy. Sotto: "‹ Campo precedente", indicatore a pallini "n di N", "Campo successivo ›". Anche lo swipe orizzontale sulla griglia cambia campo.
-- Griglia verticale del giorno per il campo selezionato: colonna orari a sinistra (passi da 30'), blocchi colorati per gli impegni (legenda sotto). Gli impegni dell'utente sono navy; le partite aperte mostrano "Chiedi".
+- Griglia verticale del giorno per il campo selezionato: colonna orari a sinistra (passi da 30'), blocchi colorati per gli impegni (legenda sotto). Gli impegni dell'utente sono navy; le partite aperte si aprono nel dettaglio da Partite.
 - Tocco su uno spazio libero → schermata 4 con campo e orario precompilati. Se lo spazio non basta per la durata scelta, messaggio chiaro.
 - Dati: `GET /bookings/schedule`.
 
@@ -102,13 +102,15 @@ Voci presenti solo nell'app, fuori dal Profilo per tenerlo uguale al sito: **Cir
 ## 7. Partite (`07-partite.html`)
 
 - Titolo "Partite", filtro segmentato **Tutte / Le mie**, selettore del giorno come in Home.
-- Card per stato come in Home. Sulle partite aperte altrui: **Chiedi**; dopo l'invio la card mostra **Richiesta inviata**. La propria partita ha il riquadro navy e porta al dettaglio.
+- Card per stato come in Home. Sulle partite aperte altrui: **Partecipa**. Le partite dell'utente hanno il riquadro navy. Ogni card porta al dettaglio.
+- "Le mie": le partite dell'utente da oggi in avanti, raggruppate per giorno (senza selettore del giorno).
 
 ## 8. Dettaglio partita (`08-dettaglio-partita.html`)
 
 - Campo, tipo, giorno, orario, livello; stato ("Aperta · 3/4") e "Organizzi tu" se è il caso.
 - Squadra A / Squadra B con i posti liberi.
-- Per l'organizzatore: **Richieste in attesa** con **Approva / Rifiuta** (lacuna n. 1); chi viene approvato prende un posto libero. **Annulla prenotazione** (annulla anche la partita se è ancora aperta).
+- Per chi non partecipa, se c'è posto: **Partecipa** (con posto in entrambe le squadre: **Partecipa in squadra A / B**). Nessuna approvazione.
+- Per l'organizzatore: **Aggiungi giocatore** dalla rubrica, **Annulla prenotazione** (annulla anche la partita se è ancora aperta).
 - Per un partecipante: **Abbandona partita**. Dopo la partita, per l'organizzatore: **Inserisci risultato** (fino a 3 set).
 
 ## 0. Scegli il circolo (`00-scegli-circolo.html`)

@@ -9,16 +9,22 @@ part of 'padel_match.dart';
 _MatchPlayer _$MatchPlayerFromJson(Map<String, dynamic> json) => _MatchPlayer(
   userId: json['user_id'] as String?,
   playerRef: json['player_ref'] as String?,
+  clubPlayerId: json['club_player_id'] as String?,
   name: json['name'] as String,
   participantType: json['participant_type'] as String?,
+  team: json['team'] as String?,
+  playingSide: json['playing_side'] as String?,
 );
 
 Map<String, dynamic> _$MatchPlayerToJson(_MatchPlayer instance) =>
     <String, dynamic>{
       'user_id': instance.userId,
       'player_ref': instance.playerRef,
+      'club_player_id': instance.clubPlayerId,
       'name': instance.name,
       'participant_type': instance.participantType,
+      'team': instance.team,
+      'playing_side': instance.playingSide,
     };
 
 _PadelMatch _$PadelMatchFromJson(Map<String, dynamic> json) => _PadelMatch(

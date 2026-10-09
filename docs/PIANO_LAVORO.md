@@ -38,7 +38,7 @@ Accettazione: con il fake si verifica il flusso con zero, uno e più circoli; un
 - [x] Modelli e repository: prenotazioni, partite, pacchetti.
 - [x] Riferimento pacchetto (visibile solo se presente). Mostra il nome del piano al posto della fascia oraria finché manca la lacuna n. 2.
 - [x] "Le tue prenotazioni" con le prossime prenotazioni.
-- [x] "Partite del giorno" con selettore giorni avanti/indietro e card per stato. Il pulsante **Chiedi** si collega nella Fase 3 (richieste di partecipazione).
+- [x] "Partite del giorno" con selettore giorni avanti/indietro e card per stato. Il pulsante **Partecipa** arriva nella Fase 3.
 - [x] Stati vuoti, caricamento, errore; pull-to-refresh.
 
 Accettazione: con un utente di staging la Home mostra i dati reali; cambiando giorno si aggiornano le partite; test dei repository e widget test della Home.
@@ -55,12 +55,12 @@ Accettazione: si prenota un campo libero su staging e compare in Home; uno slot 
 
 ## Fase 3 – Partite
 
-- [ ] Tab Partite a tutta pagina, filtro "Le mie", dettaglio partita (mockup `07-partite.html`, `08-dettaglio-partita.html`).
-- [ ] **Richiesta di partecipazione con approvazione** (lacuna backend n. 1): interfaccia repository + fake (`FAKE_MATCH_REQUESTS=true`).
-- [ ] Per l'organizzatore: richieste in attesa, approva / rifiuta.
-- [ ] Abbandona partita; inserisci risultato (fino a 3 set).
+- [x] Tab Partite a tutta pagina, filtro "Le mie", dettaglio partita (mockup `07-partite.html`, `08-dettaglio-partita.html`).
+- [x] **Partecipa** senza approvazione (`POST /matches/:id/join`, decisione del 9 ottobre 2026), con scelta della squadra.
+- [x] Per l'organizzatore: aggiungi giocatore dalla rubrica, annulla prenotazione.
+- [x] Abbandona partita; inserisci risultato (fino a 3 set, stesse regole del sito).
 
-Accettazione: flusso completo di richiesta e approvazione verificabile con i fake; abbandono e risultato funzionano su staging.
+Accettazione: partecipare, abbandonare e inserire il risultato funzionano su staging.
 
 ## Fase 4 – Profilo e abbonamenti
 

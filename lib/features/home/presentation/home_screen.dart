@@ -12,7 +12,7 @@ import '../../bookings/presentation/upcoming_bookings_provider.dart';
 import '../../bookings/presentation/widgets/booking_card.dart';
 import '../../matches/presentation/day_matches_provider.dart';
 import '../../matches/presentation/widgets/day_strip.dart';
-import '../../matches/presentation/widgets/match_card.dart';
+import '../../matches/presentation/widgets/connected_match_card.dart';
 import '../../subscriptions/presentation/subscription_summary_card.dart';
 import '../../subscriptions/presentation/subscriptions_provider.dart';
 
@@ -186,7 +186,6 @@ class _DayMatchesSection extends ConsumerWidget {
     final day = ref.watch(selectedDayProvider);
     final dayController = ref.read(selectedDayProvider.notifier);
     final matches = ref.watch(dayMatchesProvider(day));
-    final userId = ref.watch(authControllerProvider).value?.id ?? '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -215,7 +214,7 @@ class _DayMatchesSection extends ConsumerWidget {
               : Column(
                   children: [
                     for (final match in list) ...[
-                      MatchCard(match: match, myUserId: userId),
+                      ConnectedMatchCard(match: match),
                       const SizedBox(height: 10),
                     ],
                   ],
