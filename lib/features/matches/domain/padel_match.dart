@@ -26,8 +26,15 @@ abstract class MatchPlayer with _$MatchPlayer {
   const factory MatchPlayer({
     String? userId,
     String? playerRef,
+    String? clubPlayerId,
     required String name,
     String? participantType,
+
+    /// `A` o `B`; le partite più vecchie non lo hanno (vale la posizione).
+    String? team,
+
+    /// Lato preferito: `SX` o `DX`.
+    String? playingSide,
   }) = _MatchPlayer;
 
   factory MatchPlayer.fromJson(Map<String, dynamic> json) =>
@@ -82,7 +89,26 @@ abstract class PadelMatch with _$PadelMatch {
   bool involves(String userId) =>
       organizerRef == userId || players.any((p) => p.userId == userId);
 
-  List<MatchPlayer> get teamA => players.take(2).toList();
+  List<MatchPlayer> get teamA => _team('A', 0);
 
-  List<MatchPlayer> get teamB => players.skip(2).take(2).toList();
+  List<MatchPlayer> get teamB => _team('B', 2);
+
+  /// Squadra dal campo `team`; se manca, dalla posizione (0–1 A, 2–3 B).
+  List<MatchPlayer> _team(String code, int from) {
+    if (players.any((p) => p.team != null)) {
+      return players.where((p) => p.team == code).toList();
+    }
+    return players.skip(from).take(2).toList();
+  }
+
+  /// Squadra con un posto libero, `A` per prima; `null` se piena.
+  String? get teamWithFreeSpot => teamA.length < 2
+      ? 'A'
+      : teamB.length < 2
+      ? 'B'
+      : null;
+
+  bool isOrganizer(String userId) => organizerRef == userId;
+
+  bool isParticipant(String userId) => players.any((p) => p.userId == userId);
 }

@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MatchPlayer {
 
- String? get userId; String? get playerRef; String get name; String? get participantType;
+ String? get userId; String? get playerRef; String? get clubPlayerId; String get name; String? get participantType;/// `A` o `B`; le partite più vecchie non lo hanno (vale la posizione).
+ String? get team;/// Lato preferito: `SX` o `DX`.
+ String? get playingSide;
 /// Create a copy of MatchPlayer
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +30,16 @@ $MatchPlayerCopyWith<MatchPlayer> get copyWith => _$MatchPlayerCopyWithImpl<Matc
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchPlayer&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.name, name) || other.name == name)&&(identical(other.participantType, participantType) || other.participantType == participantType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchPlayer&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.clubPlayerId, clubPlayerId) || other.clubPlayerId == clubPlayerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.participantType, participantType) || other.participantType == participantType)&&(identical(other.team, team) || other.team == team)&&(identical(other.playingSide, playingSide) || other.playingSide == playingSide));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,playerRef,name,participantType);
+int get hashCode => Object.hash(runtimeType,userId,playerRef,clubPlayerId,name,participantType,team,playingSide);
 
 @override
 String toString() {
-  return 'MatchPlayer(userId: $userId, playerRef: $playerRef, name: $name, participantType: $participantType)';
+  return 'MatchPlayer(userId: $userId, playerRef: $playerRef, clubPlayerId: $clubPlayerId, name: $name, participantType: $participantType, team: $team, playingSide: $playingSide)';
 }
 
 
@@ -48,7 +50,7 @@ abstract mixin class $MatchPlayerCopyWith<$Res>  {
   factory $MatchPlayerCopyWith(MatchPlayer value, $Res Function(MatchPlayer) _then) = _$MatchPlayerCopyWithImpl;
 @useResult
 $Res call({
- String? userId, String? playerRef, String name, String? participantType
+ String? userId, String? playerRef, String? clubPlayerId, String name, String? participantType, String? team, String? playingSide
 });
 
 
@@ -65,12 +67,15 @@ class _$MatchPlayerCopyWithImpl<$Res>
 
 /// Create a copy of MatchPlayer
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = freezed,Object? playerRef = freezed,Object? name = null,Object? participantType = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = freezed,Object? playerRef = freezed,Object? clubPlayerId = freezed,Object? name = null,Object? participantType = freezed,Object? team = freezed,Object? playingSide = freezed,}) {
   return _then(_self.copyWith(
 userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String?,playerRef: freezed == playerRef ? _self.playerRef : playerRef // ignore: cast_nullable_to_non_nullable
+as String?,clubPlayerId: freezed == clubPlayerId ? _self.clubPlayerId : clubPlayerId // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,participantType: freezed == participantType ? _self.participantType : participantType // ignore: cast_nullable_to_non_nullable
+as String?,team: freezed == team ? _self.team : team // ignore: cast_nullable_to_non_nullable
+as String?,playingSide: freezed == playingSide ? _self.playingSide : playingSide // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -156,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? userId,  String? playerRef,  String name,  String? participantType)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? userId,  String? playerRef,  String? clubPlayerId,  String name,  String? participantType,  String? team,  String? playingSide)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MatchPlayer() when $default != null:
-return $default(_that.userId,_that.playerRef,_that.name,_that.participantType);case _:
+return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that.participantType,_that.team,_that.playingSide);case _:
   return orElse();
 
 }
@@ -177,10 +182,10 @@ return $default(_that.userId,_that.playerRef,_that.name,_that.participantType);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? userId,  String? playerRef,  String name,  String? participantType)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? userId,  String? playerRef,  String? clubPlayerId,  String name,  String? participantType,  String? team,  String? playingSide)  $default,) {final _that = this;
 switch (_that) {
 case _MatchPlayer():
-return $default(_that.userId,_that.playerRef,_that.name,_that.participantType);case _:
+return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that.participantType,_that.team,_that.playingSide);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +202,10 @@ return $default(_that.userId,_that.playerRef,_that.name,_that.participantType);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? userId,  String? playerRef,  String name,  String? participantType)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? userId,  String? playerRef,  String? clubPlayerId,  String name,  String? participantType,  String? team,  String? playingSide)?  $default,) {final _that = this;
 switch (_that) {
 case _MatchPlayer() when $default != null:
-return $default(_that.userId,_that.playerRef,_that.name,_that.participantType);case _:
+return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that.participantType,_that.team,_that.playingSide);case _:
   return null;
 
 }
@@ -212,13 +217,18 @@ return $default(_that.userId,_that.playerRef,_that.name,_that.participantType);c
 @JsonSerializable()
 
 class _MatchPlayer implements MatchPlayer {
-  const _MatchPlayer({this.userId, this.playerRef, required this.name, this.participantType});
+  const _MatchPlayer({this.userId, this.playerRef, this.clubPlayerId, required this.name, this.participantType, this.team, this.playingSide});
   factory _MatchPlayer.fromJson(Map<String, dynamic> json) => _$MatchPlayerFromJson(json);
 
 @override final  String? userId;
 @override final  String? playerRef;
+@override final  String? clubPlayerId;
 @override final  String name;
 @override final  String? participantType;
+/// `A` o `B`; le partite più vecchie non lo hanno (vale la posizione).
+@override final  String? team;
+/// Lato preferito: `SX` o `DX`.
+@override final  String? playingSide;
 
 /// Create a copy of MatchPlayer
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +243,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchPlayer&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.name, name) || other.name == name)&&(identical(other.participantType, participantType) || other.participantType == participantType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchPlayer&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.clubPlayerId, clubPlayerId) || other.clubPlayerId == clubPlayerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.participantType, participantType) || other.participantType == participantType)&&(identical(other.team, team) || other.team == team)&&(identical(other.playingSide, playingSide) || other.playingSide == playingSide));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,playerRef,name,participantType);
+int get hashCode => Object.hash(runtimeType,userId,playerRef,clubPlayerId,name,participantType,team,playingSide);
 
 @override
 String toString() {
-  return 'MatchPlayer(userId: $userId, playerRef: $playerRef, name: $name, participantType: $participantType)';
+  return 'MatchPlayer(userId: $userId, playerRef: $playerRef, clubPlayerId: $clubPlayerId, name: $name, participantType: $participantType, team: $team, playingSide: $playingSide)';
 }
 
 
@@ -253,7 +263,7 @@ abstract mixin class _$MatchPlayerCopyWith<$Res> implements $MatchPlayerCopyWith
   factory _$MatchPlayerCopyWith(_MatchPlayer value, $Res Function(_MatchPlayer) _then) = __$MatchPlayerCopyWithImpl;
 @override @useResult
 $Res call({
- String? userId, String? playerRef, String name, String? participantType
+ String? userId, String? playerRef, String? clubPlayerId, String name, String? participantType, String? team, String? playingSide
 });
 
 
@@ -270,12 +280,15 @@ class __$MatchPlayerCopyWithImpl<$Res>
 
 /// Create a copy of MatchPlayer
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = freezed,Object? playerRef = freezed,Object? name = null,Object? participantType = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = freezed,Object? playerRef = freezed,Object? clubPlayerId = freezed,Object? name = null,Object? participantType = freezed,Object? team = freezed,Object? playingSide = freezed,}) {
   return _then(_MatchPlayer(
 userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String?,playerRef: freezed == playerRef ? _self.playerRef : playerRef // ignore: cast_nullable_to_non_nullable
+as String?,clubPlayerId: freezed == clubPlayerId ? _self.clubPlayerId : clubPlayerId // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,participantType: freezed == participantType ? _self.participantType : participantType // ignore: cast_nullable_to_non_nullable
+as String?,team: freezed == team ? _self.team : team // ignore: cast_nullable_to_non_nullable
+as String?,playingSide: freezed == playingSide ? _self.playingSide : playingSide // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
