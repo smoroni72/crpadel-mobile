@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/providers.dart';
 import '../../../core/utils/dates.dart';
+import '../domain/directory_player.dart';
 import '../domain/padel_match.dart';
 
 final matchesRepositoryProvider = Provider<MatchesRepository>(
@@ -15,6 +16,12 @@ abstract interface class MatchesRepository {
 
   /// Partite che l'utente organizza o a cui partecipa, dalle più recenti.
   Future<List<PadelMatch>> mine({required String email});
+
+  /// Apre una partita su una propria prenotazione confermata.
+  Future<PadelMatch> create(NewMatch request);
+
+  /// Rubrica dei giocatori del circolo, per aggiungerli a una partita.
+  Future<List<DirectoryPlayer>> playersDirectory();
 }
 
 class ApiMatchesRepository implements MatchesRepository {
@@ -39,6 +46,23 @@ class ApiMatchesRepository implements MatchesRepository {
       query: {'organizer_email': email, 'sort': '-date', 'limit': 100},
     );
     return _parse(response.data);
+  }
+
+  @override
+  Future<PadelMatch> create(NewMatch request) async {
+    final response = await _api.post('/matches', data: request.toJson());
+    return PadelMatch.fromJson(
+      (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>,
+    );
+  }
+
+  @override
+  Future<List<DirectoryPlayer>> playersDirectory() async {
+    final response = await _api.get('/players/directory');
+    return ((response.data as Map<String, dynamic>)['data'] as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .map(DirectoryPlayer.fromJson)
+        .toList();
   }
 
   List<PadelMatch> _parse(Object? body) =>

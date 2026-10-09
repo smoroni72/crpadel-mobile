@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +8,9 @@ import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
 import '../features/bookings/presentation/book_screen.dart';
+import '../features/bookings/presentation/complete_booking_controller.dart';
+import '../features/bookings/presentation/complete_booking_screen.dart';
+import '../features/bookings/presentation/free_courts_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/matches/presentation/matches_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
@@ -16,6 +19,9 @@ import 'choose_club_screen.dart';
 import 'routes.dart';
 import 'splash_screen.dart';
 
+/// Navigator principale, sopra la barra in basso (pagine modali).
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier(0);
   ref.listen(authControllerProvider, (_, _) => refresh.value++);
@@ -23,6 +29,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.onDispose(refresh.dispose);
 
   final router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppPaths.splash,
     refreshListenable: refresh,
     redirect: (context, state) => appRedirect(
@@ -63,7 +70,36 @@ final routerProvider = Provider<GoRouter>((ref) {
             AppShell(navigationShell: navigationShell),
         branches: [
           _branch(AppPaths.home, AppRoutes.home, const HomeScreen()),
-          _branch(AppPaths.book, AppRoutes.book, const BookScreen()),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppPaths.book,
+                name: AppRoutes.book,
+                builder: (_, _) => const BookScreen(),
+                routes: [
+                  GoRoute(
+                    path: AppPaths.freeCourts,
+                    name: AppRoutes.freeCourts,
+                    builder: (_, _) => const FreeCourtsScreen(),
+                  ),
+                  GoRoute(
+                    path: AppPaths.completeBooking,
+                    name: AppRoutes.completeBooking,
+                    parentNavigatorKey: rootNavigatorKey,
+                    // Senza uno spazio scelto non c'è nulla da completare.
+                    redirect: (_, state) =>
+                        state.extra is BookingSlot ? null : AppPaths.book,
+                    pageBuilder: (_, state) => MaterialPage(
+                      fullscreenDialog: true,
+                      child: CompleteBookingScreen(
+                        slot: state.extra! as BookingSlot,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
           _branch(AppPaths.matches, AppRoutes.matches, const MatchesScreen()),
           _branch(AppPaths.profile, AppRoutes.profile, const ProfileScreen()),
         ],

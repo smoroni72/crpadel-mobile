@@ -5,6 +5,7 @@ extension MatchTypeLabel on MatchType {
     MatchType.ranking => 'ranking',
     MatchType.friendly => 'amichevole',
     MatchType.tournament => 'torneo',
+    MatchType.other => 'altro',
     MatchType.unknown => 'partita',
   };
 }

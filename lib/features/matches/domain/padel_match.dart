@@ -17,7 +17,7 @@ enum MatchStatus {
   unknown,
 }
 
-enum MatchType { ranking, friendly, tournament, unknown }
+enum MatchType { ranking, friendly, tournament, other, unknown }
 
 enum MatchLevel { principiante, intermedio, avanzato, qualsiasi }
 
