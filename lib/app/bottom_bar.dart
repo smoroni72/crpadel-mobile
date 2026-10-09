@@ -145,12 +145,23 @@ class _TabButton extends StatelessWidget {
                 child: Icon(tab.icon, color: colors.textSecondary, size: 24),
               ),
               const SizedBox(height: 2),
-              Text(
-                tab.label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                  color: selected ? colors.primaryText : colors.textSecondary,
+              // Una riga sola: con caratteri grandi l'etichetta si
+              // rimpicciolisce invece di andare a capo.
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    tab.label,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                      color: selected
+                          ? colors.primaryText
+                          : colors.textSecondary,
+                    ),
+                  ),
                 ),
               ),
             ],
