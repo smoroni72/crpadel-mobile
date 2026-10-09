@@ -92,6 +92,7 @@ const _$MatchTypeEnumMap = {
   MatchType.ranking: 'ranking',
   MatchType.friendly: 'friendly',
   MatchType.tournament: 'tournament',
+  MatchType.other: 'other',
   MatchType.unknown: 'unknown',
 };
 

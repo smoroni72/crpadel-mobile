@@ -1,3 +1,4 @@
+import '../domain/directory_player.dart';
 import '../domain/padel_match.dart';
 import 'matches_repository.dart';
 
@@ -32,6 +33,49 @@ class FakeMatchesRepository implements MatchesRepository {
   Future<List<PadelMatch>> mine({required String email}) async {
     if (error != null) throw error!;
     return matches.where((m) => m.involves(myUserId)).toList();
+  }
+
+  /// Rubrica restituita da [playersDirectory].
+  List<DirectoryPlayer> directory = const [
+    DirectoryPlayer(id: 'p0', fullName: 'Mario Rossi', isSelf: true),
+    DirectoryPlayer(id: 'p1', fullName: 'Anna Verdi', rankingBandName: 'Oro'),
+    DirectoryPlayer(id: 'p2', fullName: 'Bruno Neri'),
+    DirectoryPlayer(id: 'p3', fullName: 'Carla Gialli'),
+  ];
+
+  /// Se impostato, solo [create] fallisce con questo errore.
+  Object? createError;
+
+  final created = <NewMatch>[];
+
+  @override
+  Future<PadelMatch> create(NewMatch request) async {
+    if (error != null) throw error!;
+    if (createError != null) throw createError!;
+    created.add(request);
+    final match = PadelMatch(
+      id: 'm-${created.length}',
+      bookingId: request.bookingId,
+      date: DateTime.parse(request.date),
+      timeSlot: request.timeSlot,
+      organizerRef: myUserId,
+      matchType: request.matchType == 'friendly'
+          ? MatchType.friendly
+          : MatchType.ranking,
+      status: MatchStatus.open,
+      players: [
+        for (final p in request.players)
+          MatchPlayer(name: p.fullName, userId: p.isSelf ? myUserId : null),
+      ],
+    );
+    matches = [...matches, match];
+    return match;
+  }
+
+  @override
+  Future<List<DirectoryPlayer>> playersDirectory() async {
+    if (error != null) throw error!;
+    return directory;
   }
 
   static bool _sameDay(DateTime a, DateTime b) =>

@@ -46,6 +46,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   json_annotation: ^4.9.0
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
