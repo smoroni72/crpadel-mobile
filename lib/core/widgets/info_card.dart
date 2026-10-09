@@ -7,58 +7,65 @@ import '../theme/app_theme.dart';
 class InfoCard extends StatelessWidget {
   const InfoCard({
     super.key,
-    required this.leading,
+    this.leading,
     required this.title,
     this.subtitle,
     this.subtitleColor,
     this.trailing,
+    this.onTap,
   });
 
-  final Widget leading;
+  final Widget? leading;
   final String title;
   final String? subtitle;
   final Color? subtitleColor;
   final Widget? trailing;
 
+  /// Rende tutta la card toccabile.
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            leading,
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (subtitle != null && subtitle!.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              if (leading != null) ...[leading!, const SizedBox(width: 14)],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      subtitle!,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: subtitleColor ?? colors.textSecondary,
-                        fontWeight: subtitleColor == null
-                            ? FontWeight.w400
-                            : FontWeight.w600,
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
+                    if (subtitle != null && subtitle!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: subtitleColor ?? colors.textSecondary,
+                          fontWeight: subtitleColor == null
+                              ? FontWeight.w400
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            if (trailing != null) ...[const SizedBox(width: 10), trailing!],
-          ],
+              if (trailing != null) ...[const SizedBox(width: 10), trailing!],
+            ],
+          ),
         ),
       ),
     );
