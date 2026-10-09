@@ -9,6 +9,8 @@ abstract final class AppRoutes {
 
   static const home = 'home';
   static const book = 'prenota';
+  static const freeCourts = 'campi-liberi';
+  static const completeBooking = 'completa-prenotazione';
   static const matches = 'partite';
   static const profile = 'profilo';
 }
@@ -22,6 +24,8 @@ abstract final class AppPaths {
 
   static const home = '/home';
   static const book = '/prenota';
+  static const freeCourts = 'liberi';
+  static const completeBooking = 'completa';
   static const matches = '/partite';
   static const profile = '/profilo';
 
