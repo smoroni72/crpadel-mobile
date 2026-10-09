@@ -23,9 +23,9 @@ Fonte: analisi del repository `../CrPadel` (API Fastify, `api/src/routes/*`, mig
 | Prenotare | `POST /bookings` con `court_id`, `date`, `time_slot` ("HH:MM-HH:MM"), `start_hour`, `end_hour` (decimali, es. 18.5), `booking_type` (`court` / `lesson` / `training`), `coach_id` (obbligatorio per lezione e allenamento), `notes` |
 | Aprire una partita | `POST /matches` con `booking_id`, `date`, `court_id`, `time_slot` uguali alla prenotazione (che deve essere propria e `confirmed`), `match_type` (`ranking` / `friendly` / `tournament` / `other`, solo se attivo nel circolo), `activity_kind` (`match` predefinito, `lesson`, `technical`), `level`, `max_players`, giocatori (`club_player_id`, `name`) |
 | Rubrica giocatori | `GET /players/directory` |
-| Aggiungere giocatori | `POST /matches/:id/participants` (organizzatore) |
 | Partite del giorno | `GET /matches?date=YYYY-MM-DD`; le mie: `GET /matches?organizer_email=<email>` |
-| Partecipare / lasciare | `POST /matches/:id/join` (oggi iscrizione immediata, vedi lacune), `POST /matches/:id/leave` |
+| Partecipare / lasciare | `POST /matches/:id/join` con `team` (`A`/`B`), iscrizione immediata senza approvazione; `POST /matches/:id/leave` (non per l'organizzatore) |
+| Aggiungere giocatori, risultato | `POST /matches/:id/participants` con `club_player_id` e `team` (organizzatore); `PATCH /matches/:id` con `score_team1`, `score_team2` (stesso punteggio, es. `6-4 3-6 TB 10-8`) e `status: completed` |
 | Risultato | `PATCH /matches/:id` (organizzatore: punteggio + `status: completed`) |
 | Profilo e ranking | `GET /rankings?player_email=`, `GET /ranking-bands` |
 | Istruttori | `GET /coaches` |
@@ -45,7 +45,7 @@ Finché non esistono, l'app usa implementazioni fake (vedi `CLAUDE.md`).
 
 | # | Lacuna | Serve per | Proposta |
 | --- | --- | --- | --- |
-| 1 | Richiesta di partecipazione con approvazione dell'organizzatore | Partite aperte | Tabella delle richieste; `POST /matches/:id/requests`, `GET /matches/:id/requests`, `POST /match-requests/:id/approve` e `/reject` |
+| 1 | ~~Richiesta di partecipazione con approvazione~~ | — | **Non più necessaria**: dal 9 ottobre 2026 si entra nelle partite aperte senza approvazione, con `POST /matches/:id/join` |
 | 2 | Dettaglio pacchetto: fasce orarie, tipi di partita ammessi, movimenti | Dettaglio abbonamento | Includere `windows` e `allowed_match_types` in `/subscriptions/mine`; `GET /subscriptions/mine/:id/movements` |
 | 3 | Profilo modificabile e avatar | Profilo | `PATCH /me` (nome, telefono), upload avatar per l'utente |
 | 4 | Orario preferito | Campi liberi | Campo sul profilo utente; nel frattempo salvarlo sul dispositivo |

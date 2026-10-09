@@ -41,7 +41,7 @@ Feature previste: `auth` (esiste), `home`, `bookings`, `matches`, `profile`, `su
 - Gli slot partono ogni 30 minuti. Gli intervalli sono semiaperti: `[inizio, fine)`.
 - Durate fisse: partita e allenamento 90', lezione 60'.
 - Il giocatore prenota sempre a proprio nome. Chi prenota **non** è automaticamente un partecipante: "Gioco anch'io" è disattivato di default.
-- Una partita con meno di 4 giocatori è **aperta**. Chi vuole giocare invia una richiesta, che **l'organizzatore deve approvare** (decisione di prodotto presa).
+- Una partita con meno di 4 giocatori è **aperta**. Chi vuole giocare **entra direttamente** e può uscirne da solo, senza approvazione di chi l'ha aperta (decisione del 9 ottobre 2026, che sostituisce quella precedente con approvazione). L'organizzatore non abbandona la partita: annulla la prenotazione.
 - I pacchetti e gli abbonamenti si vedono solo se l'utente ne ha almeno uno.
 - Gli stati partita arrivano dall'API (`open`, `in_progress`, `pending_result`, `completed`, `not_played`, `cancelled`): non ricalcolarli nel client.
 
