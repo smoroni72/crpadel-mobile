@@ -105,7 +105,7 @@ Voci presenti solo nell'app, fuori dal Profilo per tenerlo uguale al sito: **Cir
 - Card per stato come in Home. Sulle partite aperte altrui: **Partecipa**. Le partite dell'utente hanno il riquadro navy. Ogni card porta al dettaglio.
 - "Le mie": le partite dell'utente da oggi in avanti, raggruppate per giorno (senza selettore del giorno).
 
-## 8. Dettaglio partita (`08-dettaglio-partita.html`)
+## 8. Dettaglio partita (`08-dettaglio-partita.html` organizzatore, `08b-dettaglio-partita-giocatore.html` giocatore)
 
 - Campo, tipo, giorno, orario, livello; stato ("Aperta · 3/4") e "Organizzi tu" se è il caso.
 - Squadra A / Squadra B con i posti liberi.
