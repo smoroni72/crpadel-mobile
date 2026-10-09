@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Impostazioni</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+body{margin:0}
+a{color:#C42B20;text-decoration:none}a:hover{color:#C42B20}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F9FAFB; font-family: Inter, sans-serif; color: #1C2840; display: flex; flex-direction: column; overflow: hidden">
+  <div style="padding: 16px 12px 8px; display: flex; align-items: center; gap: 4px">
+    <a href="05-profilo.html" aria-label="Torna al profilo" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #1C2840"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+    <span style="font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700">Impostazioni</span>
+  </div>
+  <div style="flex: 1; overflow: hidden; padding: 8px 16px; display: flex; flex-direction: column; gap: 16px">
+    <div style="background: #FFFFFF; border: 1px solid #DADEE7; border-radius: 16px; padding: 0 16px; display: flex; flex-direction: column">
+      <a href="00-scegli-circolo.html" style="display: flex; justify-content: space-between; align-items: center; min-height: 52px; border-bottom: 1px solid #EDEFF3; color: #1C2840; font-size: 15px"><span>Circolo</span><span style="color: #5C6884; font-size: 14px">CRPadel · Cambia ›</span></a>
+      <a href="03-campi-liberi.html" style="display: flex; justify-content: space-between; align-items: center; min-height: 52px; border-bottom: 1px solid #EDEFF3; color: #1C2840; font-size: 15px"><span>Orario preferito</span><span style="color: #5C6884; font-size: 14px">19:00–20:00 ›</span></a>
+      <a href="#" style="display: flex; justify-content: space-between; align-items: center; min-height: 52px; border-bottom: 1px solid #EDEFF3; color: #1C2840; font-size: 15px"><span>Notifiche</span><span style="color: #5C6884">›</span></a>
+      <a href="#" style="display: flex; justify-content: space-between; align-items: center; min-height: 52px; border-bottom: 1px solid #EDEFF3; color: #1C2840; font-size: 15px"><span>Cambia password</span><span style="color: #5C6884">›</span></a>
+    </div>
+    <span style="font-size: 12px; color: #5C6884; padding: 0 4px">Voci presenti solo nell'app: il resto del Profilo è uguale al sito.</span>
+  </div>
+  <nav aria-label="Navigazione principale" style="position: relative; flex: none; height: 100px">
+    <svg width="390" height="100" viewBox="0 0 390 100" aria-hidden="true" style="position: absolute; left: 0; top: 0"><path d="M0 48 Q0 28 20 28 L270.25 28 C290.25 28 286.25 60 320.25 60 C354.25 60 350.25 28 370.25 28 L370 28 Q390 28 390 48 L390 100 L0 100 Z" fill="#FFFFFF" stroke="#DADEE7" stroke-width="1"></path></svg>
+    <a href="01-dashboard.html" style="position: absolute; left: 28px; top: 28px; width: 83.5px; height: 64px; box-sizing: border-box; padding-bottom: 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; font-size: 12px; font-weight: 500; color: #5C6884"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="visibility: visible"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
+    <a href="02-prenota.html" style="position: absolute; left: 111.5px; top: 28px; width: 83.5px; height: 64px; box-sizing: border-box; padding-bottom: 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; font-size: 12px; font-weight: 500; color: #5C6884"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="visibility: visible"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>Prenota</a>
+    <a href="07-partite.html" style="position: absolute; left: 195px; top: 28px; width: 83.5px; height: 64px; box-sizing: border-box; padding-bottom: 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; font-size: 12px; font-weight: 500; color: #5C6884"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="visibility: visible"><circle cx="12" cy="12" r="9"></circle><path d="M5 8c4 2 10 2 14 0M5 16c4-2 10-2 14 0"></path></svg>Partite</a>
+    <a href="05-profilo.html" aria-current="page" style="position: absolute; left: 278.5px; top: 28px; width: 83.5px; height: 64px; box-sizing: border-box; padding-bottom: 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; font-size: 12px; font-weight: 600; color: #C42B20"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="visibility: hidden"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Profilo</a>
+    <a href="05-profilo.html" aria-label="Profilo, sezione attiva" style="position: absolute; left: 294.25px; top: 2px; width: 52px; height: 52px; border-radius: 26px; background: #E6392D; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

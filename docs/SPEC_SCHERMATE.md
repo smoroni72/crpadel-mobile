@@ -73,16 +73,22 @@ Pagina modale a schermo intero con chiusura ✕.
 - **Tipo di partita**: Ranking / Amichevole.
 - Pulsante **Conferma prenotazione**: `POST /bookings`, poi, se è una partita, `POST /matches` con i giocatori indicati. In caso di 409 (slot occupato nel frattempo) torna alla griglia aggiornata con un messaggio.
 
-## 5. Profilo (`05-profilo.html`)
+## 5. Profilo (`05-profilo.html`, `05b-profilo-abbonamenti.html`)
 
-Struttura allineata al Profilo del sito; il mockup 05 mostra ancora la versione precedente per le parti sotto le statistiche.
+**Uguale al Profilo del sito** (decisione del 9 ottobre 2026), con i colori e la barra dell'app.
 
-- Avatar con iniziali, nome, fascia di ranking (pallino colorato) e posizione.
-- Statistiche in 4 riquadri come sul sito: posizione, partite, vittorie, win rate.
-- Storico in schede: Prenotazioni, Partite, Lezioni (annullamento delle proprie prenotazioni e lezioni future).
-- **I tuoi pacchetti**: card navy completa (nome, stato, disponibili su totale, barra, scadenza, "Dettagli ›"). Sezione presente solo se ci sono pacchetti.
-- Voci: Dati personali, **Orario preferito** (fascia oraria; salvata sul dispositivo finché il backend non la supporta), Notifiche, Cambia password, **Circolo** (cambio circolo, vedi multi-circolo). Pulsante Esci.
-- **Elimina account**, con conferma: obbligatorio per la pubblicazione su App Store (linea guida Apple 5.1.1). Dipende dalla lacuna n. 10.
+- In alto: titolo "Profilo" e pulsante ingranaggio → Impostazioni.
+- Card: avatar (icona su fondo rosso tenue), nome, email, badge della fascia di ranking (o "Fuori fascia").
+- 4 riquadri: **Posizione** (es. "12°", "—" se non in classifica), **Partite**, **Vittorie**, **Win rate**. Dati da `/rankings?player_email=` e dalla classifica del circolo.
+- Schede: **Prenotazioni**, **Partite**, **Lezioni**, **Abbonamenti**.
+  - Prenotazioni e Lezioni: campo o istruttore, data e fascia oraria, stato (Confermata / Cancellata / Completata) e **Cancella** sulle confermate future.
+  - Partite: data, orario, numero di giocatori e stato **in italiano** (il sito oggi mostra il codice dello stato, es. `pending_result`).
+  - Abbonamenti: nome del piano, "Acquistato presso <circolo>", stato, attivazione ("Al primo utilizzo" se non attivo), scadenza, disponibili e utilizzate (solo per i pacchetti); tocco → Dettaglio abbonamento. **La scheda compare solo se l'utente ha almeno un pacchetto o abbonamento** (regola dell'app; il sito la mostra sempre).
+- In fondo: **Esci** e **Elimina account** con finestra di conferma (cosa viene cancellato, azione irreversibile). Obbligatorio per la pubblicazione su App Store (linea guida Apple 5.1.1); dipende dalla lacuna n. 10.
+
+## 5c. Impostazioni (`05c-impostazioni.html`)
+
+Voci presenti solo nell'app, fuori dal Profilo per tenerlo uguale al sito: **Circolo** (cambio circolo), **Orario preferito** (salvato sul dispositivo finché manca la lacuna n. 4), **Notifiche**, **Cambia password**.
 
 ## 6. Dettaglio abbonamento (`06-dettaglio-abbonamento.html`)
 
@@ -91,7 +97,7 @@ Struttura allineata al Profilo del sito; il mockup 05 mostra ancora la versione 
 - Attivato, scadenza, "Valido in tutti i circoli del gruppo".
 - **Quando puoi usarlo**: fasce per giorno con l'ultimo orario di inizio ammesso; tipi di partita ammessi.
 - **Movimenti**: acquisto, riserva, consumo, rilascio, con data e variazione.
-- Se l'utente ha più pacchetti, si arriva qui da una lista nel Profilo.
+- Si arriva qui dalla scheda Abbonamenti del Profilo o dal riferimento al pacchetto in Home.
 
 ## 7. Partite (`07-partite.html`)
 

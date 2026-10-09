@@ -65,9 +65,10 @@ Accettazione: flusso completo di richiesta e approvazione verificabile con i fak
 ## Fase 4 – Profilo e abbonamenti
 
 - [ ] Profilo: fascia, posizione, statistiche (`/rankings?player_email=`, `/ranking-bands`).
-- [ ] Card pacchetti e lista se più di uno.
+- [ ] Scheda Abbonamenti del Profilo (solo se ce n'è almeno uno), con tocco verso il dettaglio.
 - [ ] Dettaglio abbonamento: fasce, tipi ammessi, movimenti (lacuna n. 2: fake finché il backend non li espone).
-- [ ] Profilo con la struttura del sito: 4 riquadri statistiche, schede Prenotazioni / Partite / Lezioni.
+- [ ] Profilo uguale al sito: 4 riquadri statistiche, schede Prenotazioni / Partite / Lezioni / Abbonamenti (mockup `05-profilo.html`, `05b-profilo-abbonamenti.html`).
+- [ ] Impostazioni (solo app): Circolo, Orario preferito, Notifiche, Cambia password (mockup `05c-impostazioni.html`).
 - [ ] Cambia password; Esci.
 - [ ] **Elimina account** con conferma (lacuna n. 10: fake `FAKE_ACCOUNT_DELETION=true` finché manca l'endpoint). Obbligatorio prima della pubblicazione su App Store.
 
