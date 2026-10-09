@@ -11,15 +11,18 @@ class MatchCard extends StatelessWidget {
     super.key,
     required this.match,
     required this.myUserId,
-    this.onRequestJoin,
+    this.onJoin,
+    this.onTap,
   });
 
   final PadelMatch match;
   final String myUserId;
 
-  /// Mostra "Chiedi" sulle partite aperte altrui. Collegato nella Fase 3
-  /// (richieste di partecipazione).
-  final VoidCallback? onRequestJoin;
+  /// Mostra "Partecipa" sulle partite aperte altrui con posto libero.
+  final VoidCallback? onJoin;
+
+  /// Apre il dettaglio.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -55,21 +58,22 @@ class MatchCard extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       );
-    } else if (open && !mine && onRequestJoin != null) {
+    } else if (open && !mine && onJoin != null) {
       trailing = SizedBox(
         height: 44,
         child: ElevatedButton(
-          onPressed: onRequestJoin,
+          onPressed: onJoin,
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(0, 40),
             padding: const EdgeInsets.symmetric(horizontal: 14),
           ),
-          child: const Text('Chiedi'),
+          child: const Text('Partecipa'),
         ),
       );
     }
 
     return InfoCard(
+      onTap: onTap,
       leading: LeadingBox(
         background: boxColor,
         child: Text(

@@ -158,8 +158,8 @@ class CompleteBookingScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Con meno di 4 giocatori la partita resta aperta: chi vuole '
-              'giocare invia una richiesta e sei tu ad approvarla.',
+              'Con meno di 4 giocatori la partita resta aperta: altri '
+              'giocatori possono unirsi direttamente fino a 4.',
               style: TextStyle(fontSize: 12, color: colors.textSecondary),
             ),
             const SizedBox(height: 18),
