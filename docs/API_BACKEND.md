@@ -76,3 +76,33 @@ Oggi esistono `customers` (proprietario) → `clubs`, con `clubs.settings jsonb`
 - **Webapp**: editor del brand per l'owner, con anteprima e controllo del contrasto; upload di logo e splash nello storage esistente.
 - **Sito**: oggi logo, colori e testi di CR Padel sono scritti nel codice del sito. La stessa configurazione dovrebbe alimentare anche il sito, così app e sito restano allineati per ogni circolo.
 - **Email**: il mittente resta `noreply@crpadel.it`. Personalizzare il nome visualizzato ("<Circolo> via CRPadel"), il `Reply-To` (email del circolo) e logo e nome nel modello dell'email.
+
+## Notifiche push (FCM)
+
+Progetto Firebase `crpadel-e82f1`; app Android `it.crpadel.app`. L'invio va fatto dal server con l'API FCM HTTP v1 e il service account del progetto (mai nell'app o nel sito).
+
+**Contratto dei dati** che l'app usa per aprire la schermata giusta quando la notifica viene toccata. Va nel campo `data` del messaggio; titolo e testo vanno in `notification`.
+
+| `data.type` | `data.id` | Schermata aperta |
+| --- | --- | --- |
+| `match` | id della partita | Dettaglio partita |
+| `subscription` | id del pacchetto | Dettaglio abbonamento |
+| `booking` | (facoltativo) | Home, "Le tue prenotazioni" |
+| `matches` | — | Tab Partite |
+
+Senza `type` (o con un tipo sconosciuto) la notifica si mostra ma il tocco apre solo l'app.
+
+Esempio:
+
+```json
+{
+  "message": {
+    "token": "<token del dispositivo>",
+    "notification": { "title": "La tua partita è al completo", "body": "Campo 3 · giovedì 19:00" },
+    "data": { "type": "match", "id": "<id partita>" }
+  }
+}
+```
+
+Notifiche automatiche suggerite: un giocatore entra o esce dalla tua partita; la tua partita è al completo; promemoria il giorno prima; risultato da inserire; pacchetto in esaurimento o in scadenza (`low_balance_thresholds`, `expiry_warning_days` dei piani).
+

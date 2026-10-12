@@ -78,9 +78,10 @@ Accettazione: partecipare, abbandonare e inserire il risultato funzionano su sta
 
 Progetto Firebase `crpadel-e82f1` (lo stesso delle notifiche web del sito).
 
-- [ ] App Android registrata nel progetto Firebase con l'identificativo definitivo; `google-services.json` fornito da Stefano.
-- [ ] `firebase_core` + `firebase_messaging`: permesso, token, notifiche in primo piano e in background, tocco che apre la schermata giusta.
-- [ ] Registrazione del token del dispositivo (lacuna n. 5: fake `FAKE_PUSH_TOKENS=true` finché manca l'endpoint).
+- [x] App Android `it.crpadel.app` registrata nel progetto Firebase; `google-services.json` in `android/app/` (fuori da Git).
+- [x] `firebase_core` + `firebase_messaging`: permesso dopo l'accesso, token, avviso con "Apri" in primo piano, tocco che apre la schermata giusta (anche ad app chiusa, dopo l'accesso). Stato in Impostazioni → Notifiche.
+- [x] Registrazione del token del dispositivo, tolto all'uscita (lacuna n. 5: fake `FAKE_PUSH_TOKENS=true` finché manca l'endpoint).
+- [ ] Icona monocromatica per la barra delle notifiche Android (serve una versione del logo a una sola tinta).
 - [ ] iOS: servono account Apple Developer, chiave APNs caricata su Firebase e un Mac per la build.
 - [ ] Sito e backend (repository CrPadel, sessione separata): endpoint per i token, invio dal server con FCM HTTP v1, pagina admin "Invia notifica", notifiche automatiche.
 - [ ] Deep link per verifica email e reset password (lacuna n. 6).

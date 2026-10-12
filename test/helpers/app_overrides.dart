@@ -1,4 +1,6 @@
 import 'package:crpadel_mobile/core/providers.dart';
+import 'package:crpadel_mobile/core/push/push_messaging.dart';
+import 'package:crpadel_mobile/core/push/push_tokens_repository.dart';
 import 'package:crpadel_mobile/features/auth/data/auth_repository.dart';
 import 'package:crpadel_mobile/features/auth/data/fake_auth_repository.dart';
 import 'package:crpadel_mobile/features/bookings/data/bookings_repository.dart';
@@ -29,6 +31,8 @@ class FakeBackend {
     FakeProfileRepository? profile,
     this.subscriptionDetails,
     this.accountDeletion,
+    this.push,
+    this.pushTokens,
   }) : auth =
            auth ?? FakeAuthRepository(sessionUser: FakeAuthRepository.demoUser),
        bookings = bookings ?? FakeBookingsRepository(),
@@ -50,6 +54,10 @@ class FakeBackend {
   /// `null` = eliminazione dell'account non disponibile (lacuna n. 10).
   final FakeAccountDeletionRepository? accountDeletion;
 
+  /// `null` = Firebase non configurato.
+  final FakePushMessaging? push;
+  final FakePushTokensRepository? pushTokens;
+
   List<Override> get overrides => [
     authRepositoryProvider.overrideWithValue(auth),
     bookingsRepositoryProvider.overrideWithValue(bookings),
@@ -62,6 +70,8 @@ class FakeBackend {
       subscriptionDetails,
     ),
     accountDeletionRepositoryProvider.overrideWithValue(accountDeletion),
+    pushMessagingProvider.overrideWithValue(push),
+    pushTokensRepositoryProvider.overrideWithValue(pushTokens),
   ];
 
   ProviderContainer container() => ProviderContainer(

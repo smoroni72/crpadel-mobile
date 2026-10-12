@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/config/current_club.dart';
+import '../../../core/push/push_controller.dart';
+import '../../../core/push/push_messaging.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/brand_config.dart';
 import '../../bookings/presentation/book_providers.dart';
@@ -17,6 +19,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final preferred = ref.watch(preferredTimeProvider).value;
     final club = ref.watch(currentClubProvider);
+    final push = ref.watch(pushPermissionProvider);
     final colors = context.colors;
     return Scaffold(
       appBar: AppBar(title: const Text('Impostazioni')),
@@ -45,7 +48,31 @@ class SettingsScreen extends ConsumerWidget {
                   value: preferred?.label ?? 'Non impostato',
                   onTap: () => showPreferredTimeSheet(context),
                 ),
-                _Item(title: 'Notifiche', value: 'In arrivo', onTap: null),
+                _Item(
+                  title: 'Notifiche',
+                  value: switch (push) {
+                    PushPermission.granted => 'Attive',
+                    PushPermission.denied => 'Disattivate',
+                    PushPermission.notDetermined => 'Attiva',
+                    PushPermission.unavailable => 'Non disponibili',
+                  },
+                  onTap: switch (push) {
+                    PushPermission.notDetermined =>
+                      () => ref
+                          .read(pushPermissionProvider.notifier)
+                          .requestPermission(),
+                    PushPermission.denied =>
+                      () => ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Le notifiche sono disattivate: puoi attivarle '
+                            "nelle impostazioni del telefono, alla voce dell'app.",
+                          ),
+                        ),
+                      ),
+                    _ => null,
+                  },
+                ),
                 _Item(
                   title: 'Cambia password',
                   onTap: () => context.goNamed(AppRoutes.changePassword),
