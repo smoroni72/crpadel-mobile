@@ -16,6 +16,7 @@ class BrandConfig {
     required this.headingFont,
     required this.bodyFont,
     required this.monoFont,
+    required this.logoAsset,
   });
 
   final String displayName;
@@ -25,6 +26,9 @@ class BrandConfig {
   final String bodyFont;
   final String monoFont;
 
+  /// Logo mostrato in accesso e splash (stesso del sito e dell'icona).
+  final String logoAsset;
+
   static const crpadel = BrandConfig(
     displayName: 'CRPadel',
     lightColors: AppColors.light,
@@ -32,5 +36,6 @@ class BrandConfig {
     headingFont: 'Space Grotesk',
     bodyFont: 'Inter',
     monoFont: 'JetBrains Mono',
+    logoAsset: 'assets/brand/crpadel_logo.png',
   );
 }
