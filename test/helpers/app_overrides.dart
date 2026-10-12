@@ -6,6 +6,10 @@ import 'package:crpadel_mobile/features/bookings/data/fake_bookings_repository.d
 import 'package:crpadel_mobile/features/bookings/data/preferred_time_repository.dart';
 import 'package:crpadel_mobile/features/matches/data/fake_matches_repository.dart';
 import 'package:crpadel_mobile/features/matches/data/matches_repository.dart';
+import 'package:crpadel_mobile/features/profile/data/fake_profile_repository.dart';
+import 'package:crpadel_mobile/features/profile/data/profile_repository.dart';
+import 'package:crpadel_mobile/features/subscriptions/data/subscription_details_repository.dart';
+import 'package:crpadel_mobile/features/auth/data/account_deletion_repository.dart';
 import 'package:crpadel_mobile/features/subscriptions/data/fake_subscriptions_repository.dart';
 import 'package:crpadel_mobile/features/subscriptions/data/subscriptions_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,18 +26,29 @@ class FakeBackend {
     FakeMatchesRepository? matches,
     FakeSubscriptionsRepository? subscriptions,
     PreferredTime? preferredTime,
+    FakeProfileRepository? profile,
+    this.subscriptionDetails,
+    this.accountDeletion,
   }) : auth =
            auth ?? FakeAuthRepository(sessionUser: FakeAuthRepository.demoUser),
        bookings = bookings ?? FakeBookingsRepository(),
        matches = matches ?? FakeMatchesRepository(myUserId: myId),
        subscriptions = subscriptions ?? FakeSubscriptionsRepository(),
-       preferredTime = InMemoryPreferredTimeRepository(preferredTime);
+       preferredTime = InMemoryPreferredTimeRepository(preferredTime),
+       profile = profile ?? FakeProfileRepository();
 
   final FakeAuthRepository auth;
   final FakeBookingsRepository bookings;
   final FakeMatchesRepository matches;
   final FakeSubscriptionsRepository subscriptions;
   final InMemoryPreferredTimeRepository preferredTime;
+  final FakeProfileRepository profile;
+
+  /// `null` = dettagli del pacchetto non disponibili (lacuna n. 2).
+  final SubscriptionDetailsRepository? subscriptionDetails;
+
+  /// `null` = eliminazione dell'account non disponibile (lacuna n. 10).
+  final FakeAccountDeletionRepository? accountDeletion;
 
   List<Override> get overrides => [
     authRepositoryProvider.overrideWithValue(auth),
@@ -42,6 +57,11 @@ class FakeBackend {
     subscriptionsRepositoryProvider.overrideWithValue(subscriptions),
     clockProvider.overrideWithValue(() => testNow),
     preferredTimeRepositoryProvider.overrideWithValue(preferredTime),
+    profileRepositoryProvider.overrideWithValue(profile),
+    subscriptionDetailsRepositoryProvider.overrideWithValue(
+      subscriptionDetails,
+    ),
+    accountDeletionRepositoryProvider.overrideWithValue(accountDeletion),
   ];
 
   ProviderContainer container() => ProviderContainer(

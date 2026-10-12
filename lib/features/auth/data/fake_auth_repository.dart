@@ -17,7 +17,7 @@ class FakeAuthRepository implements AuthRepository {
 
   /// Utente restituito da [restoreSession]; `null` = nessuna sessione.
   AppUser? sessionUser;
-  final String password;
+  String password;
   final _sessionExpired = StreamController<void>.broadcast();
 
   @override
@@ -62,4 +62,16 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> logout() async => sessionUser = null;
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (currentPassword != password) {
+      throw const ApiException('Password attuale non valida', statusCode: 400);
+    }
+    password = newPassword;
+    sessionUser = null;
+  }
 }

@@ -29,6 +29,13 @@ abstract interface class AuthRepository {
 
   Future<void> logout();
 
+  /// Cambia la password. Il server chiude tutte le sessioni: dopo bisogna
+  /// accedere di nuovo.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
   /// Emette quando la sessione scade e il refresh non riesce.
   Stream<void> get sessionExpired;
 }
@@ -92,6 +99,18 @@ class ApiAuthRepository implements AuthRepository {
       data: {'email': email.trim().toLowerCase()},
     );
     return (response.data as Map<String, dynamic>)['message'] as String;
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _api.post(
+      '/auth/change-password',
+      data: {'current_password': currentPassword, 'new_password': newPassword},
+    );
+    await _api.setAccessToken(null);
   }
 
   @override
