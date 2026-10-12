@@ -14,7 +14,10 @@ import '../features/bookings/presentation/free_courts_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/matches/presentation/match_detail_screen.dart';
 import '../features/matches/presentation/matches_screen.dart';
+import '../features/profile/presentation/change_password_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import '../features/profile/presentation/settings_screen.dart';
+import '../features/subscriptions/presentation/subscription_detail_screen.dart';
 import 'app_shell.dart';
 import 'choose_club_screen.dart';
 import 'routes.dart';
@@ -73,6 +76,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             MatchDetailScreen(matchId: state.pathParameters['id']!),
       ),
+      GoRoute(
+        path: AppPaths.subscriptionDetail,
+        name: AppRoutes.subscriptionDetail,
+        builder: (_, state) => SubscriptionDetailScreen(
+          subscriptionId: state.pathParameters['id']!,
+        ),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -109,7 +119,29 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           _branch(AppPaths.matches, AppRoutes.matches, const MatchesScreen()),
-          _branch(AppPaths.profile, AppRoutes.profile, const ProfileScreen()),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppPaths.profile,
+                name: AppRoutes.profile,
+                builder: (_, _) => const ProfileScreen(),
+                routes: [
+                  GoRoute(
+                    path: AppPaths.settings,
+                    name: AppRoutes.settings,
+                    builder: (_, _) => const SettingsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: AppPaths.changePassword,
+                        name: AppRoutes.changePassword,
+                        builder: (_, _) => const ChangePasswordScreen(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     ],

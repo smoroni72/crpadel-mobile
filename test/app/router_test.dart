@@ -157,6 +157,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('Esci'),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byType(ProfileScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       await tester.tap(find.text('Esci'));
       await tester.pumpAndSettle();
       expect(find.byType(LoginScreen), findsOneWidget);
