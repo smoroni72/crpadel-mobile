@@ -64,13 +64,13 @@ Accettazione: partecipare, abbandonare e inserire il risultato funzionano su sta
 
 ## Fase 4 – Profilo e abbonamenti
 
-- [ ] Profilo: fascia, posizione, statistiche (`/rankings?player_email=`, `/ranking-bands`).
-- [ ] Scheda Abbonamenti del Profilo (solo se ce n'è almeno uno), con tocco verso il dettaglio.
-- [ ] Dettaglio abbonamento: fasce, tipi ammessi, movimenti (lacuna n. 2: fake finché il backend non li espone).
-- [ ] Profilo uguale al sito: 4 riquadri statistiche, schede Prenotazioni / Partite / Lezioni / Abbonamenti (mockup `05-profilo.html`, `05b-profilo-abbonamenti.html`).
-- [ ] Impostazioni (solo app): Circolo, Orario preferito, Notifiche, Cambia password (mockup `05c-impostazioni.html`).
-- [ ] Cambia password; Esci.
-- [ ] **Elimina account** con conferma (lacuna n. 10: fake `FAKE_ACCOUNT_DELETION=true` finché manca l'endpoint). Obbligatorio prima della pubblicazione su App Store.
+- [x] Profilo: fascia, posizione, statistiche (`/rankings`; la posizione dalla classifica completa, vedi lacuna n. 12).
+- [x] Scheda Abbonamenti del Profilo (solo se ce n'è almeno uno), con tocco verso il dettaglio.
+- [x] Dettaglio abbonamento: fasce, tipi ammessi, movimenti (lacuna n. 2: fake `FAKE_SUBSCRIPTION_DETAILS=true`; senza, solo i dati reali). Si apre anche dal riferimento al pacchetto in Home.
+- [x] Profilo uguale al sito: 4 riquadri statistiche, schede Prenotazioni / Partite / Lezioni / Abbonamenti (mockup `05-profilo.html`, `05b-profilo-abbonamenti.html`).
+- [x] Impostazioni (solo app): Circolo, Orario preferito, Notifiche, Cambia password (mockup `05c-impostazioni.html`).
+- [x] Cambia password (poi si torna al login: il server chiude tutte le sessioni); Esci.
+- [x] **Elimina account** con conferma (lacuna n. 10: fake `FAKE_ACCOUNT_DELETION=true`; senza, spiega che non è ancora disponibile). Obbligatorio prima della pubblicazione su App Store.
 
 ## Fase 5 – Notifiche e deep link
 
