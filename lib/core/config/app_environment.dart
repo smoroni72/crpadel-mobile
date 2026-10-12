@@ -8,4 +8,14 @@ abstract final class AppEnvironment {
     'CLUB_SLUG',
     defaultValue: 'crpadel',
   );
+
+  /// Fasce orarie e movimenti del pacchetto simulati (lacuna n. 2).
+  static const fakeSubscriptionDetails = bool.fromEnvironment(
+    'FAKE_SUBSCRIPTION_DETAILS',
+  );
+
+  /// Eliminazione dell'account simulata (lacuna n. 10).
+  static const fakeAccountDeletion = bool.fromEnvironment(
+    'FAKE_ACCOUNT_DELETION',
+  );
 }

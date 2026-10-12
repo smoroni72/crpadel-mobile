@@ -38,6 +38,9 @@ abstract class PlayerSubscription with _$PlayerSubscription {
     @Default(0) int matchesReserved,
     @Default(0) int matchesUsed,
     int? matchesAvailable,
+
+    /// Circolo che l'ha venduto; vale in tutti i circoli della proprietà.
+    String? soldByClubName,
   }) = _PlayerSubscription;
 
   factory PlayerSubscription.fromJson(Map<String, dynamic> json) =>

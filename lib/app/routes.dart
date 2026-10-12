@@ -14,6 +14,9 @@ abstract final class AppRoutes {
   static const matches = 'partite';
   static const matchDetail = 'partita';
   static const profile = 'profilo';
+  static const settings = 'impostazioni';
+  static const changePassword = 'cambia-password';
+  static const subscriptionDetail = 'abbonamento';
 }
 
 abstract final class AppPaths {
@@ -30,6 +33,9 @@ abstract final class AppPaths {
   static const matches = '/partite';
   static const matchDetail = '/partita/:id';
   static const profile = '/profilo';
+  static const settings = 'impostazioni';
+  static const changePassword = 'password';
+  static const subscriptionDetail = '/abbonamento/:id';
 
   /// Percorsi raggiungibili senza aver fatto l'accesso.
   static bool isPublic(String location) => location.startsWith(login);

@@ -27,7 +27,7 @@ Fonte: analisi del repository `../CrPadel` (API Fastify, `api/src/routes/*`, mig
 | Partecipare / lasciare | `POST /matches/:id/join` con `team` (`A`/`B`), iscrizione immediata senza approvazione; `POST /matches/:id/leave` (non per l'organizzatore) |
 | Aggiungere giocatori, risultato | `POST /matches/:id/participants` con `club_player_id` e `team` (organizzatore); `PATCH /matches/:id` con `score_team1`, `score_team2` (stesso punteggio, es. `6-4 3-6 TB 10-8`) e `status: completed` |
 | Risultato | `PATCH /matches/:id` (organizzatore: punteggio + `status: completed`) |
-| Profilo e ranking | `GET /rankings?player_email=`, `GET /ranking-bands` |
+| Profilo e ranking | `GET /rankings?player_email=` (statistiche e fascia), `GET /rankings?sort=position&limit=200` (posizione); storico `GET /bookings`, `GET /lessons`, annullamento lezione `PATCH /lessons/:id`; `POST /auth/change-password` (revoca tutte le sessioni) |
 | Istruttori | `GET /coaches` |
 
 ## Regole di dominio
@@ -56,6 +56,7 @@ Finché non esistono, l'app usa implementazioni fake (vedi `CLAUDE.md`).
 | 9 | `GET /bookings` senza filtro "da data" | Home, "Le tue prenotazioni" | Facoltativo: parametro `from=YYYY-MM-DD`. Oggi l'app chiede le 100 più recenti e scarta le passate |
 | 10 | Eliminazione del proprio account | Profilo, pubblicazione su App Store | Endpoint per l'utente autenticato (es. `DELETE /me` con conferma della password) che anonimizza o cancella i dati. Oggi il pulsante "Elimina Account" del sito chiama la funzione `deleteUserAccount`, non ancora migrata da Base44: risponde 501 e non funziona nemmeno sul sito |
 | 11 | Tipi di partita attivi leggibili dai giocatori | Completa la prenotazione | Ogni circolo attiva i suoi tipi (`club_match_type_settings`), ma `GET /match-type-settings` è riservato agli admin. Proposta: `GET /match-types` per gli iscritti (solo attivi, codice ed etichetta), oppure i tipi dentro la configurazione del circolo (n. 8). Oggi l'app propone Ranking e Amichevole e mostra l'errore del server se il tipo non è attivo |
+| 12 | Posizione in classifica del singolo giocatore | Profilo | `GET /rankings?player_email=` calcola `position` con `row_number()` dopo il filtro, quindi risponde sempre 1. L'app (come il sito) la ricava dalla classifica completa, che però arriva al massimo a 200 righe. Proposta: calcolare la posizione su tutto il circolo prima del filtro |
 
 ### Lacuna 8 – proposta
 

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/routes.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/dates.dart';
 import '../domain/player_subscription.dart';
 
 /// Riferimento piccolo al pacchetto in Home: anello, partite disponibili e
-/// scadenza. Il dettaglio arriva nella Fase 4.
+/// scadenza. Tocco → dettaglio abbonamento.
 class SubscriptionSummaryCard extends StatelessWidget {
   const SubscriptionSummaryCard({
     super.key,
@@ -53,40 +56,53 @@ class SubscriptionSummaryCard extends StatelessWidget {
       if (otherCount > 0) '+$otherCount',
     ].join(' · ');
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        border: Border.all(color: colors.border),
+    return Material(
+      color: colors.surface,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: colors.border),
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
       ),
-      child: Row(
-        children: [
-          SizedBox.square(
-            dimension: 40,
-            child: CircularProgressIndicator(
-              value: progress,
-              strokeWidth: 5,
-              strokeCap: StrokeCap.round,
-              color: colors.primary,
-              backgroundColor: colors.divider,
-              semanticsLabel: 'Partite disponibili',
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                title,
-                Text(
-                  details,
-                  style: TextStyle(fontSize: 12, color: colors.textSecondary),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.pushNamed(
+          AppRoutes.subscriptionDetail,
+          pathParameters: {'id': s.id},
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            children: [
+              SizedBox.square(
+                dimension: 40,
+                child: CircularProgressIndicator(
+                  value: progress,
+                  strokeWidth: 5,
+                  strokeCap: StrokeCap.round,
+                  color: colors.primary,
+                  backgroundColor: colors.divider,
+                  semanticsLabel: 'Partite disponibili',
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    title,
+                    Text(
+                      details,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: colors.textSecondary),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

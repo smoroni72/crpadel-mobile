@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 mixin _$PlayerSubscription {
 
  String get id; String get planName;@JsonKey(unknownEnumValue: PlanType.unknown) PlanType get planType;@JsonKey(unknownEnumValue: SubscriptionStatus.unknown) SubscriptionStatus get status;/// La validità parte dalla prima partita giocata: prima è `null`.
- DateTime? get activatedAt; DateTime? get expiresAt; int? get matchesTotal; int get matchesReserved; int get matchesUsed; int? get matchesAvailable;
+ DateTime? get activatedAt; DateTime? get expiresAt; int? get matchesTotal; int get matchesReserved; int get matchesUsed; int? get matchesAvailable;/// Circolo che l'ha venduto; vale in tutti i circoli della proprietà.
+ String? get soldByClubName;
 /// Create a copy of PlayerSubscription
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +30,16 @@ $PlayerSubscriptionCopyWith<PlayerSubscription> get copyWith => _$PlayerSubscrip
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayerSubscription&&(identical(other.id, id) || other.id == id)&&(identical(other.planName, planName) || other.planName == planName)&&(identical(other.planType, planType) || other.planType == planType)&&(identical(other.status, status) || other.status == status)&&(identical(other.activatedAt, activatedAt) || other.activatedAt == activatedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.matchesReserved, matchesReserved) || other.matchesReserved == matchesReserved)&&(identical(other.matchesUsed, matchesUsed) || other.matchesUsed == matchesUsed)&&(identical(other.matchesAvailable, matchesAvailable) || other.matchesAvailable == matchesAvailable));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayerSubscription&&(identical(other.id, id) || other.id == id)&&(identical(other.planName, planName) || other.planName == planName)&&(identical(other.planType, planType) || other.planType == planType)&&(identical(other.status, status) || other.status == status)&&(identical(other.activatedAt, activatedAt) || other.activatedAt == activatedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.matchesReserved, matchesReserved) || other.matchesReserved == matchesReserved)&&(identical(other.matchesUsed, matchesUsed) || other.matchesUsed == matchesUsed)&&(identical(other.matchesAvailable, matchesAvailable) || other.matchesAvailable == matchesAvailable)&&(identical(other.soldByClubName, soldByClubName) || other.soldByClubName == soldByClubName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,planName,planType,status,activatedAt,expiresAt,matchesTotal,matchesReserved,matchesUsed,matchesAvailable);
+int get hashCode => Object.hash(runtimeType,id,planName,planType,status,activatedAt,expiresAt,matchesTotal,matchesReserved,matchesUsed,matchesAvailable,soldByClubName);
 
 @override
 String toString() {
-  return 'PlayerSubscription(id: $id, planName: $planName, planType: $planType, status: $status, activatedAt: $activatedAt, expiresAt: $expiresAt, matchesTotal: $matchesTotal, matchesReserved: $matchesReserved, matchesUsed: $matchesUsed, matchesAvailable: $matchesAvailable)';
+  return 'PlayerSubscription(id: $id, planName: $planName, planType: $planType, status: $status, activatedAt: $activatedAt, expiresAt: $expiresAt, matchesTotal: $matchesTotal, matchesReserved: $matchesReserved, matchesUsed: $matchesUsed, matchesAvailable: $matchesAvailable, soldByClubName: $soldByClubName)';
 }
 
 
@@ -49,7 +50,7 @@ abstract mixin class $PlayerSubscriptionCopyWith<$Res>  {
   factory $PlayerSubscriptionCopyWith(PlayerSubscription value, $Res Function(PlayerSubscription) _then) = _$PlayerSubscriptionCopyWithImpl;
 @useResult
 $Res call({
- String id, String planName,@JsonKey(unknownEnumValue: PlanType.unknown) PlanType planType,@JsonKey(unknownEnumValue: SubscriptionStatus.unknown) SubscriptionStatus status, DateTime? activatedAt, DateTime? expiresAt, int? matchesTotal, int matchesReserved, int matchesUsed, int? matchesAvailable
+ String id, String planName,@JsonKey(unknownEnumValue: PlanType.unknown) PlanType planType,@JsonKey(unknownEnumValue: SubscriptionStatus.unknown) SubscriptionStatus status, DateTime? activatedAt, DateTime? expiresAt, int? matchesTotal, int matchesReserved, int matchesUsed, int? matchesAvailable, String? soldByClubName
 });
 
 
@@ -66,7 +67,7 @@ class _$PlayerSubscriptionCopyWithImpl<$Res>
 
 /// Create a copy of PlayerSubscription
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? planName = null,Object? planType = null,Object? status = null,Object? activatedAt = freezed,Object? expiresAt = freezed,Object? matchesTotal = freezed,Object? matchesReserved = null,Object? matchesUsed = null,Object? matchesAvailable = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? planName = null,Object? planType = null,Object? status = null,Object? activatedAt = freezed,Object? expiresAt = freezed,Object? matchesTotal = freezed,Object? matchesReserved = null,Object? matchesUsed = null,Object? matchesAvailable = freezed,Object? soldByClubName = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,planName: null == planName ? _self.planName : planName // ignore: cast_nullable_to_non_nullable
@@ -78,7 +79,8 @@ as DateTime?,matchesTotal: freezed == matchesTotal ? _self.matchesTotal : matche
 as int?,matchesReserved: null == matchesReserved ? _self.matchesReserved : matchesReserved // ignore: cast_nullable_to_non_nullable
 as int,matchesUsed: null == matchesUsed ? _self.matchesUsed : matchesUsed // ignore: cast_nullable_to_non_nullable
 as int,matchesAvailable: freezed == matchesAvailable ? _self.matchesAvailable : matchesAvailable // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,soldByClubName: freezed == soldByClubName ? _self.soldByClubName : soldByClubName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -163,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String planName, @JsonKey(unknownEnumValue: PlanType.unknown)  PlanType planType, @JsonKey(unknownEnumValue: SubscriptionStatus.unknown)  SubscriptionStatus status,  DateTime? activatedAt,  DateTime? expiresAt,  int? matchesTotal,  int matchesReserved,  int matchesUsed,  int? matchesAvailable)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String planName, @JsonKey(unknownEnumValue: PlanType.unknown)  PlanType planType, @JsonKey(unknownEnumValue: SubscriptionStatus.unknown)  SubscriptionStatus status,  DateTime? activatedAt,  DateTime? expiresAt,  int? matchesTotal,  int matchesReserved,  int matchesUsed,  int? matchesAvailable,  String? soldByClubName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PlayerSubscription() when $default != null:
-return $default(_that.id,_that.planName,_that.planType,_that.status,_that.activatedAt,_that.expiresAt,_that.matchesTotal,_that.matchesReserved,_that.matchesUsed,_that.matchesAvailable);case _:
+return $default(_that.id,_that.planName,_that.planType,_that.status,_that.activatedAt,_that.expiresAt,_that.matchesTotal,_that.matchesReserved,_that.matchesUsed,_that.matchesAvailable,_that.soldByClubName);case _:
   return orElse();
 
 }
@@ -184,10 +186,10 @@ return $default(_that.id,_that.planName,_that.planType,_that.status,_that.activa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String planName, @JsonKey(unknownEnumValue: PlanType.unknown)  PlanType planType, @JsonKey(unknownEnumValue: SubscriptionStatus.unknown)  SubscriptionStatus status,  DateTime? activatedAt,  DateTime? expiresAt,  int? matchesTotal,  int matchesReserved,  int matchesUsed,  int? matchesAvailable)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String planName, @JsonKey(unknownEnumValue: PlanType.unknown)  PlanType planType, @JsonKey(unknownEnumValue: SubscriptionStatus.unknown)  SubscriptionStatus status,  DateTime? activatedAt,  DateTime? expiresAt,  int? matchesTotal,  int matchesReserved,  int matchesUsed,  int? matchesAvailable,  String? soldByClubName)  $default,) {final _that = this;
 switch (_that) {
 case _PlayerSubscription():
-return $default(_that.id,_that.planName,_that.planType,_that.status,_that.activatedAt,_that.expiresAt,_that.matchesTotal,_that.matchesReserved,_that.matchesUsed,_that.matchesAvailable);case _:
+return $default(_that.id,_that.planName,_that.planType,_that.status,_that.activatedAt,_that.expiresAt,_that.matchesTotal,_that.matchesReserved,_that.matchesUsed,_that.matchesAvailable,_that.soldByClubName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +206,10 @@ return $default(_that.id,_that.planName,_that.planType,_that.status,_that.activa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String planName, @JsonKey(unknownEnumValue: PlanType.unknown)  PlanType planType, @JsonKey(unknownEnumValue: SubscriptionStatus.unknown)  SubscriptionStatus status,  DateTime? activatedAt,  DateTime? expiresAt,  int? matchesTotal,  int matchesReserved,  int matchesUsed,  int? matchesAvailable)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String planName, @JsonKey(unknownEnumValue: PlanType.unknown)  PlanType planType, @JsonKey(unknownEnumValue: SubscriptionStatus.unknown)  SubscriptionStatus status,  DateTime? activatedAt,  DateTime? expiresAt,  int? matchesTotal,  int matchesReserved,  int matchesUsed,  int? matchesAvailable,  String? soldByClubName)?  $default,) {final _that = this;
 switch (_that) {
 case _PlayerSubscription() when $default != null:
-return $default(_that.id,_that.planName,_that.planType,_that.status,_that.activatedAt,_that.expiresAt,_that.matchesTotal,_that.matchesReserved,_that.matchesUsed,_that.matchesAvailable);case _:
+return $default(_that.id,_that.planName,_that.planType,_that.status,_that.activatedAt,_that.expiresAt,_that.matchesTotal,_that.matchesReserved,_that.matchesUsed,_that.matchesAvailable,_that.soldByClubName);case _:
   return null;
 
 }
@@ -219,7 +221,7 @@ return $default(_that.id,_that.planName,_that.planType,_that.status,_that.activa
 @JsonSerializable()
 
 class _PlayerSubscription extends PlayerSubscription {
-  const _PlayerSubscription({required this.id, required this.planName, @JsonKey(unknownEnumValue: PlanType.unknown) this.planType = PlanType.unknown, @JsonKey(unknownEnumValue: SubscriptionStatus.unknown) this.status = SubscriptionStatus.unknown, this.activatedAt, this.expiresAt, this.matchesTotal, this.matchesReserved = 0, this.matchesUsed = 0, this.matchesAvailable}): super._();
+  const _PlayerSubscription({required this.id, required this.planName, @JsonKey(unknownEnumValue: PlanType.unknown) this.planType = PlanType.unknown, @JsonKey(unknownEnumValue: SubscriptionStatus.unknown) this.status = SubscriptionStatus.unknown, this.activatedAt, this.expiresAt, this.matchesTotal, this.matchesReserved = 0, this.matchesUsed = 0, this.matchesAvailable, this.soldByClubName}): super._();
   factory _PlayerSubscription.fromJson(Map<String, dynamic> json) => _$PlayerSubscriptionFromJson(json);
 
 @override final  String id;
@@ -233,6 +235,8 @@ class _PlayerSubscription extends PlayerSubscription {
 @override@JsonKey() final  int matchesReserved;
 @override@JsonKey() final  int matchesUsed;
 @override final  int? matchesAvailable;
+/// Circolo che l'ha venduto; vale in tutti i circoli della proprietà.
+@override final  String? soldByClubName;
 
 /// Create a copy of PlayerSubscription
 /// with the given fields replaced by the non-null parameter values.
@@ -247,16 +251,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayerSubscription&&(identical(other.id, id) || other.id == id)&&(identical(other.planName, planName) || other.planName == planName)&&(identical(other.planType, planType) || other.planType == planType)&&(identical(other.status, status) || other.status == status)&&(identical(other.activatedAt, activatedAt) || other.activatedAt == activatedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.matchesReserved, matchesReserved) || other.matchesReserved == matchesReserved)&&(identical(other.matchesUsed, matchesUsed) || other.matchesUsed == matchesUsed)&&(identical(other.matchesAvailable, matchesAvailable) || other.matchesAvailable == matchesAvailable));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayerSubscription&&(identical(other.id, id) || other.id == id)&&(identical(other.planName, planName) || other.planName == planName)&&(identical(other.planType, planType) || other.planType == planType)&&(identical(other.status, status) || other.status == status)&&(identical(other.activatedAt, activatedAt) || other.activatedAt == activatedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.matchesReserved, matchesReserved) || other.matchesReserved == matchesReserved)&&(identical(other.matchesUsed, matchesUsed) || other.matchesUsed == matchesUsed)&&(identical(other.matchesAvailable, matchesAvailable) || other.matchesAvailable == matchesAvailable)&&(identical(other.soldByClubName, soldByClubName) || other.soldByClubName == soldByClubName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,planName,planType,status,activatedAt,expiresAt,matchesTotal,matchesReserved,matchesUsed,matchesAvailable);
+int get hashCode => Object.hash(runtimeType,id,planName,planType,status,activatedAt,expiresAt,matchesTotal,matchesReserved,matchesUsed,matchesAvailable,soldByClubName);
 
 @override
 String toString() {
-  return 'PlayerSubscription(id: $id, planName: $planName, planType: $planType, status: $status, activatedAt: $activatedAt, expiresAt: $expiresAt, matchesTotal: $matchesTotal, matchesReserved: $matchesReserved, matchesUsed: $matchesUsed, matchesAvailable: $matchesAvailable)';
+  return 'PlayerSubscription(id: $id, planName: $planName, planType: $planType, status: $status, activatedAt: $activatedAt, expiresAt: $expiresAt, matchesTotal: $matchesTotal, matchesReserved: $matchesReserved, matchesUsed: $matchesUsed, matchesAvailable: $matchesAvailable, soldByClubName: $soldByClubName)';
 }
 
 
@@ -267,7 +271,7 @@ abstract mixin class _$PlayerSubscriptionCopyWith<$Res> implements $PlayerSubscr
   factory _$PlayerSubscriptionCopyWith(_PlayerSubscription value, $Res Function(_PlayerSubscription) _then) = __$PlayerSubscriptionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String planName,@JsonKey(unknownEnumValue: PlanType.unknown) PlanType planType,@JsonKey(unknownEnumValue: SubscriptionStatus.unknown) SubscriptionStatus status, DateTime? activatedAt, DateTime? expiresAt, int? matchesTotal, int matchesReserved, int matchesUsed, int? matchesAvailable
+ String id, String planName,@JsonKey(unknownEnumValue: PlanType.unknown) PlanType planType,@JsonKey(unknownEnumValue: SubscriptionStatus.unknown) SubscriptionStatus status, DateTime? activatedAt, DateTime? expiresAt, int? matchesTotal, int matchesReserved, int matchesUsed, int? matchesAvailable, String? soldByClubName
 });
 
 
@@ -284,7 +288,7 @@ class __$PlayerSubscriptionCopyWithImpl<$Res>
 
 /// Create a copy of PlayerSubscription
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? planName = null,Object? planType = null,Object? status = null,Object? activatedAt = freezed,Object? expiresAt = freezed,Object? matchesTotal = freezed,Object? matchesReserved = null,Object? matchesUsed = null,Object? matchesAvailable = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? planName = null,Object? planType = null,Object? status = null,Object? activatedAt = freezed,Object? expiresAt = freezed,Object? matchesTotal = freezed,Object? matchesReserved = null,Object? matchesUsed = null,Object? matchesAvailable = freezed,Object? soldByClubName = freezed,}) {
   return _then(_PlayerSubscription(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,planName: null == planName ? _self.planName : planName // ignore: cast_nullable_to_non_nullable
@@ -296,7 +300,8 @@ as DateTime?,matchesTotal: freezed == matchesTotal ? _self.matchesTotal : matche
 as int?,matchesReserved: null == matchesReserved ? _self.matchesReserved : matchesReserved // ignore: cast_nullable_to_non_nullable
 as int,matchesUsed: null == matchesUsed ? _self.matchesUsed : matchesUsed // ignore: cast_nullable_to_non_nullable
 as int,matchesAvailable: freezed == matchesAvailable ? _self.matchesAvailable : matchesAvailable // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,soldByClubName: freezed == soldByClubName ? _self.soldByClubName : soldByClubName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -34,6 +34,7 @@ _PlayerSubscription _$PlayerSubscriptionFromJson(Map<String, dynamic> json) =>
       matchesReserved: (json['matches_reserved'] as num?)?.toInt() ?? 0,
       matchesUsed: (json['matches_used'] as num?)?.toInt() ?? 0,
       matchesAvailable: (json['matches_available'] as num?)?.toInt(),
+      soldByClubName: json['sold_by_club_name'] as String?,
     );
 
 Map<String, dynamic> _$PlayerSubscriptionToJson(_PlayerSubscription instance) =>
@@ -48,6 +49,7 @@ Map<String, dynamic> _$PlayerSubscriptionToJson(_PlayerSubscription instance) =>
       'matches_reserved': instance.matchesReserved,
       'matches_used': instance.matchesUsed,
       'matches_available': instance.matchesAvailable,
+      'sold_by_club_name': instance.soldByClubName,
     };
 
 const _$PlanTypeEnumMap = {
