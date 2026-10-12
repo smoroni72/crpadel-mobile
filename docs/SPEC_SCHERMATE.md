@@ -6,7 +6,7 @@ Il mockup è sul canvas "CRPadel App – mockup approvato" su claude.ai (pagina 
 
 Il sito (https://test.crpadel.it) e l'app condividono font (Space Grotesk, Inter, JetBrains Mono), colore rosso, raggi e il tema chiaro. L'app **non** ne copia la grafica 1:1:
 
-- restano la barra in basso "a incavo" e i colori dell'app, compreso il tema scuro blu notte (il sito usa un nero neutro);
+- restano la barra in basso "a incavo" e i colori dell'app; il tema scuro è il nero neutro del sito (dal 12 ottobre 2026);
 - la Home resta quella personale dell'app, non la pagina vetrina del sito (hero, "Tutto in un'unica piattaforma", "Pronto a giocare?"), che è pensata per i visitatori ed è legata a un solo cliente;
 - dal sito si riprendono alcune sezioni come moduli facoltativi della Home (vedi Home) e la struttura del Profilo.
 
@@ -27,7 +27,7 @@ Testi, colori, logo e moduli della Home sono personalizzabili per circolo dalla 
 | Raggi | card 16–20, pulsanti e chip 12, pill 999 |
 | Tocco | target minimi 44×44 |
 
-Tema chiaro e scuro: l'app segue l'impostazione del sistema. I colori sono token (`AppColors` in `lib/core/theme`); quelli del tema scuro sono una proposta con gli stessi ruoli e contrasto del testo almeno 4,5:1.
+Tema chiaro e scuro: l'app segue l'impostazione del sistema. I colori sono token (`AppColors` in `lib/core/theme`). Il tema scuro è uguale a quello della webapp CRPadel: nero neutro (`#050505`, superfici `#141414`), contrasto del testo almeno 4,5:1 (decisione del 12 ottobre 2026).
 
 ## Navigazione
 
