@@ -1,4 +1,4 @@
-package it.crpadel.crpadel_mobile
+package it.crpadel.app
 
 import io.flutter.embedding.android.FlutterActivity
 

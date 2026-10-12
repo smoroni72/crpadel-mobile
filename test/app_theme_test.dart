@@ -30,6 +30,7 @@ void main() {
       headingFont: 'Inter',
       bodyFont: 'Inter',
       monoFont: 'JetBrains Mono',
+      logoAsset: 'assets/brand/crpadel_logo.png',
     );
     final theme = AppTheme.light(brand);
     expect(theme.colorScheme.primary, const Color(0xFF0A7D3B));

@@ -49,7 +49,7 @@ Finché non esistono, l'app usa implementazioni fake (vedi `CLAUDE.md`).
 | 2 | Dettaglio pacchetto: fasce orarie, tipi di partita ammessi, movimenti | Dettaglio abbonamento | Includere `windows` e `allowed_match_types` in `/subscriptions/mine`; `GET /subscriptions/mine/:id/movements` |
 | 3 | Profilo modificabile e avatar | Profilo | `PATCH /me` (nome, telefono), upload avatar per l'utente |
 | 4 | Orario preferito | Campi liberi | Campo sul profilo utente; nel frattempo salvarlo sul dispositivo |
-| 5 | Registrazione token push e invio FCM | Notifiche | `POST /me/push-tokens`; invio lato server |
+| 5 | Registrazione token push e invio FCM | Notifiche | Esistono la tabella `push_tokens` (con `platform` ios/android/web) e la risorsa `/push-tokens`, ma in scrittura solo per gli admin; il sito registra i token web sul progetto Firebase `crpadel-e82f1`. **Manca l'invio dal server** (era una funzione Base44 non migrata). Proposta: `POST /me/push-tokens` e `DELETE /me/push-tokens/:token` per l'utente; invio con FCM HTTP v1 (service account del progetto, solo sul server); pagina admin "Invia notifica" e notifiche automatiche (es. un giocatore entra nella tua partita) |
 | 6 | Deep link verifica email / reset password | Accesso | App Link Android, Universal Link iOS |
 | 7 | Refresh token via body | Robustezza mobile | Facoltativo: oggi il cookie jar funziona |
 | 8 | Elenco pubblico dei circoli, configurazione del brand e testi per circolo | Multi-circolo (Fase 0b), Home | Vedi sotto. Da fare dopo che Edoardo chiude il lavoro in corso: non è bloccante, l'app usa il fake e i valori predefiniti |

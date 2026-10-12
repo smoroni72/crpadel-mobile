@@ -20,7 +20,7 @@ Il backend si trova in `../CrPadel` (repository `smoroni72/crpadel-base44`). **I
 - Modelli: `freezed` + `json_serializable`.
 - Lingua: solo italiano. `flutter_localizations` + `intl` con locale `it_IT`. Fuso orario dei dati: Europe/Rome.
 - Font: Space Grotesk (titoli), Inter (testo), JetBrains Mono (orari, punteggi, numeri) sono i font predefiniti, inseriti come asset locali e sempre disponibili come ripiego. Un circolo può indicarne altri nella sua configurazione: si scaricano una volta, si verificano con lo sha256, si salvano su disco e si caricano con `FontLoader`. Solo font con licenza OFL.
-- Multi-circolo: una sola app "CRPadel" sugli store (nome, icona e scheda fissi). Colori, logo, splash Flutter e font arrivano dalla configurazione del circolo scelto; senza circoli sul backend l'app usa i valori predefiniti CRPadel. Il tema si costruisce sempre da un `BrandConfig`, mai da costanti sparse.
+- Prodotto (decisione del 12 ottobre 2026, che sostituisce l'app unica multi-circolo): **ogni cliente ha la sua app verticale**. Questa è l'app di **CRPadel**: nome, icona (il logo del sito, `assets/brand/crpadel_logo.png`) e colori della webapp CRPadel, backend `https://test.crpadel.it/api/v1` (staging), notifiche push sul progetto Firebase `crpadel-e82f1`. Plenyo è la versione standard e altri clienti (es. Centro Fusco) avranno la loro app. Il tema si costruisce sempre da un `BrandConfig`, mai da costanti sparse: un'app per un altro cliente cambia configurazione, non codice.
 
 ## Struttura
 

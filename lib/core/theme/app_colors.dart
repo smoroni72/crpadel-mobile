@@ -76,28 +76,29 @@ class AppColors extends ThemeExtension<AppColors> {
     slotTraining: Color(0xFFE6E4F8),
   );
 
-  /// Proposta per il tema scuro: stessi ruoli; testi e stati hanno contrasto
-  /// almeno 4,5:1 su fondo e superfici.
+  /// Tema scuro come la webapp CRPadel (nero neutro, `.dark` di
+  /// `src/index.css`); testi e stati hanno contrasto almeno 4,5:1.
   static const dark = AppColors(
     primary: Color(0xFFE6392D),
     primaryText: Color(0xFFFF8A7F),
-    primaryTint: Color(0xFF3B2230),
+    primaryTint: Color(0xFF3A1C1A),
     onPrimary: Color(0xFFFFFFFF),
-    navy: Color(0xFF2C3D63),
+    // Il sito usa grigi neutri anche per gli elementi "tuoi".
+    navy: Color(0xFF2E2E2E),
     onNavy: Color(0xFFFFFFFF),
-    text: Color(0xFFE6E9F0),
-    textSecondary: Color(0xFF9AA4BC),
-    background: Color(0xFF0E1424),
-    surface: Color(0xFF1A2338),
-    border: Color(0xFF2A3550),
-    divider: Color(0xFF222C44),
+    text: Color(0xFFF5F5F5),
+    textSecondary: Color(0xFFADADAD),
+    background: Color(0xFF050505),
+    surface: Color(0xFF141414),
+    border: Color(0xFF383838),
+    divider: Color(0xFF242424),
     matchOpen: Color(0xFF6EA8FF),
-    matchDone: Color(0xFF9AA4BC),
-    slotFree: Color(0xFF16301F),
-    slotMatch: Color(0xFF3D1F1F),
-    slotBooked: Color(0xFF3A2E14),
-    slotLesson: Color(0xFF16294A),
-    slotTraining: Color(0xFF25224A),
+    matchDone: Color(0xFFADADAD),
+    slotFree: Color(0xFF13241A),
+    slotMatch: Color(0xFF3A1C1A),
+    slotBooked: Color(0xFF362A12),
+    slotLesson: Color(0xFF14264A),
+    slotTraining: Color(0xFF231F48),
   );
 
   @override

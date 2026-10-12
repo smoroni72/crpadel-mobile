@@ -14,11 +14,13 @@ Obiettivo: preparare la base prima delle funzionalità.
 - [x] Localizzazione italiana (`flutter_localizations`, `intl`, locale `it_IT`).
 - [x] Font predefiniti come asset locali; tema chiaro e scuro con i token di `docs/SPEC_SCHERMATE.md`; barra in basso "a incavo".
 - [x] Predisposizione multi-circolo (senza la funzione completa): tema costruito da un `BrandConfig` (per ora solo quello predefinito CRPadel) con i colori in una `ThemeExtension`; circolo corrente come provider letto dall'`ApiClient` per `X-Club-Slug`; nel redirect del router il controllo "circolo scelto", oggi sempre soddisfatto da `CLUB_SLUG`.
-- [ ] Logo e icona dell'app: **in attesa**, li fornisce Stefano. Fino ad allora resta il segnaposto "CR".
+- [x] Logo e icona dell'app: il logo del sito CRPadel (`assets/brand/crpadel_logo.png`); icone generate con `dart run tool/make_launcher_icon.dart` e `dart run flutter_launcher_icons`.
 
 Accettazione: login, registrazione e recupero password funzionano come prima; le 4 tab navigano; `flutter analyze` e `flutter test` puliti.
 
 ## Fase 0b – Multi-circolo e brand
+
+**Sospesa (12 ottobre 2026):** ogni cliente ha la sua app verticale, quindi l'app CRPadel non sceglie il circolo. Resta valida come riferimento per l'app standard Plenyo.
 
 Dipende dalla lacuna n. 8. Si sviluppa con il fake (`FAKE_APP_CONFIG=true`) e si collega al backend quando l'endpoint esiste.
 
@@ -72,9 +74,16 @@ Accettazione: partecipare, abbandonare e inserire il risultato funzionano su sta
 - [x] Cambia password (poi si torna al login: il server chiude tutte le sessioni); Esci.
 - [x] **Elimina account** con conferma (lacuna n. 10: fake `FAKE_ACCOUNT_DELETION=true`; senza, spiega che non è ancora disponibile). Obbligatorio prima della pubblicazione su App Store.
 
-## Fase 5 – Notifiche e deep link
+## Fase 5 – Notifiche push (FCM) e deep link
 
-Dipende dalle lacune n. 5 e n. 6. Da pianificare quando il backend è pronto.
+Progetto Firebase `crpadel-e82f1` (lo stesso delle notifiche web del sito).
+
+- [ ] App Android registrata nel progetto Firebase con l'identificativo definitivo; `google-services.json` fornito da Stefano.
+- [ ] `firebase_core` + `firebase_messaging`: permesso, token, notifiche in primo piano e in background, tocco che apre la schermata giusta.
+- [ ] Registrazione del token del dispositivo (lacuna n. 5: fake `FAKE_PUSH_TOKENS=true` finché manca l'endpoint).
+- [ ] iOS: servono account Apple Developer, chiave APNs caricata su Firebase e un Mac per la build.
+- [ ] Sito e backend (repository CrPadel, sessione separata): endpoint per i token, invio dal server con FCM HTTP v1, pagina admin "Invia notifica", notifiche automatiche.
+- [ ] Deep link per verifica email e reset password (lacuna n. 6).
 
 ## Lacune backend da seguire
 
