@@ -18,6 +18,7 @@ import '../features/profile/presentation/change_password_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/settings_screen.dart';
 import '../features/subscriptions/presentation/subscription_detail_screen.dart';
+import '../features/notifications/presentation/notifications_screen.dart';
 import 'app_shell.dart';
 import 'choose_club_screen.dart';
 import 'routes.dart';
@@ -82,6 +83,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => SubscriptionDetailScreen(
           subscriptionId: state.pathParameters['id']!,
         ),
+      ),
+      GoRoute(
+        path: AppPaths.notifications,
+        name: AppRoutes.notifications,
+        builder: (_, _) => const NotificationsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, navigationShell) =>

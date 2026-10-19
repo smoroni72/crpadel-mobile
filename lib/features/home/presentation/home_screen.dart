@@ -15,6 +15,7 @@ import '../../matches/presentation/widgets/day_strip.dart';
 import '../../matches/presentation/widgets/connected_match_card.dart';
 import '../../subscriptions/presentation/subscription_summary_card.dart';
 import '../../subscriptions/presentation/subscriptions_provider.dart';
+import '../../notifications/presentation/notifications_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -71,6 +72,7 @@ class _Header extends ConsumerWidget {
     final today = ref.watch(clockProvider)();
     final colors = context.colors;
     final firstName = user?.fullName.trim().split(' ').first ?? '';
+    final unread = ref.watch(unreadNotificationsProvider).value ?? 0;
     return Row(
       children: [
         Expanded(
@@ -89,14 +91,18 @@ class _Header extends ConsumerWidget {
           ),
         ),
         IconButton.outlined(
-          onPressed: () {},
+          onPressed: () => context.pushNamed(AppRoutes.notifications),
           tooltip: 'Notifiche',
           style: IconButton.styleFrom(
             backgroundColor: colors.surface,
             side: BorderSide(color: colors.border),
             fixedSize: const Size.square(44),
           ),
-          icon: Icon(Icons.notifications_none, color: colors.text),
+          icon: Badge(
+            isLabelVisible: unread > 0,
+            label: Text(unread > 99 ? '99+' : '$unread'),
+            child: Icon(Icons.notifications_none, color: colors.text),
+          ),
         ),
       ],
     );
