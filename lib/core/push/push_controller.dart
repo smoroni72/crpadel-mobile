@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/router.dart';
 import '../../app/routes.dart';
 import '../../features/auth/presentation/auth_controller.dart';
+import '../../features/notifications/data/notifications_repository.dart';
+import '../../features/notifications/presentation/notifications_provider.dart';
 import 'push_messaging.dart';
 import 'push_tokens_repository.dart';
 
@@ -25,6 +27,7 @@ class PushController extends Notifier<PushPermission> {
 
   String? _registered;
   PushMessage? _pending;
+  DateTime? _lastSync;
 
   @override
   PushPermission build() {
@@ -35,7 +38,9 @@ class PushController extends Notifier<PushPermission> {
       push.onOpened.listen(_open),
       push.onTokenRefresh.listen(_register),
     ];
+    final lifecycle = AppLifecycleListener(onResume: () => unawaited(_refreshToken()));
     ref.onDispose(() {
+      lifecycle.dispose();
       for (final s in subscriptions) {
         s.cancel();
       }
@@ -82,9 +87,18 @@ class PushController extends Notifier<PushPermission> {
     try {
       await _tokens?.register(token: token, platform: devicePlatform);
       _registered = token;
+      _lastSync = DateTime.now();
     } catch (_) {
       // Riproveremo al prossimo avvio o al rinnovo del token.
     }
+  }
+
+  Future<void> _refreshToken() async {
+    if (ref.read(authControllerProvider).value == null) return;
+    final lastSync = _lastSync;
+    if (lastSync != null && DateTime.now().difference(lastSync) < const Duration(hours: 12)) return;
+    final token = await _push?.token();
+    if (token != null) await _register(token);
   }
 
   Future<void> _onLogout() async {
@@ -98,6 +112,8 @@ class PushController extends Notifier<PushPermission> {
   }
 
   void _showInApp(PushMessage message) {
+    ref.invalidate(notificationsProvider);
+    ref.invalidate(unreadNotificationsProvider);
     final text = [
       message.title,
       message.body,
@@ -118,6 +134,18 @@ class PushController extends Notifier<PushPermission> {
       // Prima va fatto l'accesso: apriamo la schermata subito dopo.
       _pending = message;
       return;
+    }
+    unawaited(_markAndNavigate(message));
+  }
+
+  Future<void> _markAndNavigate(PushMessage message) async {
+    final notificationId = message.data['notification_id'];
+    if (notificationId != null) {
+      try {
+        await ref.read(notificationsRepositoryProvider).markRead(notificationId);
+        ref.invalidate(notificationsProvider);
+        ref.invalidate(unreadNotificationsProvider);
+      } catch (_) {}
     }
     _navigate(message);
   }
@@ -145,7 +173,9 @@ class PushTarget {
 /// Contratto dei dati della notifica (`type` e `id`), descritto in
 /// `docs/API_BACKEND.md`. `null` se non c'è nulla da aprire.
 PushTarget? pushTarget(PushMessage message) {
-  final id = message.data['id'];
+  final id = message.data['entity_id'] ?? message.data['id'];
+  final destination = message.data['destination'];
+  if (destination != null) return notificationTarget(destination, id);
   return switch (message.data['type']) {
     'match' when id != null => PushTarget(AppRoutes.matchDetail, {'id': id}),
     'subscription' when id != null => PushTarget(AppRoutes.subscriptionDetail, {
@@ -156,3 +186,14 @@ PushTarget? pushTarget(PushMessage message) {
     _ => null,
   };
 }
+
+PushTarget? notificationTarget(String? destination, String? entityId) => switch (destination) {
+  'partite' when entityId != null => PushTarget(AppRoutes.matchDetail, {'id': entityId}),
+  'partite' => const PushTarget(AppRoutes.matches),
+  'prenotazioni' => const PushTarget(AppRoutes.book),
+  'abbonamenti' when entityId != null => PushTarget(AppRoutes.subscriptionDetail, {'id': entityId}),
+  'abbonamenti' => const PushTarget(AppRoutes.profile),
+  'eventi' || 'tornei' || 'news' => const PushTarget(AppRoutes.home),
+  null => const PushTarget(AppRoutes.home),
+  _ => null,
+};

@@ -32,6 +32,18 @@ void main() {
     expect(target({'type': 'booking'})?.name, AppRoutes.home);
     expect(target({'type': 'match'}), isNull);
     expect(target({}), isNull);
+    expect(
+      target({'destination': 'partite', 'entity_id': 'm1'})?.name,
+      AppRoutes.matchDetail,
+    );
+    expect(
+      target({'destination': 'prenotazioni'})?.name,
+      AppRoutes.book,
+    );
+    expect(
+      target({'destination': 'abbonamenti'})?.name,
+      AppRoutes.profile,
+    );
   });
 
   FakeBackend backendWith({

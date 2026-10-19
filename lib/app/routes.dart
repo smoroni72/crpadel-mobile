@@ -17,6 +17,7 @@ abstract final class AppRoutes {
   static const settings = 'impostazioni';
   static const changePassword = 'cambia-password';
   static const subscriptionDetail = 'abbonamento';
+  static const notifications = 'notifiche';
 }
 
 abstract final class AppPaths {
@@ -36,6 +37,7 @@ abstract final class AppPaths {
   static const settings = 'impostazioni';
   static const changePassword = 'password';
   static const subscriptionDetail = '/abbonamento/:id';
+  static const notifications = '/notifiche';
 
   /// Percorsi raggiungibili senza aver fatto l'accesso.
   static bool isPublic(String location) => location.startsWith(login);
