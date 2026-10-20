@@ -90,7 +90,7 @@ Progetto Firebase `crpadel-e82f1`; app Android `it.crpadel.app`. L'invio va fatt
 | `booking` | (facoltativo) | Home, "Le tue prenotazioni" |
 | `matches` | — | Tab Partite |
 
-Senza `type` (o con un tipo sconosciuto) la notifica si mostra ma il tocco apre solo l'app.
+Senza `type`/`destination` (o con un valore sconosciuto) il tocco apre il Centro notifiche. Una destinazione riconosciuta apre invece la relativa schermata; la comunicazione resta comunque disponibile nel Centro notifiche.
 
 Esempio:
 

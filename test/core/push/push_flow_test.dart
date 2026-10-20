@@ -30,8 +30,8 @@ void main() {
       AppRoutes.subscriptionDetail,
     );
     expect(target({'type': 'booking'})?.name, AppRoutes.home);
-    expect(target({'type': 'match'}), isNull);
-    expect(target({}), isNull);
+    expect(target({'type': 'match'})?.name, AppRoutes.notifications);
+    expect(target({})?.name, AppRoutes.notifications);
     expect(
       target({'destination': 'partite', 'entity_id': 'm1'})?.name,
       AppRoutes.matchDetail,
@@ -43,6 +43,10 @@ void main() {
     expect(
       target({'destination': 'abbonamenti'})?.name,
       AppRoutes.profile,
+    );
+    expect(
+      target({'destination': 'non-riconosciuta'})?.name,
+      AppRoutes.notifications,
     );
   });
 
