@@ -17,7 +17,8 @@ mixin _$MatchPlayer {
 
  String? get userId; String? get playerRef; String? get clubPlayerId; String get name; String? get participantType;/// `A` o `B`; le partite più vecchie non lo hanno (vale la posizione).
  String? get team;/// Lato preferito: `SX` o `DX`.
- String? get playingSide;
+ String? get playingSide;/// Dati correnti della fascia ranking, forniti insieme alla partita.
+@JsonKey(fromJson: nullableDoubleFromJson) double? get rankingCoefficient; String? get rankingBandColor; String? get rankingBandName;
 /// Create a copy of MatchPlayer
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,16 +31,16 @@ $MatchPlayerCopyWith<MatchPlayer> get copyWith => _$MatchPlayerCopyWithImpl<Matc
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchPlayer&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.clubPlayerId, clubPlayerId) || other.clubPlayerId == clubPlayerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.participantType, participantType) || other.participantType == participantType)&&(identical(other.team, team) || other.team == team)&&(identical(other.playingSide, playingSide) || other.playingSide == playingSide));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchPlayer&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.clubPlayerId, clubPlayerId) || other.clubPlayerId == clubPlayerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.participantType, participantType) || other.participantType == participantType)&&(identical(other.team, team) || other.team == team)&&(identical(other.playingSide, playingSide) || other.playingSide == playingSide)&&(identical(other.rankingCoefficient, rankingCoefficient) || other.rankingCoefficient == rankingCoefficient)&&(identical(other.rankingBandColor, rankingBandColor) || other.rankingBandColor == rankingBandColor)&&(identical(other.rankingBandName, rankingBandName) || other.rankingBandName == rankingBandName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,playerRef,clubPlayerId,name,participantType,team,playingSide);
+int get hashCode => Object.hash(runtimeType,userId,playerRef,clubPlayerId,name,participantType,team,playingSide,rankingCoefficient,rankingBandColor,rankingBandName);
 
 @override
 String toString() {
-  return 'MatchPlayer(userId: $userId, playerRef: $playerRef, clubPlayerId: $clubPlayerId, name: $name, participantType: $participantType, team: $team, playingSide: $playingSide)';
+  return 'MatchPlayer(userId: $userId, playerRef: $playerRef, clubPlayerId: $clubPlayerId, name: $name, participantType: $participantType, team: $team, playingSide: $playingSide, rankingCoefficient: $rankingCoefficient, rankingBandColor: $rankingBandColor, rankingBandName: $rankingBandName)';
 }
 
 
@@ -50,7 +51,7 @@ abstract mixin class $MatchPlayerCopyWith<$Res>  {
   factory $MatchPlayerCopyWith(MatchPlayer value, $Res Function(MatchPlayer) _then) = _$MatchPlayerCopyWithImpl;
 @useResult
 $Res call({
- String? userId, String? playerRef, String? clubPlayerId, String name, String? participantType, String? team, String? playingSide
+ String? userId, String? playerRef, String? clubPlayerId, String name, String? participantType, String? team, String? playingSide,@JsonKey(fromJson: nullableDoubleFromJson) double? rankingCoefficient, String? rankingBandColor, String? rankingBandName
 });
 
 
@@ -67,7 +68,7 @@ class _$MatchPlayerCopyWithImpl<$Res>
 
 /// Create a copy of MatchPlayer
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = freezed,Object? playerRef = freezed,Object? clubPlayerId = freezed,Object? name = null,Object? participantType = freezed,Object? team = freezed,Object? playingSide = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = freezed,Object? playerRef = freezed,Object? clubPlayerId = freezed,Object? name = null,Object? participantType = freezed,Object? team = freezed,Object? playingSide = freezed,Object? rankingCoefficient = freezed,Object? rankingBandColor = freezed,Object? rankingBandName = freezed,}) {
   return _then(_self.copyWith(
 userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String?,playerRef: freezed == playerRef ? _self.playerRef : playerRef // ignore: cast_nullable_to_non_nullable
@@ -76,6 +77,9 @@ as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_no
 as String,participantType: freezed == participantType ? _self.participantType : participantType // ignore: cast_nullable_to_non_nullable
 as String?,team: freezed == team ? _self.team : team // ignore: cast_nullable_to_non_nullable
 as String?,playingSide: freezed == playingSide ? _self.playingSide : playingSide // ignore: cast_nullable_to_non_nullable
+as String?,rankingCoefficient: freezed == rankingCoefficient ? _self.rankingCoefficient : rankingCoefficient // ignore: cast_nullable_to_non_nullable
+as double?,rankingBandColor: freezed == rankingBandColor ? _self.rankingBandColor : rankingBandColor // ignore: cast_nullable_to_non_nullable
+as String?,rankingBandName: freezed == rankingBandName ? _self.rankingBandName : rankingBandName // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -161,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? userId,  String? playerRef,  String? clubPlayerId,  String name,  String? participantType,  String? team,  String? playingSide)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? userId,  String? playerRef,  String? clubPlayerId,  String name,  String? participantType,  String? team,  String? playingSide, @JsonKey(fromJson: nullableDoubleFromJson)  double? rankingCoefficient,  String? rankingBandColor,  String? rankingBandName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MatchPlayer() when $default != null:
-return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that.participantType,_that.team,_that.playingSide);case _:
+return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that.participantType,_that.team,_that.playingSide,_that.rankingCoefficient,_that.rankingBandColor,_that.rankingBandName);case _:
   return orElse();
 
 }
@@ -182,10 +186,10 @@ return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? userId,  String? playerRef,  String? clubPlayerId,  String name,  String? participantType,  String? team,  String? playingSide)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? userId,  String? playerRef,  String? clubPlayerId,  String name,  String? participantType,  String? team,  String? playingSide, @JsonKey(fromJson: nullableDoubleFromJson)  double? rankingCoefficient,  String? rankingBandColor,  String? rankingBandName)  $default,) {final _that = this;
 switch (_that) {
 case _MatchPlayer():
-return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that.participantType,_that.team,_that.playingSide);case _:
+return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that.participantType,_that.team,_that.playingSide,_that.rankingCoefficient,_that.rankingBandColor,_that.rankingBandName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +206,10 @@ return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? userId,  String? playerRef,  String? clubPlayerId,  String name,  String? participantType,  String? team,  String? playingSide)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? userId,  String? playerRef,  String? clubPlayerId,  String name,  String? participantType,  String? team,  String? playingSide, @JsonKey(fromJson: nullableDoubleFromJson)  double? rankingCoefficient,  String? rankingBandColor,  String? rankingBandName)?  $default,) {final _that = this;
 switch (_that) {
 case _MatchPlayer() when $default != null:
-return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that.participantType,_that.team,_that.playingSide);case _:
+return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that.participantType,_that.team,_that.playingSide,_that.rankingCoefficient,_that.rankingBandColor,_that.rankingBandName);case _:
   return null;
 
 }
@@ -217,7 +221,7 @@ return $default(_that.userId,_that.playerRef,_that.clubPlayerId,_that.name,_that
 @JsonSerializable()
 
 class _MatchPlayer implements MatchPlayer {
-  const _MatchPlayer({this.userId, this.playerRef, this.clubPlayerId, required this.name, this.participantType, this.team, this.playingSide});
+  const _MatchPlayer({this.userId, this.playerRef, this.clubPlayerId, required this.name, this.participantType, this.team, this.playingSide, @JsonKey(fromJson: nullableDoubleFromJson) this.rankingCoefficient, this.rankingBandColor, this.rankingBandName});
   factory _MatchPlayer.fromJson(Map<String, dynamic> json) => _$MatchPlayerFromJson(json);
 
 @override final  String? userId;
@@ -229,6 +233,10 @@ class _MatchPlayer implements MatchPlayer {
 @override final  String? team;
 /// Lato preferito: `SX` o `DX`.
 @override final  String? playingSide;
+/// Dati correnti della fascia ranking, forniti insieme alla partita.
+@override@JsonKey(fromJson: nullableDoubleFromJson) final  double? rankingCoefficient;
+@override final  String? rankingBandColor;
+@override final  String? rankingBandName;
 
 /// Create a copy of MatchPlayer
 /// with the given fields replaced by the non-null parameter values.
@@ -243,16 +251,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchPlayer&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.clubPlayerId, clubPlayerId) || other.clubPlayerId == clubPlayerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.participantType, participantType) || other.participantType == participantType)&&(identical(other.team, team) || other.team == team)&&(identical(other.playingSide, playingSide) || other.playingSide == playingSide));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchPlayer&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.clubPlayerId, clubPlayerId) || other.clubPlayerId == clubPlayerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.participantType, participantType) || other.participantType == participantType)&&(identical(other.team, team) || other.team == team)&&(identical(other.playingSide, playingSide) || other.playingSide == playingSide)&&(identical(other.rankingCoefficient, rankingCoefficient) || other.rankingCoefficient == rankingCoefficient)&&(identical(other.rankingBandColor, rankingBandColor) || other.rankingBandColor == rankingBandColor)&&(identical(other.rankingBandName, rankingBandName) || other.rankingBandName == rankingBandName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,playerRef,clubPlayerId,name,participantType,team,playingSide);
+int get hashCode => Object.hash(runtimeType,userId,playerRef,clubPlayerId,name,participantType,team,playingSide,rankingCoefficient,rankingBandColor,rankingBandName);
 
 @override
 String toString() {
-  return 'MatchPlayer(userId: $userId, playerRef: $playerRef, clubPlayerId: $clubPlayerId, name: $name, participantType: $participantType, team: $team, playingSide: $playingSide)';
+  return 'MatchPlayer(userId: $userId, playerRef: $playerRef, clubPlayerId: $clubPlayerId, name: $name, participantType: $participantType, team: $team, playingSide: $playingSide, rankingCoefficient: $rankingCoefficient, rankingBandColor: $rankingBandColor, rankingBandName: $rankingBandName)';
 }
 
 
@@ -263,7 +271,7 @@ abstract mixin class _$MatchPlayerCopyWith<$Res> implements $MatchPlayerCopyWith
   factory _$MatchPlayerCopyWith(_MatchPlayer value, $Res Function(_MatchPlayer) _then) = __$MatchPlayerCopyWithImpl;
 @override @useResult
 $Res call({
- String? userId, String? playerRef, String? clubPlayerId, String name, String? participantType, String? team, String? playingSide
+ String? userId, String? playerRef, String? clubPlayerId, String name, String? participantType, String? team, String? playingSide,@JsonKey(fromJson: nullableDoubleFromJson) double? rankingCoefficient, String? rankingBandColor, String? rankingBandName
 });
 
 
@@ -280,7 +288,7 @@ class __$MatchPlayerCopyWithImpl<$Res>
 
 /// Create a copy of MatchPlayer
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = freezed,Object? playerRef = freezed,Object? clubPlayerId = freezed,Object? name = null,Object? participantType = freezed,Object? team = freezed,Object? playingSide = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = freezed,Object? playerRef = freezed,Object? clubPlayerId = freezed,Object? name = null,Object? participantType = freezed,Object? team = freezed,Object? playingSide = freezed,Object? rankingCoefficient = freezed,Object? rankingBandColor = freezed,Object? rankingBandName = freezed,}) {
   return _then(_MatchPlayer(
 userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String?,playerRef: freezed == playerRef ? _self.playerRef : playerRef // ignore: cast_nullable_to_non_nullable
@@ -289,6 +297,9 @@ as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_no
 as String,participantType: freezed == participantType ? _self.participantType : participantType // ignore: cast_nullable_to_non_nullable
 as String?,team: freezed == team ? _self.team : team // ignore: cast_nullable_to_non_nullable
 as String?,playingSide: freezed == playingSide ? _self.playingSide : playingSide // ignore: cast_nullable_to_non_nullable
+as String?,rankingCoefficient: freezed == rankingCoefficient ? _self.rankingCoefficient : rankingCoefficient // ignore: cast_nullable_to_non_nullable
+as double?,rankingBandColor: freezed == rankingBandColor ? _self.rankingBandColor : rankingBandColor // ignore: cast_nullable_to_non_nullable
+as String?,rankingBandName: freezed == rankingBandName ? _self.rankingBandName : rankingBandName // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -302,7 +313,7 @@ mixin _$PadelMatch {
 
  String get id; String? get bookingId; DateTime get date; String get courtName; String get timeSlot;@JsonKey(unknownEnumValue: MatchStatus.unknown) MatchStatus get status;@JsonKey(unknownEnumValue: MatchType.unknown) MatchType get matchType;@JsonKey(unknownEnumValue: MatchLevel.qualsiasi) MatchLevel get level;/// Id dell'organizzatore se registrato, altrimenti un hash dell'email.
  String? get organizerRef; String? get organizerName; int get maxPlayers;/// Punteggio dal punto di vista della squadra A, es. `"6-4 6-3"`.
- String? get scoreTeam1; String? get winnerTeam;/// In ordine di posizione: 0–1 squadra A, 2–3 squadra B.
+ String? get scoreTeam1; String? get winnerTeam;@JsonKey(fromJson: nullableDoubleFromJson) double? get rankingTeamACoefficientAtResult;@JsonKey(fromJson: nullableDoubleFromJson) double? get rankingTeamBCoefficientAtResult;/// In ordine di posizione: 0–1 squadra A, 2–3 squadra B.
  List<MatchPlayer> get players;
 /// Create a copy of PadelMatch
 /// with the given fields replaced by the non-null parameter values.
@@ -316,16 +327,16 @@ $PadelMatchCopyWith<PadelMatch> get copyWith => _$PadelMatchCopyWithImpl<PadelMa
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PadelMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.bookingId, bookingId) || other.bookingId == bookingId)&&(identical(other.date, date) || other.date == date)&&(identical(other.courtName, courtName) || other.courtName == courtName)&&(identical(other.timeSlot, timeSlot) || other.timeSlot == timeSlot)&&(identical(other.status, status) || other.status == status)&&(identical(other.matchType, matchType) || other.matchType == matchType)&&(identical(other.level, level) || other.level == level)&&(identical(other.organizerRef, organizerRef) || other.organizerRef == organizerRef)&&(identical(other.organizerName, organizerName) || other.organizerName == organizerName)&&(identical(other.maxPlayers, maxPlayers) || other.maxPlayers == maxPlayers)&&(identical(other.scoreTeam1, scoreTeam1) || other.scoreTeam1 == scoreTeam1)&&(identical(other.winnerTeam, winnerTeam) || other.winnerTeam == winnerTeam)&&const DeepCollectionEquality().equals(other.players, players));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PadelMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.bookingId, bookingId) || other.bookingId == bookingId)&&(identical(other.date, date) || other.date == date)&&(identical(other.courtName, courtName) || other.courtName == courtName)&&(identical(other.timeSlot, timeSlot) || other.timeSlot == timeSlot)&&(identical(other.status, status) || other.status == status)&&(identical(other.matchType, matchType) || other.matchType == matchType)&&(identical(other.level, level) || other.level == level)&&(identical(other.organizerRef, organizerRef) || other.organizerRef == organizerRef)&&(identical(other.organizerName, organizerName) || other.organizerName == organizerName)&&(identical(other.maxPlayers, maxPlayers) || other.maxPlayers == maxPlayers)&&(identical(other.scoreTeam1, scoreTeam1) || other.scoreTeam1 == scoreTeam1)&&(identical(other.winnerTeam, winnerTeam) || other.winnerTeam == winnerTeam)&&(identical(other.rankingTeamACoefficientAtResult, rankingTeamACoefficientAtResult) || other.rankingTeamACoefficientAtResult == rankingTeamACoefficientAtResult)&&(identical(other.rankingTeamBCoefficientAtResult, rankingTeamBCoefficientAtResult) || other.rankingTeamBCoefficientAtResult == rankingTeamBCoefficientAtResult)&&const DeepCollectionEquality().equals(other.players, players));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,bookingId,date,courtName,timeSlot,status,matchType,level,organizerRef,organizerName,maxPlayers,scoreTeam1,winnerTeam,const DeepCollectionEquality().hash(players));
+int get hashCode => Object.hash(runtimeType,id,bookingId,date,courtName,timeSlot,status,matchType,level,organizerRef,organizerName,maxPlayers,scoreTeam1,winnerTeam,rankingTeamACoefficientAtResult,rankingTeamBCoefficientAtResult,const DeepCollectionEquality().hash(players));
 
 @override
 String toString() {
-  return 'PadelMatch(id: $id, bookingId: $bookingId, date: $date, courtName: $courtName, timeSlot: $timeSlot, status: $status, matchType: $matchType, level: $level, organizerRef: $organizerRef, organizerName: $organizerName, maxPlayers: $maxPlayers, scoreTeam1: $scoreTeam1, winnerTeam: $winnerTeam, players: $players)';
+  return 'PadelMatch(id: $id, bookingId: $bookingId, date: $date, courtName: $courtName, timeSlot: $timeSlot, status: $status, matchType: $matchType, level: $level, organizerRef: $organizerRef, organizerName: $organizerName, maxPlayers: $maxPlayers, scoreTeam1: $scoreTeam1, winnerTeam: $winnerTeam, rankingTeamACoefficientAtResult: $rankingTeamACoefficientAtResult, rankingTeamBCoefficientAtResult: $rankingTeamBCoefficientAtResult, players: $players)';
 }
 
 
@@ -336,7 +347,7 @@ abstract mixin class $PadelMatchCopyWith<$Res>  {
   factory $PadelMatchCopyWith(PadelMatch value, $Res Function(PadelMatch) _then) = _$PadelMatchCopyWithImpl;
 @useResult
 $Res call({
- String id, String? bookingId, DateTime date, String courtName, String timeSlot,@JsonKey(unknownEnumValue: MatchStatus.unknown) MatchStatus status,@JsonKey(unknownEnumValue: MatchType.unknown) MatchType matchType,@JsonKey(unknownEnumValue: MatchLevel.qualsiasi) MatchLevel level, String? organizerRef, String? organizerName, int maxPlayers, String? scoreTeam1, String? winnerTeam, List<MatchPlayer> players
+ String id, String? bookingId, DateTime date, String courtName, String timeSlot,@JsonKey(unknownEnumValue: MatchStatus.unknown) MatchStatus status,@JsonKey(unknownEnumValue: MatchType.unknown) MatchType matchType,@JsonKey(unknownEnumValue: MatchLevel.qualsiasi) MatchLevel level, String? organizerRef, String? organizerName, int maxPlayers, String? scoreTeam1, String? winnerTeam,@JsonKey(fromJson: nullableDoubleFromJson) double? rankingTeamACoefficientAtResult,@JsonKey(fromJson: nullableDoubleFromJson) double? rankingTeamBCoefficientAtResult, List<MatchPlayer> players
 });
 
 
@@ -353,7 +364,7 @@ class _$PadelMatchCopyWithImpl<$Res>
 
 /// Create a copy of PadelMatch
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? bookingId = freezed,Object? date = null,Object? courtName = null,Object? timeSlot = null,Object? status = null,Object? matchType = null,Object? level = null,Object? organizerRef = freezed,Object? organizerName = freezed,Object? maxPlayers = null,Object? scoreTeam1 = freezed,Object? winnerTeam = freezed,Object? players = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? bookingId = freezed,Object? date = null,Object? courtName = null,Object? timeSlot = null,Object? status = null,Object? matchType = null,Object? level = null,Object? organizerRef = freezed,Object? organizerName = freezed,Object? maxPlayers = null,Object? scoreTeam1 = freezed,Object? winnerTeam = freezed,Object? rankingTeamACoefficientAtResult = freezed,Object? rankingTeamBCoefficientAtResult = freezed,Object? players = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,bookingId: freezed == bookingId ? _self.bookingId : bookingId // ignore: cast_nullable_to_non_nullable
@@ -368,7 +379,9 @@ as String?,organizerName: freezed == organizerName ? _self.organizerName : organ
 as String?,maxPlayers: null == maxPlayers ? _self.maxPlayers : maxPlayers // ignore: cast_nullable_to_non_nullable
 as int,scoreTeam1: freezed == scoreTeam1 ? _self.scoreTeam1 : scoreTeam1 // ignore: cast_nullable_to_non_nullable
 as String?,winnerTeam: freezed == winnerTeam ? _self.winnerTeam : winnerTeam // ignore: cast_nullable_to_non_nullable
-as String?,players: null == players ? _self.players : players // ignore: cast_nullable_to_non_nullable
+as String?,rankingTeamACoefficientAtResult: freezed == rankingTeamACoefficientAtResult ? _self.rankingTeamACoefficientAtResult : rankingTeamACoefficientAtResult // ignore: cast_nullable_to_non_nullable
+as double?,rankingTeamBCoefficientAtResult: freezed == rankingTeamBCoefficientAtResult ? _self.rankingTeamBCoefficientAtResult : rankingTeamBCoefficientAtResult // ignore: cast_nullable_to_non_nullable
+as double?,players: null == players ? _self.players : players // ignore: cast_nullable_to_non_nullable
 as List<MatchPlayer>,
   ));
 }
@@ -454,10 +467,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? bookingId,  DateTime date,  String courtName,  String timeSlot, @JsonKey(unknownEnumValue: MatchStatus.unknown)  MatchStatus status, @JsonKey(unknownEnumValue: MatchType.unknown)  MatchType matchType, @JsonKey(unknownEnumValue: MatchLevel.qualsiasi)  MatchLevel level,  String? organizerRef,  String? organizerName,  int maxPlayers,  String? scoreTeam1,  String? winnerTeam,  List<MatchPlayer> players)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? bookingId,  DateTime date,  String courtName,  String timeSlot, @JsonKey(unknownEnumValue: MatchStatus.unknown)  MatchStatus status, @JsonKey(unknownEnumValue: MatchType.unknown)  MatchType matchType, @JsonKey(unknownEnumValue: MatchLevel.qualsiasi)  MatchLevel level,  String? organizerRef,  String? organizerName,  int maxPlayers,  String? scoreTeam1,  String? winnerTeam, @JsonKey(fromJson: nullableDoubleFromJson)  double? rankingTeamACoefficientAtResult, @JsonKey(fromJson: nullableDoubleFromJson)  double? rankingTeamBCoefficientAtResult,  List<MatchPlayer> players)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PadelMatch() when $default != null:
-return $default(_that.id,_that.bookingId,_that.date,_that.courtName,_that.timeSlot,_that.status,_that.matchType,_that.level,_that.organizerRef,_that.organizerName,_that.maxPlayers,_that.scoreTeam1,_that.winnerTeam,_that.players);case _:
+return $default(_that.id,_that.bookingId,_that.date,_that.courtName,_that.timeSlot,_that.status,_that.matchType,_that.level,_that.organizerRef,_that.organizerName,_that.maxPlayers,_that.scoreTeam1,_that.winnerTeam,_that.rankingTeamACoefficientAtResult,_that.rankingTeamBCoefficientAtResult,_that.players);case _:
   return orElse();
 
 }
@@ -475,10 +488,10 @@ return $default(_that.id,_that.bookingId,_that.date,_that.courtName,_that.timeSl
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? bookingId,  DateTime date,  String courtName,  String timeSlot, @JsonKey(unknownEnumValue: MatchStatus.unknown)  MatchStatus status, @JsonKey(unknownEnumValue: MatchType.unknown)  MatchType matchType, @JsonKey(unknownEnumValue: MatchLevel.qualsiasi)  MatchLevel level,  String? organizerRef,  String? organizerName,  int maxPlayers,  String? scoreTeam1,  String? winnerTeam,  List<MatchPlayer> players)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? bookingId,  DateTime date,  String courtName,  String timeSlot, @JsonKey(unknownEnumValue: MatchStatus.unknown)  MatchStatus status, @JsonKey(unknownEnumValue: MatchType.unknown)  MatchType matchType, @JsonKey(unknownEnumValue: MatchLevel.qualsiasi)  MatchLevel level,  String? organizerRef,  String? organizerName,  int maxPlayers,  String? scoreTeam1,  String? winnerTeam, @JsonKey(fromJson: nullableDoubleFromJson)  double? rankingTeamACoefficientAtResult, @JsonKey(fromJson: nullableDoubleFromJson)  double? rankingTeamBCoefficientAtResult,  List<MatchPlayer> players)  $default,) {final _that = this;
 switch (_that) {
 case _PadelMatch():
-return $default(_that.id,_that.bookingId,_that.date,_that.courtName,_that.timeSlot,_that.status,_that.matchType,_that.level,_that.organizerRef,_that.organizerName,_that.maxPlayers,_that.scoreTeam1,_that.winnerTeam,_that.players);case _:
+return $default(_that.id,_that.bookingId,_that.date,_that.courtName,_that.timeSlot,_that.status,_that.matchType,_that.level,_that.organizerRef,_that.organizerName,_that.maxPlayers,_that.scoreTeam1,_that.winnerTeam,_that.rankingTeamACoefficientAtResult,_that.rankingTeamBCoefficientAtResult,_that.players);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -495,10 +508,10 @@ return $default(_that.id,_that.bookingId,_that.date,_that.courtName,_that.timeSl
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? bookingId,  DateTime date,  String courtName,  String timeSlot, @JsonKey(unknownEnumValue: MatchStatus.unknown)  MatchStatus status, @JsonKey(unknownEnumValue: MatchType.unknown)  MatchType matchType, @JsonKey(unknownEnumValue: MatchLevel.qualsiasi)  MatchLevel level,  String? organizerRef,  String? organizerName,  int maxPlayers,  String? scoreTeam1,  String? winnerTeam,  List<MatchPlayer> players)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? bookingId,  DateTime date,  String courtName,  String timeSlot, @JsonKey(unknownEnumValue: MatchStatus.unknown)  MatchStatus status, @JsonKey(unknownEnumValue: MatchType.unknown)  MatchType matchType, @JsonKey(unknownEnumValue: MatchLevel.qualsiasi)  MatchLevel level,  String? organizerRef,  String? organizerName,  int maxPlayers,  String? scoreTeam1,  String? winnerTeam, @JsonKey(fromJson: nullableDoubleFromJson)  double? rankingTeamACoefficientAtResult, @JsonKey(fromJson: nullableDoubleFromJson)  double? rankingTeamBCoefficientAtResult,  List<MatchPlayer> players)?  $default,) {final _that = this;
 switch (_that) {
 case _PadelMatch() when $default != null:
-return $default(_that.id,_that.bookingId,_that.date,_that.courtName,_that.timeSlot,_that.status,_that.matchType,_that.level,_that.organizerRef,_that.organizerName,_that.maxPlayers,_that.scoreTeam1,_that.winnerTeam,_that.players);case _:
+return $default(_that.id,_that.bookingId,_that.date,_that.courtName,_that.timeSlot,_that.status,_that.matchType,_that.level,_that.organizerRef,_that.organizerName,_that.maxPlayers,_that.scoreTeam1,_that.winnerTeam,_that.rankingTeamACoefficientAtResult,_that.rankingTeamBCoefficientAtResult,_that.players);case _:
   return null;
 
 }
@@ -510,7 +523,7 @@ return $default(_that.id,_that.bookingId,_that.date,_that.courtName,_that.timeSl
 @JsonSerializable()
 
 class _PadelMatch extends PadelMatch {
-  const _PadelMatch({required this.id, this.bookingId, required this.date, this.courtName = '', required this.timeSlot, @JsonKey(unknownEnumValue: MatchStatus.unknown) this.status = MatchStatus.unknown, @JsonKey(unknownEnumValue: MatchType.unknown) this.matchType = MatchType.unknown, @JsonKey(unknownEnumValue: MatchLevel.qualsiasi) this.level = MatchLevel.qualsiasi, this.organizerRef, this.organizerName, this.maxPlayers = 4, this.scoreTeam1, this.winnerTeam, final  List<MatchPlayer> players = const []}): _players = players,super._();
+  const _PadelMatch({required this.id, this.bookingId, required this.date, this.courtName = '', required this.timeSlot, @JsonKey(unknownEnumValue: MatchStatus.unknown) this.status = MatchStatus.unknown, @JsonKey(unknownEnumValue: MatchType.unknown) this.matchType = MatchType.unknown, @JsonKey(unknownEnumValue: MatchLevel.qualsiasi) this.level = MatchLevel.qualsiasi, this.organizerRef, this.organizerName, this.maxPlayers = 4, this.scoreTeam1, this.winnerTeam, @JsonKey(fromJson: nullableDoubleFromJson) this.rankingTeamACoefficientAtResult, @JsonKey(fromJson: nullableDoubleFromJson) this.rankingTeamBCoefficientAtResult, final  List<MatchPlayer> players = const []}): _players = players,super._();
   factory _PadelMatch.fromJson(Map<String, dynamic> json) => _$PadelMatchFromJson(json);
 
 @override final  String id;
@@ -528,6 +541,8 @@ class _PadelMatch extends PadelMatch {
 /// Punteggio dal punto di vista della squadra A, es. `"6-4 6-3"`.
 @override final  String? scoreTeam1;
 @override final  String? winnerTeam;
+@override@JsonKey(fromJson: nullableDoubleFromJson) final  double? rankingTeamACoefficientAtResult;
+@override@JsonKey(fromJson: nullableDoubleFromJson) final  double? rankingTeamBCoefficientAtResult;
 /// In ordine di posizione: 0–1 squadra A, 2–3 squadra B.
  final  List<MatchPlayer> _players;
 /// In ordine di posizione: 0–1 squadra A, 2–3 squadra B.
@@ -551,16 +566,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PadelMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.bookingId, bookingId) || other.bookingId == bookingId)&&(identical(other.date, date) || other.date == date)&&(identical(other.courtName, courtName) || other.courtName == courtName)&&(identical(other.timeSlot, timeSlot) || other.timeSlot == timeSlot)&&(identical(other.status, status) || other.status == status)&&(identical(other.matchType, matchType) || other.matchType == matchType)&&(identical(other.level, level) || other.level == level)&&(identical(other.organizerRef, organizerRef) || other.organizerRef == organizerRef)&&(identical(other.organizerName, organizerName) || other.organizerName == organizerName)&&(identical(other.maxPlayers, maxPlayers) || other.maxPlayers == maxPlayers)&&(identical(other.scoreTeam1, scoreTeam1) || other.scoreTeam1 == scoreTeam1)&&(identical(other.winnerTeam, winnerTeam) || other.winnerTeam == winnerTeam)&&const DeepCollectionEquality().equals(other._players, _players));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PadelMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.bookingId, bookingId) || other.bookingId == bookingId)&&(identical(other.date, date) || other.date == date)&&(identical(other.courtName, courtName) || other.courtName == courtName)&&(identical(other.timeSlot, timeSlot) || other.timeSlot == timeSlot)&&(identical(other.status, status) || other.status == status)&&(identical(other.matchType, matchType) || other.matchType == matchType)&&(identical(other.level, level) || other.level == level)&&(identical(other.organizerRef, organizerRef) || other.organizerRef == organizerRef)&&(identical(other.organizerName, organizerName) || other.organizerName == organizerName)&&(identical(other.maxPlayers, maxPlayers) || other.maxPlayers == maxPlayers)&&(identical(other.scoreTeam1, scoreTeam1) || other.scoreTeam1 == scoreTeam1)&&(identical(other.winnerTeam, winnerTeam) || other.winnerTeam == winnerTeam)&&(identical(other.rankingTeamACoefficientAtResult, rankingTeamACoefficientAtResult) || other.rankingTeamACoefficientAtResult == rankingTeamACoefficientAtResult)&&(identical(other.rankingTeamBCoefficientAtResult, rankingTeamBCoefficientAtResult) || other.rankingTeamBCoefficientAtResult == rankingTeamBCoefficientAtResult)&&const DeepCollectionEquality().equals(other._players, _players));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,bookingId,date,courtName,timeSlot,status,matchType,level,organizerRef,organizerName,maxPlayers,scoreTeam1,winnerTeam,const DeepCollectionEquality().hash(_players));
+int get hashCode => Object.hash(runtimeType,id,bookingId,date,courtName,timeSlot,status,matchType,level,organizerRef,organizerName,maxPlayers,scoreTeam1,winnerTeam,rankingTeamACoefficientAtResult,rankingTeamBCoefficientAtResult,const DeepCollectionEquality().hash(_players));
 
 @override
 String toString() {
-  return 'PadelMatch(id: $id, bookingId: $bookingId, date: $date, courtName: $courtName, timeSlot: $timeSlot, status: $status, matchType: $matchType, level: $level, organizerRef: $organizerRef, organizerName: $organizerName, maxPlayers: $maxPlayers, scoreTeam1: $scoreTeam1, winnerTeam: $winnerTeam, players: $players)';
+  return 'PadelMatch(id: $id, bookingId: $bookingId, date: $date, courtName: $courtName, timeSlot: $timeSlot, status: $status, matchType: $matchType, level: $level, organizerRef: $organizerRef, organizerName: $organizerName, maxPlayers: $maxPlayers, scoreTeam1: $scoreTeam1, winnerTeam: $winnerTeam, rankingTeamACoefficientAtResult: $rankingTeamACoefficientAtResult, rankingTeamBCoefficientAtResult: $rankingTeamBCoefficientAtResult, players: $players)';
 }
 
 
@@ -571,7 +586,7 @@ abstract mixin class _$PadelMatchCopyWith<$Res> implements $PadelMatchCopyWith<$
   factory _$PadelMatchCopyWith(_PadelMatch value, $Res Function(_PadelMatch) _then) = __$PadelMatchCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? bookingId, DateTime date, String courtName, String timeSlot,@JsonKey(unknownEnumValue: MatchStatus.unknown) MatchStatus status,@JsonKey(unknownEnumValue: MatchType.unknown) MatchType matchType,@JsonKey(unknownEnumValue: MatchLevel.qualsiasi) MatchLevel level, String? organizerRef, String? organizerName, int maxPlayers, String? scoreTeam1, String? winnerTeam, List<MatchPlayer> players
+ String id, String? bookingId, DateTime date, String courtName, String timeSlot,@JsonKey(unknownEnumValue: MatchStatus.unknown) MatchStatus status,@JsonKey(unknownEnumValue: MatchType.unknown) MatchType matchType,@JsonKey(unknownEnumValue: MatchLevel.qualsiasi) MatchLevel level, String? organizerRef, String? organizerName, int maxPlayers, String? scoreTeam1, String? winnerTeam,@JsonKey(fromJson: nullableDoubleFromJson) double? rankingTeamACoefficientAtResult,@JsonKey(fromJson: nullableDoubleFromJson) double? rankingTeamBCoefficientAtResult, List<MatchPlayer> players
 });
 
 
@@ -588,7 +603,7 @@ class __$PadelMatchCopyWithImpl<$Res>
 
 /// Create a copy of PadelMatch
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? bookingId = freezed,Object? date = null,Object? courtName = null,Object? timeSlot = null,Object? status = null,Object? matchType = null,Object? level = null,Object? organizerRef = freezed,Object? organizerName = freezed,Object? maxPlayers = null,Object? scoreTeam1 = freezed,Object? winnerTeam = freezed,Object? players = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? bookingId = freezed,Object? date = null,Object? courtName = null,Object? timeSlot = null,Object? status = null,Object? matchType = null,Object? level = null,Object? organizerRef = freezed,Object? organizerName = freezed,Object? maxPlayers = null,Object? scoreTeam1 = freezed,Object? winnerTeam = freezed,Object? rankingTeamACoefficientAtResult = freezed,Object? rankingTeamBCoefficientAtResult = freezed,Object? players = null,}) {
   return _then(_PadelMatch(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,bookingId: freezed == bookingId ? _self.bookingId : bookingId // ignore: cast_nullable_to_non_nullable
@@ -603,7 +618,9 @@ as String?,organizerName: freezed == organizerName ? _self.organizerName : organ
 as String?,maxPlayers: null == maxPlayers ? _self.maxPlayers : maxPlayers // ignore: cast_nullable_to_non_nullable
 as int,scoreTeam1: freezed == scoreTeam1 ? _self.scoreTeam1 : scoreTeam1 // ignore: cast_nullable_to_non_nullable
 as String?,winnerTeam: freezed == winnerTeam ? _self.winnerTeam : winnerTeam // ignore: cast_nullable_to_non_nullable
-as String?,players: null == players ? _self._players : players // ignore: cast_nullable_to_non_nullable
+as String?,rankingTeamACoefficientAtResult: freezed == rankingTeamACoefficientAtResult ? _self.rankingTeamACoefficientAtResult : rankingTeamACoefficientAtResult // ignore: cast_nullable_to_non_nullable
+as double?,rankingTeamBCoefficientAtResult: freezed == rankingTeamBCoefficientAtResult ? _self.rankingTeamBCoefficientAtResult : rankingTeamBCoefficientAtResult // ignore: cast_nullable_to_non_nullable
+as double?,players: null == players ? _self._players : players // ignore: cast_nullable_to_non_nullable
 as List<MatchPlayer>,
   ));
 }

@@ -35,7 +35,9 @@ class MatchesScreen extends ConsumerWidget {
           onRefresh: refresh,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            // Lascia spazio alla barra di navigazione sovrapposta, anche quando
+            // l'ultima card contiene squadre, coefficienti e azioni.
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 124),
             children: [
               Text(
                 'Partite',

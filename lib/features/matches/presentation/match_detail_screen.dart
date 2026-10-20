@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/colors.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -342,115 +343,189 @@ class _Teams extends StatelessWidget {
   final String me;
 
   @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      _TeamPanel(
+        label: 'SQUADRA A',
+        players: match.teamA,
+        coefficient: match.teamCoefficient('A'),
+        me: me,
+        winner: match.winnerTeam == 'team1',
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Text(
+          'VS',
+          style: TextStyle(
+            color: context.colors.textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      _TeamPanel(
+        label: 'SQUADRA B',
+        players: match.teamB,
+        coefficient: match.teamCoefficient('B'),
+        me: me,
+        winner: match.winnerTeam == 'team2',
+      ),
+    ],
+  );
+}
+
+class _TeamPanel extends StatelessWidget {
+  const _TeamPanel({
+    required this.label,
+    required this.players,
+    required this.coefficient,
+    required this.me,
+    required this.winner,
+  });
+
+  final String label;
+  final List<MatchPlayer> players;
+  final double? coefficient;
+  final String me;
+  final bool winner;
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final header = TextStyle(
-      fontSize: 11,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.6,
-      color: colors.textSecondary,
-    );
-    Widget slot(MatchPlayer? p) {
-      if (p == null) {
-        return Container(
-          height: 56,
-          decoration: BoxDecoration(
-            border: Border.all(color: colors.border, width: 1.5),
-            borderRadius: BorderRadius.circular(AppTheme.controlRadius),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            'Posto libero',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: colors.textSecondary,
-            ),
-          ),
-        );
-      }
-      final isMe = p.userId == me && me.isNotEmpty;
-      final note = [
-        if (isMe) 'tu',
-        if (p.playingSide != null) p.playingSide!,
-        if (p.participantType != null && p.participantType != 'member')
-          'ospite',
-      ].join(' · ');
-      return Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          border: Border.all(color: colors.border),
-          borderRadius: BorderRadius.circular(AppTheme.controlRadius),
-        ),
-        child: Row(
+    MatchPlayer? playerAt(int index) =>
+        index < players.length ? players[index] : null;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CircleAvatar(
-              radius: 15,
-              backgroundColor: isMe ? colors.navy : colors.textSecondary,
-              foregroundColor: colors.onNavy,
-              child: Text(
-                initials(p.name),
-                style: const TextStyle(fontSize: 11),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            Row(
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: colors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                if (winner) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.emoji_events_outlined,
+                    size: 16,
+                    color: colors.primaryText,
+                  ),
+                ],
+                const Spacer(),
+                if (coefficient != null)
                   Text(
-                    p.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13,
+                    'Coeff. coppia ${coefficientLabel(coefficient)}',
+                    style: context.fonts.monoStyle(
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  if (note.isNotEmpty)
-                    Text(
-                      note,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
+            const SizedBox(height: 10),
+            for (var i = 0; i < 2; i++) ...[
+              _PlayerRow(player: playerAt(i), me: me, winner: winner),
+              if (i == 0) const SizedBox(height: 8),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlayerRow extends StatelessWidget {
+  const _PlayerRow({
+    required this.player,
+    required this.me,
+    required this.winner,
+  });
+
+  final MatchPlayer? player;
+  final String me;
+  final bool winner;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final current = player;
+    if (current == null) {
+      return Container(
+        constraints: const BoxConstraints(minHeight: 52),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: colors.border),
+          borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+        ),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          'Posto disponibile',
+          style: TextStyle(color: colors.textSecondary),
         ),
       );
     }
-
-    MatchPlayer? at(List<MatchPlayer> team, int i) =>
-        i < team.length ? team[i] : null;
-    final a = match.teamA;
-    final b = match.teamB;
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(child: Text('SQUADRA A', style: header)),
-            const SizedBox(width: 8),
-            Expanded(child: Text('SQUADRA B', style: header)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        for (var i = 0; i < 2; i++) ...[
-          Row(
-            children: [
-              Expanded(child: slot(at(a, i))),
-              const SizedBox(width: 8),
-              Expanded(child: slot(at(b, i))),
-            ],
+    final isMe = current.userId == me && me.isNotEmpty;
+    final notes = [
+      if (isMe) 'Tu',
+      if (current.rankingBandName != null) current.rankingBandName!,
+      if (current.playingSide != null) current.playingSide!,
+      if (current.participantType != null &&
+          current.participantType != 'member')
+        'Ospite',
+    ];
+    return Container(
+      constraints: const BoxConstraints(minHeight: 56),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: isMe ? colors.primaryTint : colors.surface,
+        border: Border.all(color: colors.border),
+        borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: parseHexColor(current.rankingBandColor) ?? colors.divider,
+              border: Border.all(color: colors.border),
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  current.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: winner || isMe
+                        ? FontWeight.w700
+                        : FontWeight.w600,
+                  ),
+                ),
+                if (notes.isNotEmpty)
+                  Text(
+                    notes.join(' · '),
+                    style: TextStyle(color: colors.textSecondary, fontSize: 11),
+                  ),
+              ],
+            ),
+          ),
         ],
-      ],
+      ),
     );
   }
 }

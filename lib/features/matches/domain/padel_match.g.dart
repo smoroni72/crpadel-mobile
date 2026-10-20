@@ -14,6 +14,9 @@ _MatchPlayer _$MatchPlayerFromJson(Map<String, dynamic> json) => _MatchPlayer(
   participantType: json['participant_type'] as String?,
   team: json['team'] as String?,
   playingSide: json['playing_side'] as String?,
+  rankingCoefficient: nullableDoubleFromJson(json['ranking_coefficient']),
+  rankingBandColor: json['ranking_band_color'] as String?,
+  rankingBandName: json['ranking_band_name'] as String?,
 );
 
 Map<String, dynamic> _$MatchPlayerToJson(_MatchPlayer instance) =>
@@ -25,6 +28,9 @@ Map<String, dynamic> _$MatchPlayerToJson(_MatchPlayer instance) =>
       'participant_type': instance.participantType,
       'team': instance.team,
       'playing_side': instance.playingSide,
+      'ranking_coefficient': instance.rankingCoefficient,
+      'ranking_band_color': instance.rankingBandColor,
+      'ranking_band_name': instance.rankingBandName,
     };
 
 _PadelMatch _$PadelMatchFromJson(Map<String, dynamic> json) => _PadelMatch(
@@ -59,6 +65,12 @@ _PadelMatch _$PadelMatchFromJson(Map<String, dynamic> json) => _PadelMatch(
   maxPlayers: (json['max_players'] as num?)?.toInt() ?? 4,
   scoreTeam1: json['score_team1'] as String?,
   winnerTeam: json['winner_team'] as String?,
+  rankingTeamACoefficientAtResult: nullableDoubleFromJson(
+    json['ranking_team_a_coefficient_at_result'],
+  ),
+  rankingTeamBCoefficientAtResult: nullableDoubleFromJson(
+    json['ranking_team_b_coefficient_at_result'],
+  ),
   players:
       (json['players'] as List<dynamic>?)
           ?.map((e) => MatchPlayer.fromJson(e as Map<String, dynamic>))
@@ -81,6 +93,10 @@ Map<String, dynamic> _$PadelMatchToJson(_PadelMatch instance) =>
       'max_players': instance.maxPlayers,
       'score_team1': instance.scoreTeam1,
       'winner_team': instance.winnerTeam,
+      'ranking_team_a_coefficient_at_result':
+          instance.rankingTeamACoefficientAtResult,
+      'ranking_team_b_coefficient_at_result':
+          instance.rankingTeamBCoefficientAtResult,
       'players': instance.players.map((e) => e.toJson()).toList(),
     };
 
