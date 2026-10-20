@@ -35,6 +35,11 @@ abstract class MatchPlayer with _$MatchPlayer {
 
     /// Lato preferito: `SX` o `DX`.
     String? playingSide,
+
+    /// Dati correnti della fascia ranking, forniti insieme alla partita.
+    @JsonKey(fromJson: nullableDoubleFromJson) double? rankingCoefficient,
+    String? rankingBandColor,
+    String? rankingBandName,
   }) = _MatchPlayer;
 
   factory MatchPlayer.fromJson(Map<String, dynamic> json) =>
@@ -70,6 +75,10 @@ abstract class PadelMatch with _$PadelMatch {
     /// Punteggio dal punto di vista della squadra A, es. `"6-4 6-3"`.
     String? scoreTeam1,
     String? winnerTeam,
+    @JsonKey(fromJson: nullableDoubleFromJson)
+    double? rankingTeamACoefficientAtResult,
+    @JsonKey(fromJson: nullableDoubleFromJson)
+    double? rankingTeamBCoefficientAtResult,
 
     /// In ordine di posizione: 0–1 squadra A, 2–3 squadra B.
     @Default([]) List<MatchPlayer> players,
@@ -111,4 +120,27 @@ abstract class PadelMatch with _$PadelMatch {
   bool isOrganizer(String userId) => organizerRef == userId;
 
   bool isParticipant(String userId) => players.any((p) => p.userId == userId);
+
+  /// Coefficiente mostrato sulla partita. Per una partita conclusa usa il
+  /// valore congelato al momento del risultato; prima usa le fasce correnti.
+  double? teamCoefficient(String team) {
+    if (matchType != MatchType.ranking) return null;
+    final snapshot = team == 'A'
+        ? rankingTeamACoefficientAtResult
+        : rankingTeamBCoefficientAtResult;
+    if (status == MatchStatus.completed && snapshot != null && snapshot > 0) {
+      return snapshot;
+    }
+    final members = team == 'A' ? teamA : teamB;
+    if (members.length != 2) return null;
+    final coefficients = members.map((p) => p.rankingCoefficient).toList();
+    if (coefficients.any((value) => value == null || value <= 0)) return null;
+    return coefficients.whereType<double>().reduce((a, b) => a + b);
+  }
 }
+
+double? nullableDoubleFromJson(Object? value) => switch (value) {
+  num number => number.toDouble(),
+  String text => double.tryParse(text),
+  _ => null,
+};
