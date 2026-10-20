@@ -45,23 +45,31 @@ class ApiPushTokensRepository implements PushTokensRepository {
     final existing = preferences.getString(key);
     if (existing != null) return existing;
     final random = Random.secure();
-    final value = '${DateTime.now().microsecondsSinceEpoch}-${List.generate(16, (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0')).join()}';
+    final value =
+        '${DateTime.now().microsecondsSinceEpoch}-${List.generate(16, (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0')).join()}';
     await preferences.setString(key, value);
     return value;
   }
 
   @override
-  Future<void> register({required String token, required String platform}) async {
-    await _api.post('/communications/me/push-tokens', data: {
-      'token': token,
-      'platform': platform,
-      'installation_id': await _installationId(),
-    });
+  Future<void> register({
+    required String token,
+    required String platform,
+  }) async {
+    await _api.post(
+      '/communications/me/push-tokens',
+      data: {
+        'token': token,
+        'platform': platform,
+        'installation_id': await _installationId(),
+      },
+    );
   }
 
   @override
-  Future<void> unregister(String token) =>
-      _api.delete('/communications/me/push-tokens/${Uri.encodeComponent(token)}');
+  Future<void> unregister(String token) => _api.delete(
+    '/communications/me/push-tokens/${Uri.encodeComponent(token)}',
+  );
 }
 
 /// `android` o `ios`, come la colonna `platform` di `push_tokens`.

@@ -6,10 +6,12 @@ import '../../../app/routes.dart';
 import '../../../core/config/current_club.dart';
 import '../../../core/push/push_controller.dart';
 import '../../../core/push/push_messaging.dart';
+import '../../../core/push/push_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/brand_config.dart';
 import '../../bookings/presentation/book_providers.dart';
 import '../../bookings/presentation/widgets/preferred_time_sheet.dart';
+import '../../notifications/presentation/notifications_provider.dart';
 
 /// Voci presenti solo nell'app, fuori dal Profilo che resta uguale al sito.
 class SettingsScreen extends ConsumerWidget {
@@ -20,6 +22,8 @@ class SettingsScreen extends ConsumerWidget {
     final preferred = ref.watch(preferredTimeProvider).value;
     final club = ref.watch(currentClubProvider);
     final push = ref.watch(pushPermissionProvider);
+    final pushEnabled = ref.watch(pushNotificationsEnabledProvider);
+    final unread = ref.watch(unreadNotificationsProvider).value ?? 0;
     final colors = context.colors;
     return Scaffold(
       appBar: AppBar(title: const Text('Impostazioni')),
@@ -49,28 +53,57 @@ class SettingsScreen extends ConsumerWidget {
                   onTap: () => showPreferredTimeSheet(context),
                 ),
                 _Item(
-                  title: 'Notifiche',
-                  value: switch (push) {
-                    PushPermission.granted => 'Attive',
-                    PushPermission.denied => 'Disattivate',
-                    PushPermission.notDetermined => 'Attiva',
-                    PushPermission.unavailable => 'Non disponibili',
-                  },
-                  onTap: switch (push) {
-                    PushPermission.notDetermined =>
-                      () => ref
+                  title: 'Centro notifiche',
+                  value: unread == 0
+                      ? 'Nessuna da leggere'
+                      : '$unread da leggere',
+                  onTap: () => context.pushNamed(AppRoutes.notifications),
+                ),
+                _SwitchItem(
+                  title: 'Avvisi sul dispositivo',
+                  subtitle: push == PushPermission.unavailable
+                      ? 'Non disponibili su questo dispositivo'
+                      : 'Ricevi le comunicazioni anche quando l’app è chiusa',
+                  value:
+                      (pushEnabled.value ?? true) &&
+                      push == PushPermission.granted,
+                  enabled:
+                      push != PushPermission.unavailable &&
+                      !pushEnabled.isLoading,
+                  onChanged: (enabled) async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    if (!enabled) {
+                      await ref
                           .read(pushPermissionProvider.notifier)
-                          .requestPermission(),
-                    PushPermission.denied =>
-                      () => ScaffoldMessenger.of(context).showSnackBar(
+                          .disableNotifications();
+                      if (context.mounted) {
+                        messenger.showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Avvisi disattivati. Il Centro notifiche resta disponibile.',
+                            ),
+                          ),
+                        );
+                      }
+                      return;
+                    }
+                    final result = await ref
+                        .read(pushPermissionProvider.notifier)
+                        .enableNotifications();
+                    if (!context.mounted) return;
+                    if (result == PushPermission.granted) {
+                      messenger.showSnackBar(
+                        const SnackBar(content: Text('Avvisi attivati')),
+                      );
+                    } else {
+                      messenger.showSnackBar(
                         const SnackBar(
                           content: Text(
-                            'Le notifiche sono disattivate: puoi attivarle '
-                            "nelle impostazioni del telefono, alla voce dell'app.",
+                            'Per attivare gli avvisi, abilita le notifiche nelle impostazioni del telefono.',
                           ),
                         ),
-                      ),
-                    _ => null,
+                      );
+                    }
                   },
                 ),
                 _Item(
@@ -89,6 +122,51 @@ class SettingsScreen extends ConsumerWidget {
               style: TextStyle(fontSize: 12, color: colors.textSecondary),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SwitchItem extends StatelessWidget {
+  const _SwitchItem({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool value;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 64),
+      padding: const EdgeInsets.fromLTRB(16, 7, 8, 7),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: colors.divider)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontSize: 15)),
+                Text(
+                  subtitle,
+                  style: TextStyle(fontSize: 12, color: colors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          Switch(value: value, onChanged: enabled ? onChanged : null),
         ],
       ),
     );

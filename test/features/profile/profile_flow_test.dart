@@ -216,7 +216,8 @@ void main() {
     await tester.tap(find.byTooltip('Impostazioni'));
     await tester.pumpAndSettle();
     expect(find.text('Orario preferito'), findsOneWidget);
-    expect(find.text('Non disponibili'), findsOneWidget);
+    expect(find.text('Centro notifiche'), findsOneWidget);
+    expect(find.textContaining('Non disponibili'), findsOneWidget);
 
     await tester.tap(find.text('Cambia password'));
     await tester.pumpAndSettle();
