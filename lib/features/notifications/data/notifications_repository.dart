@@ -23,12 +23,16 @@ class ApiNotificationsRepository implements NotificationsRepository {
   Future<List<AppNotification>> list() async {
     final response = await _api.get('/communications/me/notifications');
     return ((response.data as Map<String, dynamic>)['data'] as List<dynamic>)
-        .cast<Map<String, dynamic>>().map(AppNotification.fromJson).toList();
+        .cast<Map<String, dynamic>>()
+        .map(AppNotification.fromJson)
+        .toList();
   }
 
   @override
   Future<int> unreadCount() async {
-    final response = await _api.get('/communications/me/notifications/unread-count');
+    final response = await _api.get(
+      '/communications/me/notifications/unread-count',
+    );
     return (response.data as Map<String, dynamic>)['count'] as int;
   }
 
