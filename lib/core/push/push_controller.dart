@@ -9,6 +9,7 @@ import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/notifications/data/notifications_repository.dart';
 import '../../features/notifications/presentation/notifications_provider.dart';
 import 'push_messaging.dart';
+import 'push_preferences.dart';
 import 'push_tokens_repository.dart';
 
 /// Messenger dell'app, per gli avvisi delle notifiche in primo piano.
@@ -38,7 +39,9 @@ class PushController extends Notifier<PushPermission> {
       push.onOpened.listen(_open),
       push.onTokenRefresh.listen(_register),
     ];
-    final lifecycle = AppLifecycleListener(onResume: () => unawaited(_refreshToken()));
+    final lifecycle = AppLifecycleListener(
+      onResume: () => unawaited(_refreshToken()),
+    );
     ref.onDispose(() {
       lifecycle.dispose();
       for (final s in subscriptions) {
@@ -63,6 +66,7 @@ class PushController extends Notifier<PushPermission> {
 
   /// Chiede il permesso (se serve) e registra il dispositivo.
   Future<void> _onLogin() async {
+    if (!await ref.read(pushPreferencesProvider).isEnabled()) return;
     await requestPermission();
     final pending = _pending;
     if (pending != null) {
@@ -84,6 +88,7 @@ class PushController extends Notifier<PushPermission> {
 
   Future<void> _register(String token) async {
     if (ref.read(authControllerProvider).value == null) return;
+    if (!await ref.read(pushPreferencesProvider).isEnabled()) return;
     try {
       await _tokens?.register(token: token, platform: devicePlatform);
       _registered = token;
@@ -95,8 +100,12 @@ class PushController extends Notifier<PushPermission> {
 
   Future<void> _refreshToken() async {
     if (ref.read(authControllerProvider).value == null) return;
+    if (!await ref.read(pushPreferencesProvider).isEnabled()) return;
     final lastSync = _lastSync;
-    if (lastSync != null && DateTime.now().difference(lastSync) < const Duration(hours: 12)) return;
+    if (lastSync != null &&
+        DateTime.now().difference(lastSync) < const Duration(hours: 12)) {
+      return;
+    }
     final token = await _push?.token();
     if (token != null) await _register(token);
   }
@@ -109,6 +118,35 @@ class PushController extends Notifier<PushPermission> {
       await _tokens?.unregister(token);
       await _push?.deleteToken();
     } catch (_) {}
+  }
+
+  /// Attiva gli avvisi push per questo dispositivo e lo registra sul backend.
+  Future<PushPermission> enableNotifications() async {
+    // La registrazione del nuovo token deve essere già autorizzata dalla
+    // preferenza quando requestPermission() richiama _register().
+    await ref.read(pushPreferencesProvider).setEnabled(true);
+    final permission = await requestPermission();
+    final enabled = permission == PushPermission.granted;
+    await ref.read(pushPreferencesProvider).setEnabled(enabled);
+    ref.invalidate(pushNotificationsEnabledProvider);
+    return permission;
+  }
+
+  /// Ferma gli avvisi sul dispositivo. Le comunicazioni già ricevute e quelle
+  /// inviate dal circolo restano consultabili nel Centro notifiche.
+  Future<void> disableNotifications() async {
+    await ref.read(pushPreferencesProvider).setEnabled(false);
+    final token = _registered ?? await _push?.token();
+    _registered = null;
+    if (token != null) {
+      try {
+        await _tokens?.unregister(token);
+      } catch (_) {}
+    }
+    try {
+      await _push?.deleteToken();
+    } catch (_) {}
+    ref.invalidate(pushNotificationsEnabledProvider);
   }
 
   void _showInApp(PushMessage message) {
@@ -142,7 +180,9 @@ class PushController extends Notifier<PushPermission> {
     final notificationId = message.data['notification_id'];
     if (notificationId != null) {
       try {
-        await ref.read(notificationsRepositoryProvider).markRead(notificationId);
+        await ref
+            .read(notificationsRepositoryProvider)
+            .markRead(notificationId);
         ref.invalidate(notificationsProvider);
         ref.invalidate(unreadNotificationsProvider);
       } catch (_) {}
@@ -187,13 +227,19 @@ PushTarget? pushTarget(PushMessage message) {
   };
 }
 
-PushTarget? notificationTarget(String? destination, String? entityId) => switch (destination) {
-  'partite' when entityId != null => PushTarget(AppRoutes.matchDetail, {'id': entityId}),
-  'partite' => const PushTarget(AppRoutes.matches),
-  'prenotazioni' => const PushTarget(AppRoutes.book),
-  'abbonamenti' when entityId != null => PushTarget(AppRoutes.subscriptionDetail, {'id': entityId}),
-  'abbonamenti' => const PushTarget(AppRoutes.profile),
-  'eventi' || 'tornei' || 'news' => const PushTarget(AppRoutes.home),
-  null => const PushTarget(AppRoutes.notifications),
-  _ => const PushTarget(AppRoutes.notifications),
-};
+PushTarget? notificationTarget(String? destination, String? entityId) =>
+    switch (destination) {
+      'partite' when entityId != null => PushTarget(AppRoutes.matchDetail, {
+        'id': entityId,
+      }),
+      'partite' => const PushTarget(AppRoutes.matches),
+      'prenotazioni' => const PushTarget(AppRoutes.book),
+      'abbonamenti' when entityId != null => PushTarget(
+        AppRoutes.subscriptionDetail,
+        {'id': entityId},
+      ),
+      'abbonamenti' => const PushTarget(AppRoutes.profile),
+      'eventi' || 'tornei' || 'news' => const PushTarget(AppRoutes.home),
+      null => const PushTarget(AppRoutes.notifications),
+      _ => const PushTarget(AppRoutes.notifications),
+    };

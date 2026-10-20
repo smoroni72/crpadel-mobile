@@ -1,6 +1,7 @@
 import 'package:crpadel_mobile/core/providers.dart';
 import 'package:crpadel_mobile/core/push/push_messaging.dart';
 import 'package:crpadel_mobile/core/push/push_tokens_repository.dart';
+import 'package:crpadel_mobile/core/push/push_preferences.dart';
 import 'package:crpadel_mobile/features/auth/data/auth_repository.dart';
 import 'package:crpadel_mobile/features/auth/data/fake_auth_repository.dart';
 import 'package:crpadel_mobile/features/bookings/data/bookings_repository.dart';
@@ -33,13 +34,15 @@ class FakeBackend {
     this.accountDeletion,
     this.push,
     this.pushTokens,
+    InMemoryPushPreferences? pushPreferences,
   }) : auth =
            auth ?? FakeAuthRepository(sessionUser: FakeAuthRepository.demoUser),
        bookings = bookings ?? FakeBookingsRepository(),
        matches = matches ?? FakeMatchesRepository(myUserId: myId),
        subscriptions = subscriptions ?? FakeSubscriptionsRepository(),
        preferredTime = InMemoryPreferredTimeRepository(preferredTime),
-       profile = profile ?? FakeProfileRepository();
+       profile = profile ?? FakeProfileRepository(),
+       pushPreferences = pushPreferences ?? InMemoryPushPreferences();
 
   final FakeAuthRepository auth;
   final FakeBookingsRepository bookings;
@@ -57,6 +60,7 @@ class FakeBackend {
   /// `null` = Firebase non configurato.
   final FakePushMessaging? push;
   final FakePushTokensRepository? pushTokens;
+  final InMemoryPushPreferences pushPreferences;
 
   List<Override> get overrides => [
     authRepositoryProvider.overrideWithValue(auth),
@@ -72,6 +76,7 @@ class FakeBackend {
     accountDeletionRepositoryProvider.overrideWithValue(accountDeletion),
     pushMessagingProvider.overrideWithValue(push),
     pushTokensRepositoryProvider.overrideWithValue(pushTokens),
+    pushPreferencesProvider.overrideWithValue(pushPreferences),
   ];
 
   ProviderContainer container() => ProviderContainer(

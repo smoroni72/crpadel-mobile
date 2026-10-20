@@ -36,14 +36,8 @@ void main() {
       target({'destination': 'partite', 'entity_id': 'm1'})?.name,
       AppRoutes.matchDetail,
     );
-    expect(
-      target({'destination': 'prenotazioni'})?.name,
-      AppRoutes.book,
-    );
-    expect(
-      target({'destination': 'abbonamenti'})?.name,
-      AppRoutes.profile,
-    );
+    expect(target({'destination': 'prenotazioni'})?.name, AppRoutes.book);
+    expect(target({'destination': 'abbonamenti'})?.name, AppRoutes.profile);
     expect(
       target({'destination': 'non-riconosciuta'})?.name,
       AppRoutes.notifications,
@@ -186,6 +180,76 @@ void main() {
     await tester.tap(find.byTooltip('Impostazioni'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Attive'), findsOneWidget);
+    expect(find.text('Centro notifiche'), findsOneWidget);
+    expect(find.byType(Switch), findsOneWidget);
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
+  });
+
+  testWidgets('dal Profilo si apre il Centro notifiche', (tester) async {
+    final push = FakePushMessaging();
+    await start(tester, backendWith(push: push));
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AppBottomBar),
+        matching: find.text('Profilo'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Centro notifiche'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Notifiche'), findsOneWidget);
+  });
+
+  testWidgets('l’interruttore disattiva token e avvisi push', (tester) async {
+    final push = FakePushMessaging();
+    final tokens = FakePushTokensRepository();
+    final backend = backendWith(push: push, tokens: tokens);
+    await start(tester, backend);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AppBottomBar),
+        matching: find.text('Profilo'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Impostazioni'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(backend.pushPreferences.enabled, isFalse);
+    expect(tokens.registered, isEmpty);
+    expect(push.deletedTokens, 1);
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+  });
+
+  testWidgets('l’interruttore riattiva e registra il dispositivo', (
+    tester,
+  ) async {
+    final push = FakePushMessaging();
+    final tokens = FakePushTokensRepository();
+    final backend = backendWith(push: push, tokens: tokens);
+    await start(tester, backend);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AppBottomBar),
+        matching: find.text('Profilo'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Impostazioni'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(backend.pushPreferences.enabled, isTrue);
+    expect(tokens.registered, {'token-di-prova'});
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
   });
 }
