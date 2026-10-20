@@ -70,26 +70,36 @@ void main() {
     expect(find.byType(MatchesScreen), findsOneWidget);
   }
 
+  Future<void> openMatchCard(WidgetTester tester, String court) async {
+    final card = find.text(court.toUpperCase());
+    await Scrollable.ensureVisible(tester.element(card), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(card);
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('Partecipa dalla card: si entra subito', (tester) async {
     final backend = backendWith();
     await openMatches(tester, backend);
 
     expect(find.text('Partecipa'), findsOneWidget);
-    await tester.tap(find.text('Partecipa'));
+    final participate = find.text('Partecipa');
+    await Scrollable.ensureVisible(tester.element(participate), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(participate);
     await tester.pumpAndSettle();
 
     expect(backend.matches.joined, ['altrui']);
     expect(find.text('Sei nella partita delle 19:00'), findsOneWidget);
     expect(find.text('Partecipa'), findsNothing);
-    expect(find.textContaining('Tua · Aperta · 3/4'), findsOneWidget);
+    expect(find.text('TU'), findsWidgets);
   });
 
   testWidgets('dal dettaglio si sceglie la squadra', (tester) async {
     final backend = backendWith();
     await openMatches(tester, backend);
 
-    await tester.tap(find.text('Campo 3 · ranking'));
-    await tester.pumpAndSettle();
+    await openMatchCard(tester, 'Campo 3');
     expect(find.text('Partecipa in squadra A'), findsNothing);
     // X Y e Z W sono in squadra A: resta solo la B.
     await tester.tap(find.text('Partecipa'));
@@ -105,8 +115,7 @@ void main() {
   ) async {
     await openMatches(tester, backendWith());
 
-    await tester.tap(find.text('Campo 2 · ranking'));
-    await tester.pumpAndSettle();
+    await openMatchCard(tester, 'Campo 2');
     expect(find.text('Organizzi tu'), findsOneWidget);
     expect(find.textContaining('Partecipa'), findsNothing);
     expect(find.text('Richieste in attesa'), findsNothing);
@@ -118,8 +127,7 @@ void main() {
     final backend = backendWith();
     await openMatches(tester, backend);
 
-    await tester.tap(find.text('Campo 1 · amichevole'));
-    await tester.pumpAndSettle();
+    await openMatchCard(tester, 'Campo 1');
     await tester.tap(find.text('Abbandona partita'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Abbandona'));
@@ -147,8 +155,7 @@ void main() {
     ];
     await openMatches(tester, backend);
 
-    await tester.tap(find.text('Campo 4 · ranking'));
-    await tester.pumpAndSettle();
+    await openMatchCard(tester, 'Campo 4');
     await tester.tap(find.text('Inserisci risultato'));
     await tester.pumpAndSettle();
 
@@ -179,8 +186,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Mercoledì 7 ottobre'), findsWidgets);
-    expect(find.text('Campo 2 · ranking'), findsOneWidget);
-    expect(find.text('Campo 1 · amichevole'), findsOneWidget);
-    expect(find.text('Campo 3 · ranking'), findsNothing);
+    expect(find.text('CAMPO 2'), findsOneWidget);
+    expect(find.text('CAMPO 1'), findsOneWidget);
+    expect(find.text('CAMPO 3'), findsNothing);
   });
 }

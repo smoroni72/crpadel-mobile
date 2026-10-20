@@ -114,11 +114,13 @@ void main() {
           court: 'Campo 1',
           status: MatchStatus.completed,
           score: '6-4 6-3',
+          coefficientA: 14.5,
+          coefficientB: 12.5,
           players: [
-            player('Anna Rossi'),
-            player('Bea Bianchi'),
-            player('Carla Verdi'),
-            player('Dora Neri'),
+            player('Anna Rossi', coefficient: 7.5, color: '#E6392D'),
+            player('Bea Bianchi', coefficient: 7, color: '#F5A623'),
+            player('Carla Verdi', coefficient: 6, color: '#2ECC71'),
+            player('Dora Neri', coefficient: 6.5, color: '#111111'),
           ],
         ),
         match(id: 'aperta', players: [player('X Y'), player('Z W')]),
@@ -132,18 +134,21 @@ void main() {
     );
     await pumpHome(tester, FakeBackend(matches: matches));
 
-    expect(find.text('Campo 1 · conclusa'), findsOneWidget);
-    expect(find.text('Rossi/Bianchi vs Verdi/Neri'), findsOneWidget);
+    expect(find.text('CAMPO 1'), findsOneWidget);
+    expect(find.text('Anna Rossi'), findsOneWidget);
+    expect(find.text('Dora Neri'), findsOneWidget);
+    expect(find.text('Coeff. coppia 14,50'), findsOneWidget);
+    expect(find.text('Coeff. coppia 12,50'), findsOneWidget);
     expect(find.text('6-4 6-3'), findsOneWidget);
-    expect(find.text('Campo 3 · ranking'), findsOneWidget);
-    expect(find.text('Aperta · 2/4 · intermedio'), findsOneWidget);
-    expect(find.text('Campo 4 · amichevole'), findsNothing);
+    expect(find.text('CAMPO 3'), findsOneWidget);
+    expect(find.text('Aperta'), findsOneWidget);
+    expect(find.text('CAMPO 4'), findsNothing);
 
     await tester.tap(find.byTooltip('Giorno successivo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Campo 4 · amichevole'), findsOneWidget);
-    expect(find.text('Campo 1 · conclusa'), findsNothing);
+    expect(find.text('CAMPO 4'), findsOneWidget);
+    expect(find.text('CAMPO 1'), findsNothing);
     expect(matches.requestedDays.last, DateTime(2026, 10, 8));
   });
 
@@ -162,6 +167,6 @@ void main() {
     matches.matches = [match()];
     await tester.tap(find.text('Riprova').last);
     await tester.pumpAndSettle();
-    expect(find.text('Campo 3 · ranking'), findsOneWidget);
+    expect(find.text('CAMPO 3'), findsOneWidget);
   });
 }

@@ -25,8 +25,17 @@ Booking booking({
   coachName: coach,
 );
 
-MatchPlayer player(String name, {String? userId}) =>
-    MatchPlayer(name: name, userId: userId);
+MatchPlayer player(
+  String name, {
+  String? userId,
+  double? coefficient,
+  String? color,
+}) => MatchPlayer(
+  name: name,
+  userId: userId,
+  rankingCoefficient: coefficient,
+  rankingBandColor: color,
+);
 
 PadelMatch match({
   String id = 'm1',
@@ -40,6 +49,8 @@ PadelMatch match({
   String? organizerRef = 'altro',
   List<MatchPlayer> players = const [],
   String? score,
+  double? coefficientA,
+  double? coefficientB,
 }) => PadelMatch(
   id: id,
   bookingId: bookingId,
@@ -52,6 +63,8 @@ PadelMatch match({
   organizerRef: organizerRef,
   players: players,
   scoreTeam1: score,
+  rankingTeamACoefficientAtResult: coefficientA,
+  rankingTeamBCoefficientAtResult: coefficientB,
 );
 
 PlayerSubscription package({

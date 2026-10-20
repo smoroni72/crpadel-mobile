@@ -46,3 +46,6 @@ extension MatchStatusLabel on PadelMatch {
     return '$a vs $b';
   }
 }
+
+String coefficientLabel(double? value) =>
+    value == null ? '—' : value.toStringAsFixed(2).replaceFirst('.', ',');
