@@ -183,7 +183,7 @@ PushTarget? pushTarget(PushMessage message) {
     }),
     'booking' => const PushTarget(AppRoutes.home),
     'matches' => const PushTarget(AppRoutes.matches),
-    _ => null,
+    _ => const PushTarget(AppRoutes.notifications),
   };
 }
 
@@ -194,6 +194,6 @@ PushTarget? notificationTarget(String? destination, String? entityId) => switch 
   'abbonamenti' when entityId != null => PushTarget(AppRoutes.subscriptionDetail, {'id': entityId}),
   'abbonamenti' => const PushTarget(AppRoutes.profile),
   'eventi' || 'tornei' || 'news' => const PushTarget(AppRoutes.home),
-  null => const PushTarget(AppRoutes.home),
-  _ => null,
+  null => const PushTarget(AppRoutes.notifications),
+  _ => const PushTarget(AppRoutes.notifications),
 };
