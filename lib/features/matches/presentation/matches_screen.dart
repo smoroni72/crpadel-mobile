@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/routes.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_controller.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../domain/padel_match.dart';
@@ -39,9 +42,29 @@ class MatchesScreen extends ConsumerWidget {
             // l'ultima card contiene squadre, coefficienti e azioni.
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 124),
             children: [
-              Text(
-                'Partite',
-                style: Theme.of(context).textTheme.headlineMedium,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Partite',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () => context.goNamed(
+                      AppRoutes.book,
+                      queryParameters: const {'mode': 'match'},
+                    ),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Crea partita'),
+                  ),
+                  const SizedBox(width: 8),
+                  const ThemeToggleButton(),
+                ],
               ),
               const SizedBox(height: 14),
               _Filter(

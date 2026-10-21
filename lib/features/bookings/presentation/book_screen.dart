@@ -17,11 +17,26 @@ import 'cancel_booking.dart';
 import 'complete_booking_controller.dart';
 
 /// Prenota: griglia del giorno, un campo alla volta.
-class BookScreen extends ConsumerWidget {
-  const BookScreen({super.key});
+class BookScreen extends ConsumerStatefulWidget {
+  const BookScreen({
+    super.key,
+    this.createMatch = false,
+    this.createLesson = false,
+  });
+
+  final bool createMatch;
+  final bool createLesson;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BookScreen> createState() => _BookScreenState();
+}
+
+class _BookScreenState extends ConsumerState<BookScreen> {
+  String _matchType = 'ranking';
+  String _matchLevel = 'qualsiasi';
+
+  @override
+  Widget build(BuildContext context) {
     final day = ref.watch(bookDayProvider);
     final schedule = ref.watch(scheduleProvider(day));
     return Scaffold(
@@ -30,7 +45,17 @@ class BookScreen extends ConsumerWidget {
         child: Column(
           children: [
             const _Header(),
-            const _FreeCourtsChip(),
+            if (widget.createMatch)
+              _MatchSetupPanel(
+                matchType: _matchType,
+                level: _matchLevel,
+                onMatchTypeChanged: (value) =>
+                    setState(() => _matchType = value),
+                onLevelChanged: (value) => setState(() => _matchLevel = value),
+              ),
+            if (widget.createLesson) const _LessonCreationHint(),
+            if (!widget.createMatch && !widget.createLesson)
+              const _FreeCourtsChip(),
             Expanded(
               child: AsyncValueView(
                 value: schedule,
@@ -38,7 +63,14 @@ class BookScreen extends ConsumerWidget {
                 onRetry: () => ref.invalidate(scheduleProvider(day)),
                 data: (grid) => grid.courts.isEmpty
                     ? const Center(child: Text('Nessun campo disponibile'))
-                    : _CourtGrid(grid: grid, day: day),
+                    : _CourtGrid(
+                        grid: grid,
+                        day: day,
+                        createMatch: widget.createMatch,
+                        createLesson: widget.createLesson,
+                        matchType: _matchType,
+                        matchLevel: _matchLevel,
+                      ),
               ),
             ),
           ],
@@ -46,6 +78,118 @@ class BookScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _LessonCreationHint extends StatelessWidget {
+  const _LessonCreationHint();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: context.colors.primaryTint,
+      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+      border: Border.all(color: context.colors.primary.withValues(alpha: .45)),
+    ),
+    child: const Row(
+      children: [
+        Icon(Icons.school_outlined, size: 20),
+        SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            'Prenota una lezione: scegli un campo e un orario libero per 60 minuti.',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _MatchSetupPanel extends StatelessWidget {
+  const _MatchSetupPanel({
+    required this.matchType,
+    required this.level,
+    required this.onMatchTypeChanged,
+    required this.onLevelChanged,
+  });
+
+  final String matchType;
+  final String level;
+  final ValueChanged<String> onMatchTypeChanged;
+  final ValueChanged<String> onLevelChanged;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: context.colors.primaryTint,
+      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+      border: Border.all(color: context.colors.primary.withValues(alpha: .45)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.sports_tennis,
+              size: 20,
+              color: context.colors.primaryText,
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'Crea partita',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SegmentedButton<String>(
+          showSelectedIcon: false,
+          segments: const [
+            ButtonSegment(value: 'ranking', label: Text('Ranking')),
+            ButtonSegment(value: 'friendly', label: Text('Amichevole')),
+          ],
+          selected: {matchType},
+          onSelectionChanged: (values) => onMatchTypeChanged(values.first),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          matchType == 'ranking'
+              ? 'Il risultato aggiornerà la classifica.'
+              : 'La partita non assegna punti ranking.',
+          style: TextStyle(fontSize: 11, color: context.colors.textSecondary),
+        ),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          initialValue: level,
+          decoration: const InputDecoration(labelText: 'Livello di gioco'),
+          items: const [
+            DropdownMenuItem(value: 'qualsiasi', child: Text('Qualsiasi')),
+            DropdownMenuItem(
+              value: 'principiante',
+              child: Text('Principiante'),
+            ),
+            DropdownMenuItem(value: 'intermedio', child: Text('Intermedio')),
+            DropdownMenuItem(value: 'avanzato', child: Text('Avanzato')),
+          ],
+          onChanged: (value) {
+            if (value != null) onLevelChanged(value);
+          },
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Scegli sotto un campo e un orario libero per almeno 90 minuti.',
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        ),
+      ],
+    ),
+  );
 }
 
 class _Header extends ConsumerWidget {
@@ -131,10 +275,21 @@ class _FreeCourtsChip extends ConsumerWidget {
 }
 
 class _CourtGrid extends ConsumerStatefulWidget {
-  const _CourtGrid({required this.grid, required this.day});
+  const _CourtGrid({
+    required this.grid,
+    required this.day,
+    required this.createMatch,
+    required this.createLesson,
+    required this.matchType,
+    required this.matchLevel,
+  });
 
   final DaySchedule grid;
   final DateTime day;
+  final bool createMatch;
+  final bool createLesson;
+  final String matchType;
+  final String matchLevel;
 
   @override
   ConsumerState<_CourtGrid> createState() => _CourtGridState();
@@ -167,14 +322,19 @@ class _CourtGridState extends ConsumerState<_CourtGrid> {
 
   Future<void> _onFreeTap(CourtRef court, int start) async {
     final free = widget.grid.freeMinutesFrom(court.id, start, closingMinutes);
-    if (free < BookingType.lesson.minutes) {
+    final minimum = widget.createMatch
+        ? BookingType.court.minutes
+        : BookingType.lesson.minutes;
+    if (free < minimum) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
             content: Text(
-              'Qui ci sono solo $free minuti liberi: una lezione dura '
-              "60', una partita 90'.",
+              widget.createMatch
+                  ? "Qui ci sono solo $free minuti liberi: una partita dura 90'."
+                  : 'Qui ci sono solo $free minuti liberi: una lezione dura '
+                        "60', una partita 90'.",
             ),
           ),
         );
@@ -187,6 +347,13 @@ class _CourtGridState extends ConsumerState<_CourtGrid> {
         date: widget.day,
         startMinutes: start,
         freeMinutes: free,
+        initialType: widget.createMatch
+            ? BookingType.court
+            : widget.createLesson
+            ? BookingType.lesson
+            : null,
+        initialMatchType: widget.createMatch ? widget.matchType : null,
+        initialMatchLevel: widget.createMatch ? widget.matchLevel : null,
       ),
     );
   }
@@ -505,6 +672,13 @@ class _FreeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final background = bookable
+        ? (dark ? const Color(0xFF073B28) : const Color(0xFFDDF7E9))
+        : (dark ? const Color(0xFF28282B) : const Color(0xFFE6E7EA));
+    final foreground = bookable
+        ? (dark ? const Color(0xFF67E8A8) : const Color(0xFF087A50))
+        : colors.textSecondary;
     return Positioned(
       top: top,
       height: height,
@@ -513,14 +687,27 @@ class _FreeRow extends StatelessWidget {
       child: Semantics(
         button: bookable,
         label: bookable ? 'Libero alle ${hhmm(start)}, prenota' : null,
+        excludeSemantics: bookable,
         child: InkWell(
           onTap: bookable ? () => onTap(start) : null,
-          child: DecoratedBox(
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            alignment: Alignment.centerLeft,
             decoration: BoxDecoration(
-              color: bookable ? null : colors.divider.withValues(alpha: 0.7),
-              border: Border(
-                bottom: BorderSide(color: colors.border.withValues(alpha: 0.5)),
+              color: background,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: bookable
+                    ? foreground.withValues(alpha: .55)
+                    : colors.border,
               ),
+            ),
+            child: Text(
+              bookable ? hhmm(start) : 'Non disponibile',
+              style: context.fonts
+                  .monoStyle(fontSize: 11, fontWeight: FontWeight.w600)
+                  .copyWith(color: foreground),
             ),
           ),
         ),

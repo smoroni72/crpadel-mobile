@@ -47,6 +47,23 @@ class BookingCard extends ConsumerWidget {
       title:
           '${booking.courtName} · ${booking.slot?.label ?? booking.timeSlot}',
       subtitle: _subtitle(booking, item.match),
+      trailing: IconButton(
+        tooltip: 'Annulla prenotazione',
+        onPressed: () => _cancel(context, ref),
+        icon: const Icon(Icons.delete_outline),
+      ),
+    );
+  }
+
+  Future<void> _cancel(BuildContext context, WidgetRef ref) async {
+    final booking = item.booking;
+    await confirmAndCancelBooking(
+      context,
+      ref,
+      bookingId: booking.id,
+      date: booking.date,
+      description: bookingDescription(booking),
+      hasOpenMatch: item.match?.status == MatchStatus.open,
     );
   }
 

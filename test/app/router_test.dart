@@ -147,6 +147,25 @@ void main() {
       expect(find.byType(ProfileScreen), findsOneWidget);
     });
 
+    testWidgets('parte con tema scuro e il sole attiva quello chiaro', (
+      tester,
+    ) async {
+      await pumpApp(tester, loggedIn: true);
+
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.dark,
+      );
+      await tester.tap(find.byTooltip('Passa al tema chiaro'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.light,
+      );
+      expect(find.byTooltip('Passa al tema scuro'), findsOneWidget);
+    });
+
     testWidgets('Esci dal profilo riporta al login', (tester) async {
       await pumpApp(tester, loggedIn: true);
       await tester.tap(

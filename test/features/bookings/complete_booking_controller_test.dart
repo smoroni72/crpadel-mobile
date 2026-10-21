@@ -14,11 +14,20 @@ import '../../helpers/app_overrides.dart';
 void main() {
   final day = DateTime(2026, 10, 8);
   const court = CourtRef(id: 'c1', name: 'Campo 1');
-  BookingSlot slot({int start = 18 * 60, int free = 120}) => BookingSlot(
+  BookingSlot slot({
+    int start = 18 * 60,
+    int free = 120,
+    BookingType? initialType,
+    String? matchType,
+    String? matchLevel,
+  }) => BookingSlot(
     court: court,
     date: day,
     startMinutes: start,
     freeMinutes: free,
+    initialType: initialType,
+    initialMatchType: matchType,
+    initialMatchLevel: matchLevel,
   );
   const self = DirectoryPlayer(id: 'p0', fullName: 'Mario Rossi', isSelf: true);
   const anna = DirectoryPlayer(id: 'p1', fullName: 'Anna Verdi');
@@ -45,6 +54,18 @@ void main() {
     expect(state(slot()).type, BookingType.court);
     controller(slot(free: 60));
     expect(state(slot(free: 60)).type, BookingType.lesson);
+  });
+
+  test('rispetta il tipo iniziale richiesto dal flusso', () {
+    final s = slot(
+      initialType: BookingType.court,
+      matchType: 'friendly',
+      matchLevel: 'avanzato',
+    );
+    controller(s);
+    expect(state(s).type, BookingType.court);
+    expect(state(s).matchType, 'friendly');
+    expect(state(s).matchLevel, 'avanzato');
   });
 
   test('lezione e allenamento richiedono l\'istruttore', () {
@@ -88,7 +109,8 @@ void main() {
     final s = slot();
     final c = controller(s)
       ..setPlayer(2, anna)
-      ..setMatchType('friendly');
+      ..setMatchType('friendly')
+      ..setMatchLevel('intermedio');
 
     final outcome = await c.submit();
 
@@ -99,7 +121,10 @@ void main() {
     final match = backend.matches.created.single;
     expect(match.bookingId, (outcome! as BookingConfirmed).booking.id);
     expect(match.matchType, 'friendly');
+    expect(match.level, 'intermedio');
     expect(match.players, [anna]);
+    expect(match.teamsByPlayerId, {'p1': 'B'});
+    expect((match.toJson()['players'] as List).single['team'], 'B');
   });
 
   test('una lezione non apre una partita', () async {

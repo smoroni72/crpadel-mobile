@@ -19,6 +19,9 @@ class BookingSlot {
     required this.date,
     required this.startMinutes,
     required this.freeMinutes,
+    this.initialType,
+    this.initialMatchType,
+    this.initialMatchLevel,
   });
 
   final CourtRef court;
@@ -27,6 +30,9 @@ class BookingSlot {
 
   /// Minuti liberi da [startMinutes] al prossimo impegno o alla chiusura.
   final int freeMinutes;
+  final BookingType? initialType;
+  final String? initialMatchType;
+  final String? initialMatchLevel;
 
   @override
   bool operator ==(Object other) =>
@@ -34,10 +40,21 @@ class BookingSlot {
       other.court == court &&
       other.date == date &&
       other.startMinutes == startMinutes &&
-      other.freeMinutes == freeMinutes;
+      other.freeMinutes == freeMinutes &&
+      other.initialType == initialType &&
+      other.initialMatchType == initialMatchType &&
+      other.initialMatchLevel == initialMatchLevel;
 
   @override
-  int get hashCode => Object.hash(court, date, startMinutes, freeMinutes);
+  int get hashCode => Object.hash(
+    court,
+    date,
+    startMinutes,
+    freeMinutes,
+    initialType,
+    initialMatchType,
+    initialMatchLevel,
+  );
 }
 
 class CompleteBookingState {
@@ -46,6 +63,7 @@ class CompleteBookingState {
     this.coachId,
     this.players = const [null, null, null, null],
     this.matchType = 'ranking',
+    this.matchLevel = 'qualsiasi',
     this.submitting = false,
     this.error,
   });
@@ -56,6 +74,7 @@ class CompleteBookingState {
   /// 4 posti: 0–1 squadra A, 2–3 squadra B.
   final List<DirectoryPlayer?> players;
   final String matchType;
+  final String matchLevel;
   final bool submitting;
 
   /// Messaggio da mostrare sotto il pulsante di conferma.
@@ -70,6 +89,7 @@ class CompleteBookingState {
     String? Function()? coachId,
     List<DirectoryPlayer?>? players,
     String? matchType,
+    String? matchLevel,
     bool? submitting,
     String? Function()? error,
   }) => CompleteBookingState(
@@ -77,6 +97,7 @@ class CompleteBookingState {
     coachId: coachId != null ? coachId() : this.coachId,
     players: players ?? this.players,
     matchType: matchType ?? this.matchType,
+    matchLevel: matchLevel ?? this.matchLevel,
     submitting: submitting ?? this.submitting,
     error: error != null ? error() : this.error,
   );
@@ -119,9 +140,13 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
   @override
   CompleteBookingState build() => CompleteBookingState(
     // Se non c'è spazio per 90' si parte dalla lezione da 60'.
-    type: slot.freeMinutes >= BookingType.court.minutes
-        ? BookingType.court
-        : BookingType.lesson,
+    type:
+        slot.initialType ??
+        (slot.freeMinutes >= BookingType.court.minutes
+            ? BookingType.court
+            : BookingType.lesson),
+    matchType: slot.initialMatchType ?? 'ranking',
+    matchLevel: slot.initialMatchLevel ?? 'qualsiasi',
   );
 
   bool get fits => state.type.minutes <= slot.freeMinutes;
@@ -138,6 +163,8 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
       state = state.copyWith(coachId: () => coachId, error: () => null);
 
   void setMatchType(String code) => state = state.copyWith(matchType: code);
+
+  void setMatchLevel(String code) => state = state.copyWith(matchLevel: code);
 
   /// Mette o toglie l'utente dal primo posto libero ("Gioco anch'io").
   void setPlaysToo(bool value, DirectoryPlayer? self) {
@@ -156,6 +183,7 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
   }
 
   void setPlayer(int position, DirectoryPlayer? player) {
+    if (position < 0 || position >= state.players.length) return;
     final players = [...state.players];
     if (player != null && players.any((p) => p?.id == player.id)) return;
     players[position] = player;
@@ -203,7 +231,13 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
                 courtId: slot.court.id,
                 timeSlot: request.timeSlot,
                 matchType: state.matchType,
+                level: state.matchLevel,
                 players: state.players.whereType<DirectoryPlayer>().toList(),
+                teamsByPlayerId: {
+                  for (var index = 0; index < state.players.length; index++)
+                    if (state.players[index] case final player?)
+                      player.id: index < 2 ? 'A' : 'B',
+                },
               ),
             );
       } catch (e) {

@@ -63,6 +63,12 @@ class FakeMatchesRepository implements MatchesRepository {
       matchType: request.matchType == 'friendly'
           ? MatchType.friendly
           : MatchType.ranking,
+      level: switch (request.level) {
+        'principiante' => MatchLevel.principiante,
+        'intermedio' => MatchLevel.intermedio,
+        'avanzato' => MatchLevel.avanzato,
+        _ => MatchLevel.qualsiasi,
+      },
       status: MatchStatus.open,
       players: [
         for (final p in request.players)
@@ -80,6 +86,7 @@ class FakeMatchesRepository implements MatchesRepository {
   }
 
   final left = <String>[];
+  final cancelled = <String>[];
   final results = <String, String>{};
 
   PadelMatch _find(String id) {
@@ -159,6 +166,13 @@ class FakeMatchesRepository implements MatchesRepository {
         ],
       ),
     );
+  }
+
+  @override
+  Future<PadelMatch> cancel(String matchId) async {
+    final match = _find(matchId);
+    cancelled.add(matchId);
+    return _replace(match.copyWith(status: MatchStatus.cancelled));
   }
 
   @override

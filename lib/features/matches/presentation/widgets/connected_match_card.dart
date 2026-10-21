@@ -24,6 +24,38 @@ class ConnectedMatchCard extends ConsumerWidget {
         AppRoutes.matchDetail,
         pathParameters: {'id': match.id},
       ),
+      onCancel: match.isOrganizer(userId) && match.status == MatchStatus.open
+          ? () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Annullare la partita?'),
+                  content: const Text(
+                    'La partita verrà annullata. La prenotazione del campo '
+                    'resterà attiva e potrai annullarla separatamente.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('No, tienila'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Annulla partita'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed != true || !context.mounted) return;
+              final messenger = ScaffoldMessenger.of(context);
+              final error = await ref
+                  .read(matchActionsProvider)
+                  .cancel(match.id);
+              messenger.showSnackBar(
+                SnackBar(content: Text(error ?? 'Partita annullata')),
+              );
+            }
+          : null,
       onJoin: () async {
         final messenger = ScaffoldMessenger.of(context);
         final error = await ref.read(matchActionsProvider).join(match);

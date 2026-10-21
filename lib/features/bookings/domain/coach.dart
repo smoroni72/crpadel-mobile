@@ -9,8 +9,18 @@ abstract class Coach with _$Coach {
     required String id,
     required String name,
     String? photoUrl,
+    String? bio,
+    @Default('istruttore') String level,
+    @JsonKey(fromJson: decimalFromJson) @Default(0) double pricePerHour,
+    @Default([]) List<String> specialties,
     @Default(true) bool isActive,
   }) = _Coach;
 
   factory Coach.fromJson(Map<String, dynamic> json) => _$CoachFromJson(json);
 }
+
+double decimalFromJson(Object? value) => switch (value) {
+  num number => number.toDouble(),
+  String text => double.tryParse(text) ?? 0,
+  _ => 0,
+};

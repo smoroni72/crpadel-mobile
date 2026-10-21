@@ -6,6 +6,7 @@ import '../../../app/routes.dart';
 import '../../../core/providers.dart';
 import '../../../core/config/app_environment.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_controller.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/utils/colors.dart';
 import '../../../core/widgets/async_value_view.dart';
@@ -577,6 +578,8 @@ class _Header extends ConsumerWidget {
             ],
           ),
         ),
+        const ThemeToggleButton(),
+        const SizedBox(width: 8),
         IconButton.outlined(
           onPressed: () => context.pushNamed(AppRoutes.notifications),
           tooltip: 'Notifiche',
@@ -590,6 +593,13 @@ class _Header extends ConsumerWidget {
             label: Text(unread > 99 ? '99+' : '$unread'),
             child: Icon(Icons.notifications_none, color: colors.text),
           ),
+        ),
+        const SizedBox(width: 8),
+        IconButton.filled(
+          onPressed: () => context.pushNamed(AppRoutes.exploreMenu),
+          tooltip: 'Menu',
+          style: IconButton.styleFrom(fixedSize: const Size.square(44)),
+          icon: const Icon(Icons.menu),
         ),
       ],
     );

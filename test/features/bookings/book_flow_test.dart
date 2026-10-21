@@ -83,6 +83,8 @@ void main() {
     // Alle 12 di oggi gli orari passati non si prenotano.
     expect(freeAt('11:30'), findsNothing);
     expect(freeAt('12:00'), findsOneWidget);
+    expect(find.text('Non disponibile'), findsWidgets);
+    expect(find.text('12:00'), findsWidgets);
   });
 
   testWidgets('prenota uno spazio libero e lo ritrova in Home', (tester) async {
@@ -182,12 +184,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Campo 2 · 18:30–20:00'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Annulla prenotazione'));
+    await tester.tap(find.byTooltip('Annulla prenotazione'));
     await tester.pumpAndSettle();
     // Finestra di conferma.
-    await tester.tap(find.text('Annulla prenotazione').last);
+    await tester.tap(find.text('Annulla prenotazione'));
     await tester.pumpAndSettle();
 
     expect(backend.bookings.cancelled, ['b1']);

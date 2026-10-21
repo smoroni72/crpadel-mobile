@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Coach {
 
- String get id; String get name; String? get photoUrl; bool get isActive;
+ String get id; String get name; String? get photoUrl; String? get bio; String get level;@JsonKey(fromJson: decimalFromJson) double get pricePerHour; List<String> get specialties; bool get isActive;
 /// Create a copy of Coach
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $CoachCopyWith<Coach> get copyWith => _$CoachCopyWithImpl<Coach>(this as Coach, 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Coach&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.isActive, isActive) || other.isActive == isActive));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Coach&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.level, level) || other.level == level)&&(identical(other.pricePerHour, pricePerHour) || other.pricePerHour == pricePerHour)&&const DeepCollectionEquality().equals(other.specialties, specialties)&&(identical(other.isActive, isActive) || other.isActive == isActive));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,photoUrl,isActive);
+int get hashCode => Object.hash(runtimeType,id,name,photoUrl,bio,level,pricePerHour,const DeepCollectionEquality().hash(specialties),isActive);
 
 @override
 String toString() {
-  return 'Coach(id: $id, name: $name, photoUrl: $photoUrl, isActive: $isActive)';
+  return 'Coach(id: $id, name: $name, photoUrl: $photoUrl, bio: $bio, level: $level, pricePerHour: $pricePerHour, specialties: $specialties, isActive: $isActive)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $CoachCopyWith<$Res>  {
   factory $CoachCopyWith(Coach value, $Res Function(Coach) _then) = _$CoachCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String? photoUrl, bool isActive
+ String id, String name, String? photoUrl, String? bio, String level,@JsonKey(fromJson: decimalFromJson) double pricePerHour, List<String> specialties, bool isActive
 });
 
 
@@ -65,12 +65,16 @@ class _$CoachCopyWithImpl<$Res>
 
 /// Create a copy of Coach
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? photoUrl = freezed,Object? isActive = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? photoUrl = freezed,Object? bio = freezed,Object? level = null,Object? pricePerHour = null,Object? specialties = null,Object? isActive = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
-as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as String?,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
+as String?,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
+as String,pricePerHour: null == pricePerHour ? _self.pricePerHour : pricePerHour // ignore: cast_nullable_to_non_nullable
+as double,specialties: null == specialties ? _self.specialties : specialties // ignore: cast_nullable_to_non_nullable
+as List<String>,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -156,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? photoUrl,  bool isActive)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? photoUrl,  String? bio,  String level, @JsonKey(fromJson: decimalFromJson)  double pricePerHour,  List<String> specialties,  bool isActive)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Coach() when $default != null:
-return $default(_that.id,_that.name,_that.photoUrl,_that.isActive);case _:
+return $default(_that.id,_that.name,_that.photoUrl,_that.bio,_that.level,_that.pricePerHour,_that.specialties,_that.isActive);case _:
   return orElse();
 
 }
@@ -177,10 +181,10 @@ return $default(_that.id,_that.name,_that.photoUrl,_that.isActive);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? photoUrl,  bool isActive)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? photoUrl,  String? bio,  String level, @JsonKey(fromJson: decimalFromJson)  double pricePerHour,  List<String> specialties,  bool isActive)  $default,) {final _that = this;
 switch (_that) {
 case _Coach():
-return $default(_that.id,_that.name,_that.photoUrl,_that.isActive);case _:
+return $default(_that.id,_that.name,_that.photoUrl,_that.bio,_that.level,_that.pricePerHour,_that.specialties,_that.isActive);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +201,10 @@ return $default(_that.id,_that.name,_that.photoUrl,_that.isActive);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? photoUrl,  bool isActive)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? photoUrl,  String? bio,  String level, @JsonKey(fromJson: decimalFromJson)  double pricePerHour,  List<String> specialties,  bool isActive)?  $default,) {final _that = this;
 switch (_that) {
 case _Coach() when $default != null:
-return $default(_that.id,_that.name,_that.photoUrl,_that.isActive);case _:
+return $default(_that.id,_that.name,_that.photoUrl,_that.bio,_that.level,_that.pricePerHour,_that.specialties,_that.isActive);case _:
   return null;
 
 }
@@ -212,12 +216,22 @@ return $default(_that.id,_that.name,_that.photoUrl,_that.isActive);case _:
 @JsonSerializable()
 
 class _Coach implements Coach {
-  const _Coach({required this.id, required this.name, this.photoUrl, this.isActive = true});
+  const _Coach({required this.id, required this.name, this.photoUrl, this.bio, this.level = 'istruttore', @JsonKey(fromJson: decimalFromJson) this.pricePerHour = 0, final  List<String> specialties = const [], this.isActive = true}): _specialties = specialties;
   factory _Coach.fromJson(Map<String, dynamic> json) => _$CoachFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override final  String? photoUrl;
+@override final  String? bio;
+@override@JsonKey() final  String level;
+@override@JsonKey(fromJson: decimalFromJson) final  double pricePerHour;
+ final  List<String> _specialties;
+@override@JsonKey() List<String> get specialties {
+  if (_specialties is EqualUnmodifiableListView) return _specialties;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_specialties);
+}
+
 @override@JsonKey() final  bool isActive;
 
 /// Create a copy of Coach
@@ -233,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Coach&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.isActive, isActive) || other.isActive == isActive));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Coach&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.level, level) || other.level == level)&&(identical(other.pricePerHour, pricePerHour) || other.pricePerHour == pricePerHour)&&const DeepCollectionEquality().equals(other._specialties, _specialties)&&(identical(other.isActive, isActive) || other.isActive == isActive));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,photoUrl,isActive);
+int get hashCode => Object.hash(runtimeType,id,name,photoUrl,bio,level,pricePerHour,const DeepCollectionEquality().hash(_specialties),isActive);
 
 @override
 String toString() {
-  return 'Coach(id: $id, name: $name, photoUrl: $photoUrl, isActive: $isActive)';
+  return 'Coach(id: $id, name: $name, photoUrl: $photoUrl, bio: $bio, level: $level, pricePerHour: $pricePerHour, specialties: $specialties, isActive: $isActive)';
 }
 
 
@@ -253,7 +267,7 @@ abstract mixin class _$CoachCopyWith<$Res> implements $CoachCopyWith<$Res> {
   factory _$CoachCopyWith(_Coach value, $Res Function(_Coach) _then) = __$CoachCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String? photoUrl, bool isActive
+ String id, String name, String? photoUrl, String? bio, String level,@JsonKey(fromJson: decimalFromJson) double pricePerHour, List<String> specialties, bool isActive
 });
 
 
@@ -270,12 +284,16 @@ class __$CoachCopyWithImpl<$Res>
 
 /// Create a copy of Coach
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? photoUrl = freezed,Object? isActive = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? photoUrl = freezed,Object? bio = freezed,Object? level = null,Object? pricePerHour = null,Object? specialties = null,Object? isActive = null,}) {
   return _then(_Coach(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
-as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as String?,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
+as String?,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
+as String,pricePerHour: null == pricePerHour ? _self.pricePerHour : pricePerHour // ignore: cast_nullable_to_non_nullable
+as double,specialties: null == specialties ? _self._specialties : specialties // ignore: cast_nullable_to_non_nullable
+as List<String>,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

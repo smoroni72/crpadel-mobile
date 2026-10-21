@@ -3,6 +3,9 @@ import 'package:crpadel_mobile/app/bottom_bar.dart';
 import 'package:crpadel_mobile/core/utils/dates.dart';
 import 'package:crpadel_mobile/features/matches/domain/padel_match.dart';
 import 'package:crpadel_mobile/features/matches/presentation/matches_screen.dart';
+import 'package:crpadel_mobile/features/bookings/presentation/book_screen.dart';
+import 'package:crpadel_mobile/features/bookings/presentation/complete_booking_screen.dart';
+import 'package:crpadel_mobile/features/matches/presentation/widgets/player_ranking_marker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -120,7 +123,40 @@ void main() {
     expect(find.textContaining('Partecipa'), findsNothing);
     expect(find.text('Richieste in attesa'), findsNothing);
     expect(find.text('Aggiungi giocatore'), findsOneWidget);
-    expect(find.text('Annulla prenotazione'), findsOneWidget);
+    expect(find.text('Annulla partita'), findsOneWidget);
+    expect(find.text('Annulla prenotazione e partita'), findsOneWidget);
+  });
+
+  testWidgets("l'organizzatore annulla la partita direttamente dalla card", (
+    tester,
+  ) async {
+    final backend = backendWith();
+    await openMatches(tester, backend);
+
+    await tester.tap(find.byKey(const ValueKey('cancel-match-mia')));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('La prenotazione del campo resterà'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Annulla partita').last);
+    await tester.pumpAndSettle();
+
+    expect(backend.matches.cancelled, ['mia']);
+    expect(backend.bookings.cancelled, isEmpty);
+    expect(find.text('Partita annullata'), findsOneWidget);
+  });
+
+  testWidgets('senza fascia mostra la pallina da tennis come sul sito', (
+    tester,
+  ) async {
+    await openMatches(tester, backendWith());
+
+    final markers = tester.widgetList<PlayerRankingMarker>(
+      find.byType(PlayerRankingMarker),
+    );
+    expect(markers, isNotEmpty);
+    expect(markers.any((marker) => !marker.hasRankingColor), isTrue);
   });
 
   testWidgets('un partecipante abbandona la partita', (tester) async {
@@ -189,5 +225,26 @@ void main() {
     expect(find.text('CAMPO 2'), findsOneWidget);
     expect(find.text('CAMPO 1'), findsOneWidget);
     expect(find.text('CAMPO 3'), findsNothing);
+  });
+
+  testWidgets('Crea partita apre la scelta del campo già in modalità partita', (
+    tester,
+  ) async {
+    await openMatches(tester, backendWith());
+
+    await tester.tap(find.text('Crea partita'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BookScreen), findsOneWidget);
+    expect(find.text('Crea partita'), findsOneWidget);
+    expect(find.text('Livello di gioco'), findsOneWidget);
+
+    final freeSlot = find.bySemanticsLabel('Libero alle 18:00, prenota');
+    await tester.ensureVisible(freeSlot);
+    await tester.tap(freeSlot);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CompleteBookingScreen), findsOneWidget);
+    expect(find.text('Mer 7 ott · 18:00–19:30'), findsOneWidget);
   });
 }
