@@ -16,8 +16,11 @@ class AppShell extends StatelessWidget {
       currentIndex: navigationShell.currentIndex,
       onSelected: (index) => navigationShell.goBranch(
         index,
-        // Un secondo tocco sulla tab attiva torna alla sua schermata iniziale.
-        initialLocation: index == navigationShell.currentIndex,
+        // Prenota deve sempre riaprire la griglia normale: i parametri usati
+        // dai flussi «Crea partita» e «Lezione» non devono restare memorizzati
+        // nello stack della tab dopo che l'utente è tornato altrove.
+        // Per le altre tab, un secondo tocco torna alla schermata iniziale.
+        initialLocation: index == 1 || index == navigationShell.currentIndex,
       ),
     ),
   );
