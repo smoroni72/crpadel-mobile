@@ -12,7 +12,9 @@ _Coach _$CoachFromJson(Map<String, dynamic> json) => _Coach(
   photoUrl: json['photo_url'] as String?,
   bio: json['bio'] as String?,
   level: json['level'] as String? ?? 'istruttore',
-  pricePerHour: (json['price_per_hour'] as num?)?.toDouble() ?? 0,
+  pricePerHour: json['price_per_hour'] == null
+      ? 0
+      : decimalFromJson(json['price_per_hour']),
   specialties:
       (json['specialties'] as List<dynamic>?)
           ?.map((e) => e as String)

@@ -84,6 +84,9 @@ class MatchActions {
   Future<String?> leave(String matchId) =>
       _run(matchId, () => _matches.leave(matchId));
 
+  Future<String?> cancel(String matchId) =>
+      _run(matchId, () => _matches.cancel(matchId));
+
   Future<String?> submitResult(String matchId, String score) =>
       _run(matchId, () => _matches.submitResult(matchId, score));
 

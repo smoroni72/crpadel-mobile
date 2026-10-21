@@ -4,6 +4,7 @@ import 'package:crpadel_mobile/features/bookings/domain/booking_request.dart';
 import 'package:crpadel_mobile/features/bookings/domain/schedule.dart';
 import 'package:crpadel_mobile/features/matches/data/matches_repository.dart';
 import 'package:crpadel_mobile/features/matches/domain/directory_player.dart';
+import 'package:crpadel_mobile/features/matches/domain/padel_match.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_http.dart';
@@ -173,6 +174,33 @@ void main() {
     expect(adapter.requests.single.data, {'status': 'cancelled'});
   });
 
+  test(
+    'istruttori: accetta il prezzo decimale restituito come testo',
+    () async {
+      final adapter = FakeAdapter(
+        (_) => (
+          200,
+          {
+            'data': [
+              {
+                'id': 'k1',
+                'name': 'Eliano Viti',
+                'price_per_hour': '25.00',
+                'is_active': true,
+                'specialties': <Object>[],
+              },
+            ],
+          },
+        ),
+      );
+      final repository = ApiBookingsRepository(fakeApiClient(adapter));
+
+      final coaches = await repository.coaches();
+
+      expect(coaches.single.pricePerHour, 25);
+    },
+  );
+
   test('aprire una partita invia i giocatori per posizione', () async {
     final adapter = FakeAdapter(
       (_) => (
@@ -241,4 +269,32 @@ void main() {
     expect(adapter.requests.single.path, '/players/directory');
     expect(players.single.rankingBandName, 'Oro');
   });
+
+  test(
+    "l'organizzatore annulla la partita senza cancellare la prenotazione",
+    () async {
+      final adapter = FakeAdapter(
+        (_) => (
+          200,
+          {
+            'data': {
+              'id': 'm1',
+              'booking_id': 'b9',
+              'date': '2026-10-08',
+              'time_slot': '18:30-20:00',
+              'status': 'cancelled',
+            },
+          },
+        ),
+      );
+      final repository = ApiMatchesRepository(fakeApiClient(adapter));
+
+      final match = await repository.cancel('m1');
+
+      expect(adapter.requests.single.method, 'PATCH');
+      expect(adapter.requests.single.path, '/matches/m1');
+      expect(adapter.requests.single.data, {'status': 'cancelled'});
+      expect(match.status, MatchStatus.cancelled);
+    },
+  );
 }

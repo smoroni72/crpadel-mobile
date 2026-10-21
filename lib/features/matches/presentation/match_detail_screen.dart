@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/colors.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -13,6 +12,7 @@ import '../domain/padel_match.dart';
 import 'match_labels.dart';
 import 'match_providers.dart';
 import 'widgets/result_sheet.dart';
+import 'widgets/player_ranking_marker.dart';
 
 /// Dettaglio partita: squadre, richieste (per l'organizzatore) e azioni.
 class MatchDetailScreen extends ConsumerWidget {
@@ -226,6 +226,29 @@ class _Body extends ConsumerWidget {
         );
       }
     }
+    if (organizer && open) {
+      buttons.add(
+        OutlinedButton.icon(
+          onPressed: () async {
+            final confirmed = await _confirm(
+              context,
+              title: 'Annullare la partita?',
+              body:
+                  'La partita verrà annullata. La prenotazione del campo '
+                  'resterà attiva.',
+              action: 'Annulla partita',
+            );
+            if (!confirmed || !context.mounted) return;
+            final error = await actions.cancel(match.id);
+            if (!context.mounted) return;
+            await _show(context, error, 'Partita annullata');
+            if (error == null && context.mounted) context.pop();
+          },
+          icon: const Icon(Icons.delete_outline),
+          label: const Text('Annulla partita'),
+        ),
+      );
+    }
     if (organizer && open && match.bookingId != null) {
       buttons.add(
         TextButton(
@@ -243,7 +266,7 @@ class _Body extends ConsumerWidget {
             );
             if (done && context.mounted) context.pop();
           },
-          child: const Text('Annulla prenotazione'),
+          child: const Text('Annulla prenotazione e partita'),
         ),
       );
     }
@@ -492,15 +515,7 @@ class _PlayerRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: parseHexColor(current.rankingBandColor) ?? colors.divider,
-              border: Border.all(color: colors.border),
-            ),
-          ),
+          PlayerRankingMarker(colorHex: current.rankingBandColor, size: 16),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Coach {
 
- String get id; String get name; String? get photoUrl; String? get bio; String get level; double get pricePerHour; List<String> get specialties; bool get isActive;
+ String get id; String get name; String? get photoUrl; String? get bio; String get level;@JsonKey(fromJson: decimalFromJson) double get pricePerHour; List<String> get specialties; bool get isActive;
 /// Create a copy of Coach
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $CoachCopyWith<$Res>  {
   factory $CoachCopyWith(Coach value, $Res Function(Coach) _then) = _$CoachCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String? photoUrl, String? bio, String level, double pricePerHour, List<String> specialties, bool isActive
+ String id, String name, String? photoUrl, String? bio, String level,@JsonKey(fromJson: decimalFromJson) double pricePerHour, List<String> specialties, bool isActive
 });
 
 
@@ -160,7 +160,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? photoUrl,  String? bio,  String level,  double pricePerHour,  List<String> specialties,  bool isActive)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? photoUrl,  String? bio,  String level, @JsonKey(fromJson: decimalFromJson)  double pricePerHour,  List<String> specialties,  bool isActive)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Coach() when $default != null:
 return $default(_that.id,_that.name,_that.photoUrl,_that.bio,_that.level,_that.pricePerHour,_that.specialties,_that.isActive);case _:
@@ -181,7 +181,7 @@ return $default(_that.id,_that.name,_that.photoUrl,_that.bio,_that.level,_that.p
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? photoUrl,  String? bio,  String level,  double pricePerHour,  List<String> specialties,  bool isActive)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? photoUrl,  String? bio,  String level, @JsonKey(fromJson: decimalFromJson)  double pricePerHour,  List<String> specialties,  bool isActive)  $default,) {final _that = this;
 switch (_that) {
 case _Coach():
 return $default(_that.id,_that.name,_that.photoUrl,_that.bio,_that.level,_that.pricePerHour,_that.specialties,_that.isActive);case _:
@@ -201,7 +201,7 @@ return $default(_that.id,_that.name,_that.photoUrl,_that.bio,_that.level,_that.p
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? photoUrl,  String? bio,  String level,  double pricePerHour,  List<String> specialties,  bool isActive)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? photoUrl,  String? bio,  String level, @JsonKey(fromJson: decimalFromJson)  double pricePerHour,  List<String> specialties,  bool isActive)?  $default,) {final _that = this;
 switch (_that) {
 case _Coach() when $default != null:
 return $default(_that.id,_that.name,_that.photoUrl,_that.bio,_that.level,_that.pricePerHour,_that.specialties,_that.isActive);case _:
@@ -216,7 +216,7 @@ return $default(_that.id,_that.name,_that.photoUrl,_that.bio,_that.level,_that.p
 @JsonSerializable()
 
 class _Coach implements Coach {
-  const _Coach({required this.id, required this.name, this.photoUrl, this.bio, this.level = 'istruttore', this.pricePerHour = 0, final  List<String> specialties = const [], this.isActive = true}): _specialties = specialties;
+  const _Coach({required this.id, required this.name, this.photoUrl, this.bio, this.level = 'istruttore', @JsonKey(fromJson: decimalFromJson) this.pricePerHour = 0, final  List<String> specialties = const [], this.isActive = true}): _specialties = specialties;
   factory _Coach.fromJson(Map<String, dynamic> json) => _$CoachFromJson(json);
 
 @override final  String id;
@@ -224,7 +224,7 @@ class _Coach implements Coach {
 @override final  String? photoUrl;
 @override final  String? bio;
 @override@JsonKey() final  String level;
-@override@JsonKey() final  double pricePerHour;
+@override@JsonKey(fromJson: decimalFromJson) final  double pricePerHour;
  final  List<String> _specialties;
 @override@JsonKey() List<String> get specialties {
   if (_specialties is EqualUnmodifiableListView) return _specialties;
@@ -267,7 +267,7 @@ abstract mixin class _$CoachCopyWith<$Res> implements $CoachCopyWith<$Res> {
   factory _$CoachCopyWith(_Coach value, $Res Function(_Coach) _then) = __$CoachCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String? photoUrl, String? bio, String level, double pricePerHour, List<String> specialties, bool isActive
+ String id, String name, String? photoUrl, String? bio, String level,@JsonKey(fromJson: decimalFromJson) double pricePerHour, List<String> specialties, bool isActive
 });
 
 

@@ -41,6 +41,10 @@ abstract interface class MatchesRepository {
   /// Un partecipante (non l'organizzatore) lascia una partita aperta.
   Future<PadelMatch> leave(String matchId);
 
+  /// L'organizzatore annulla una propria partita ancora aperta. La
+  /// prenotazione del campo resta attiva.
+  Future<PadelMatch> cancel(String matchId);
+
   /// L'organizzatore inserisce il risultato finale, es. `"6-4 6-3"`.
   Future<PadelMatch> submitResult(String matchId, String score);
 }
@@ -110,6 +114,11 @@ class ApiMatchesRepository implements MatchesRepository {
   @override
   Future<PadelMatch> leave(String matchId) async =>
       _one((await _api.post('/matches/$matchId/leave')).data);
+
+  @override
+  Future<PadelMatch> cancel(String matchId) async => _one(
+    (await _api.patch('/matches/$matchId', data: {'status': 'cancelled'})).data,
+  );
 
   @override
   Future<PadelMatch> submitResult(String matchId, String score) async => _one(

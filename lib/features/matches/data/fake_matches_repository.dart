@@ -86,6 +86,7 @@ class FakeMatchesRepository implements MatchesRepository {
   }
 
   final left = <String>[];
+  final cancelled = <String>[];
   final results = <String, String>{};
 
   PadelMatch _find(String id) {
@@ -165,6 +166,13 @@ class FakeMatchesRepository implements MatchesRepository {
         ],
       ),
     );
+  }
+
+  @override
+  Future<PadelMatch> cancel(String matchId) async {
+    final match = _find(matchId);
+    cancelled.add(matchId);
+    return _replace(match.copyWith(status: MatchStatus.cancelled));
   }
 
   @override

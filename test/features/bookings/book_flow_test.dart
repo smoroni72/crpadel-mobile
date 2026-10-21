@@ -184,12 +184,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Campo 2 · 18:30–20:00'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Annulla prenotazione'));
+    await tester.tap(find.byTooltip('Annulla prenotazione'));
     await tester.pumpAndSettle();
     // Finestra di conferma.
-    await tester.tap(find.text('Annulla prenotazione').last);
+    await tester.tap(find.text('Annulla prenotazione'));
     await tester.pumpAndSettle();
 
     expect(backend.bookings.cancelled, ['b1']);

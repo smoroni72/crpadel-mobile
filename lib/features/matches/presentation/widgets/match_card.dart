@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/utils/colors.dart';
 import '../../domain/padel_match.dart';
 import '../match_labels.dart';
+import 'player_ranking_marker.dart';
 
 /// Riepilogo mobile della partita, con le due squadre disposte in verticale.
 class MatchCard extends StatelessWidget {
@@ -13,12 +13,14 @@ class MatchCard extends StatelessWidget {
     required this.myUserId,
     this.onJoin,
     this.onTap,
+    this.onCancel,
   });
 
   final PadelMatch match;
   final String myUserId;
   final VoidCallback? onJoin;
   final VoidCallback? onTap;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +127,15 @@ class MatchCard extends StatelessWidget {
                       onPressed: onJoin,
                       icon: const Icon(Icons.person_add_alt, size: 18),
                       label: const Text('Partecipa'),
+                    ),
+                  ],
+                  if (onCancel != null) ...[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      key: ValueKey('cancel-match-${match.id}'),
+                      onPressed: onCancel,
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      label: const Text('Annulla partita'),
                     ),
                   ],
                 ],
@@ -241,17 +252,7 @@ class _TeamSummary extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 2),
               child: Row(
                 children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color:
-                          parseHexColor(player.rankingBandColor) ??
-                          colors.divider,
-                      border: Border.all(color: colors.border),
-                    ),
-                  ),
+                  PlayerRankingMarker(colorHex: player.rankingBandColor),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
