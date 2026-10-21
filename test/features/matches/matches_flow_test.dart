@@ -3,6 +3,8 @@ import 'package:crpadel_mobile/app/bottom_bar.dart';
 import 'package:crpadel_mobile/core/utils/dates.dart';
 import 'package:crpadel_mobile/features/matches/domain/padel_match.dart';
 import 'package:crpadel_mobile/features/matches/presentation/matches_screen.dart';
+import 'package:crpadel_mobile/features/bookings/presentation/book_screen.dart';
+import 'package:crpadel_mobile/features/bookings/presentation/complete_booking_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -189,5 +191,28 @@ void main() {
     expect(find.text('CAMPO 2'), findsOneWidget);
     expect(find.text('CAMPO 1'), findsOneWidget);
     expect(find.text('CAMPO 3'), findsNothing);
+  });
+
+  testWidgets('Crea partita apre la scelta del campo già in modalità partita', (
+    tester,
+  ) async {
+    await openMatches(tester, backendWith());
+
+    await tester.tap(find.text('Crea'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BookScreen), findsOneWidget);
+    expect(
+      find.textContaining('Crea partita: scegli un campo'),
+      findsOneWidget,
+    );
+
+    final freeSlot = find.bySemanticsLabel('Libero alle 18:00, prenota');
+    await tester.ensureVisible(freeSlot);
+    await tester.tap(freeSlot);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CompleteBookingScreen), findsOneWidget);
+    expect(find.text('Mer 7 ott · 18:00–19:30'), findsOneWidget);
   });
 }

@@ -14,11 +14,16 @@ import '../../helpers/app_overrides.dart';
 void main() {
   final day = DateTime(2026, 10, 8);
   const court = CourtRef(id: 'c1', name: 'Campo 1');
-  BookingSlot slot({int start = 18 * 60, int free = 120}) => BookingSlot(
+  BookingSlot slot({
+    int start = 18 * 60,
+    int free = 120,
+    BookingType? initialType,
+  }) => BookingSlot(
     court: court,
     date: day,
     startMinutes: start,
     freeMinutes: free,
+    initialType: initialType,
   );
   const self = DirectoryPlayer(id: 'p0', fullName: 'Mario Rossi', isSelf: true);
   const anna = DirectoryPlayer(id: 'p1', fullName: 'Anna Verdi');
@@ -45,6 +50,12 @@ void main() {
     expect(state(slot()).type, BookingType.court);
     controller(slot(free: 60));
     expect(state(slot(free: 60)).type, BookingType.lesson);
+  });
+
+  test('rispetta il tipo iniziale richiesto dal flusso', () {
+    final s = slot(initialType: BookingType.court);
+    controller(s);
+    expect(state(s).type, BookingType.court);
   });
 
   test('lezione e allenamento richiedono l\'istruttore', () {

@@ -19,6 +19,7 @@ class BookingSlot {
     required this.date,
     required this.startMinutes,
     required this.freeMinutes,
+    this.initialType,
   });
 
   final CourtRef court;
@@ -27,6 +28,7 @@ class BookingSlot {
 
   /// Minuti liberi da [startMinutes] al prossimo impegno o alla chiusura.
   final int freeMinutes;
+  final BookingType? initialType;
 
   @override
   bool operator ==(Object other) =>
@@ -34,10 +36,12 @@ class BookingSlot {
       other.court == court &&
       other.date == date &&
       other.startMinutes == startMinutes &&
-      other.freeMinutes == freeMinutes;
+      other.freeMinutes == freeMinutes &&
+      other.initialType == initialType;
 
   @override
-  int get hashCode => Object.hash(court, date, startMinutes, freeMinutes);
+  int get hashCode =>
+      Object.hash(court, date, startMinutes, freeMinutes, initialType);
 }
 
 class CompleteBookingState {
@@ -119,9 +123,11 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
   @override
   CompleteBookingState build() => CompleteBookingState(
     // Se non c'è spazio per 90' si parte dalla lezione da 60'.
-    type: slot.freeMinutes >= BookingType.court.minutes
-        ? BookingType.court
-        : BookingType.lesson,
+    type:
+        slot.initialType ??
+        (slot.freeMinutes >= BookingType.court.minutes
+            ? BookingType.court
+            : BookingType.lesson),
   );
 
   bool get fits => state.type.minutes <= slot.freeMinutes;

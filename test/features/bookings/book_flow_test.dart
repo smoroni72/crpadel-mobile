@@ -83,6 +83,8 @@ void main() {
     // Alle 12 di oggi gli orari passati non si prenotano.
     expect(freeAt('11:30'), findsNothing);
     expect(freeAt('12:00'), findsOneWidget);
+    expect(find.text('Non disponibile'), findsWidgets);
+    expect(find.text('12:00'), findsWidgets);
   });
 
   testWidgets('prenota uno spazio libero e lo ritrova in Home', (tester) async {

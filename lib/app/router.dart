@@ -99,7 +99,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppPaths.book,
                 name: AppRoutes.book,
-                builder: (_, _) => const BookScreen(),
+                builder: (_, state) => BookScreen(
+                  createMatch: state.uri.queryParameters['mode'] == 'match',
+                ),
                 routes: [
                   GoRoute(
                     path: AppPaths.freeCourts,
