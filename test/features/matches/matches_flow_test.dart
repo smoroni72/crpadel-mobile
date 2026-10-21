@@ -198,14 +198,12 @@ void main() {
   ) async {
     await openMatches(tester, backendWith());
 
-    await tester.tap(find.text('Crea'));
+    await tester.tap(find.text('Crea partita'));
     await tester.pumpAndSettle();
 
     expect(find.byType(BookScreen), findsOneWidget);
-    expect(
-      find.textContaining('Crea partita: scegli un campo'),
-      findsOneWidget,
-    );
+    expect(find.text('Crea partita'), findsOneWidget);
+    expect(find.text('Livello di gioco'), findsOneWidget);
 
     final freeSlot = find.bySemanticsLabel('Libero alle 18:00, prenota');
     await tester.ensureVisible(freeSlot);

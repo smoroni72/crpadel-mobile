@@ -9,6 +9,10 @@ abstract class Coach with _$Coach {
     required String id,
     required String name,
     String? photoUrl,
+    String? bio,
+    @Default('istruttore') String level,
+    @Default(0) double pricePerHour,
+    @Default([]) List<String> specialties,
     @Default(true) bool isActive,
   }) = _Coach;
 

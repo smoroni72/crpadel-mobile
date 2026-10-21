@@ -594,6 +594,13 @@ class _Header extends ConsumerWidget {
             child: Icon(Icons.notifications_none, color: colors.text),
           ),
         ),
+        const SizedBox(width: 8),
+        IconButton.filled(
+          onPressed: () => context.pushNamed(AppRoutes.exploreMenu),
+          tooltip: 'Menu',
+          style: IconButton.styleFrom(fixedSize: const Size.square(44)),
+          icon: const Icon(Icons.menu),
+        ),
       ],
     );
   }

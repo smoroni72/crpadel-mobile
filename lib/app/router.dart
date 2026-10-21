@@ -12,6 +12,12 @@ import '../features/bookings/presentation/complete_booking_controller.dart';
 import '../features/bookings/presentation/complete_booking_screen.dart';
 import '../features/bookings/presentation/free_courts_screen.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/explore/presentation/club_info_screen.dart';
+import '../features/explore/presentation/explore_menu_screen.dart';
+import '../features/explore/presentation/gallery_screen.dart';
+import '../features/explore/presentation/lessons_screen.dart';
+import '../features/explore/presentation/rankings_screen.dart';
+import '../features/explore/presentation/tournaments_screen.dart';
 import '../features/matches/presentation/match_detail_screen.dart';
 import '../features/matches/presentation/matches_screen.dart';
 import '../features/profile/presentation/change_password_screen.dart';
@@ -89,6 +95,36 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.notifications,
         builder: (_, _) => const NotificationsScreen(),
       ),
+      GoRoute(
+        path: AppPaths.exploreMenu,
+        name: AppRoutes.exploreMenu,
+        builder: (_, _) => const ExploreMenuScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.tournaments,
+        name: AppRoutes.tournaments,
+        builder: (_, _) => const TournamentsScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.rankings,
+        name: AppRoutes.rankings,
+        builder: (_, _) => const RankingsScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.lessons,
+        name: AppRoutes.lessons,
+        builder: (_, _) => const LessonsScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.gallery,
+        name: AppRoutes.gallery,
+        builder: (_, _) => const GalleryScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.clubInfo,
+        name: AppRoutes.clubInfo,
+        builder: (_, _) => const ClubInfoScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -101,6 +137,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: AppRoutes.book,
                 builder: (_, state) => BookScreen(
                   createMatch: state.uri.queryParameters['mode'] == 'match',
+                  createLesson: state.uri.queryParameters['mode'] == 'lesson',
                 ),
                 routes: [
                   GoRoute(

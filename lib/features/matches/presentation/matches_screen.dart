@@ -60,7 +60,7 @@ class MatchesScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Crea'),
+                    label: const Text('Crea partita'),
                   ),
                   const SizedBox(width: 8),
                   const ThemeToggleButton(),

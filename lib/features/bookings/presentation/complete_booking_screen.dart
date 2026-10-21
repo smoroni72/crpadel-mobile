@@ -63,12 +63,17 @@ class CompleteBookingScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final user = ref.watch(authControllerProvider).value;
     final end = slot.startMinutes + state.type.minutes;
+    final dedicatedMatchFlow = slot.initialMatchType != null;
     return Scaffold(
       backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: colors.surface,
         automaticallyImplyLeading: false,
-        title: const Text('Completa la prenotazione'),
+        title: Text(
+          dedicatedMatchFlow
+              ? 'Completa la partita'
+              : 'Completa la prenotazione',
+        ),
         actions: [
           IconButton(
             onPressed: () => context.pop(),
@@ -158,8 +163,9 @@ class CompleteBookingScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Con meno di 4 giocatori la partita resta aperta: altri '
-              'giocatori possono unirsi direttamente fino a 4.',
+              'Ogni squadra può avere al massimo 2 giocatori. Con meno di '
+              '4 partecipanti la partita resta aperta e gli altri possono '
+              'unirsi successivamente.',
               style: TextStyle(fontSize: 12, color: colors.textSecondary),
             ),
             const SizedBox(height: 18),
@@ -167,6 +173,12 @@ class CompleteBookingScreen extends ConsumerWidget {
             _MatchTypeChips(
               selected: state.matchType,
               onSelected: controller.setMatchType,
+            ),
+            const SizedBox(height: 18),
+            _Label('Livello di gioco'),
+            _MatchLevelChips(
+              selected: state.matchLevel,
+              onSelected: controller.setMatchLevel,
             ),
           ],
         ],
@@ -195,7 +207,11 @@ class CompleteBookingScreen extends ConsumerWidget {
                         dimension: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Conferma prenotazione'),
+                    : Text(
+                        dedicatedMatchFlow
+                            ? 'Conferma e apri partita'
+                            : 'Conferma prenotazione',
+                      ),
               ),
             ],
           ),
@@ -461,6 +477,43 @@ class _MatchTypeChips extends ConsumerWidget {
             selectedColor: colors.navy,
             labelStyle: TextStyle(
               color: t.code == selected ? colors.onNavy : colors.text,
+              fontWeight: FontWeight.w600,
+            ),
+            shape: const StadiumBorder(),
+          ),
+      ],
+    );
+  }
+}
+
+class _MatchLevelChips extends StatelessWidget {
+  const _MatchLevelChips({required this.selected, required this.onSelected});
+
+  final String selected;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    const levels = {
+      'qualsiasi': 'Qualsiasi',
+      'principiante': 'Principiante',
+      'intermedio': 'Intermedio',
+      'avanzato': 'Avanzato',
+    };
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final entry in levels.entries)
+          ChoiceChip(
+            label: Text(entry.value),
+            selected: entry.key == selected,
+            onSelected: (_) => onSelected(entry.key),
+            showCheckmark: false,
+            selectedColor: colors.navy,
+            labelStyle: TextStyle(
+              color: entry.key == selected ? colors.onNavy : colors.text,
               fontWeight: FontWeight.w600,
             ),
             shape: const StadiumBorder(),

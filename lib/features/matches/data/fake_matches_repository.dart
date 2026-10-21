@@ -63,6 +63,12 @@ class FakeMatchesRepository implements MatchesRepository {
       matchType: request.matchType == 'friendly'
           ? MatchType.friendly
           : MatchType.ranking,
+      level: switch (request.level) {
+        'principiante' => MatchLevel.principiante,
+        'intermedio' => MatchLevel.intermedio,
+        'avanzato' => MatchLevel.avanzato,
+        _ => MatchLevel.qualsiasi,
+      },
       status: MatchStatus.open,
       players: [
         for (final p in request.players)
