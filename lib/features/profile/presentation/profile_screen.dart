@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../app/routes.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_controller.dart';
 import '../../../core/utils/colors.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
@@ -76,6 +77,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   ),
                   const Spacer(),
+                  const ThemeToggleButton(),
+                  const SizedBox(width: 8),
                   IconButton.outlined(
                     onPressed: () => context.pushNamed(AppRoutes.notifications),
                     tooltip: 'Centro notifiche',

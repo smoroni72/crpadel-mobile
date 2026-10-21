@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_controller.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../domain/padel_match.dart';
@@ -39,9 +40,16 @@ class MatchesScreen extends ConsumerWidget {
             // l'ultima card contiene squadre, coefficienti e azioni.
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 124),
             children: [
-              Text(
-                'Partite',
-                style: Theme.of(context).textTheme.headlineMedium,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Partite',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                  const ThemeToggleButton(),
+                ],
               ),
               const SizedBox(height: 14),
               _Filter(

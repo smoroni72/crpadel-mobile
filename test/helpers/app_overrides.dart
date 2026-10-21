@@ -1,4 +1,5 @@
 import 'package:crpadel_mobile/core/providers.dart';
+import 'package:crpadel_mobile/core/theme/theme_controller.dart';
 import 'package:crpadel_mobile/core/push/push_messaging.dart';
 import 'package:crpadel_mobile/core/push/push_tokens_repository.dart';
 import 'package:crpadel_mobile/core/push/push_preferences.dart';
@@ -38,6 +39,7 @@ class FakeBackend {
     this.push,
     this.pushTokens,
     InMemoryPushPreferences? pushPreferences,
+    InMemoryThemePreferences? themePreferences,
   }) : auth =
            auth ?? FakeAuthRepository(sessionUser: FakeAuthRepository.demoUser),
        bookings = bookings ?? FakeBookingsRepository(),
@@ -46,7 +48,8 @@ class FakeBackend {
        preferredTime = InMemoryPreferredTimeRepository(preferredTime),
        profile = profile ?? FakeProfileRepository(),
        home = home ?? FakeHomeRepository(),
-       pushPreferences = pushPreferences ?? InMemoryPushPreferences();
+       pushPreferences = pushPreferences ?? InMemoryPushPreferences(),
+       themePreferences = themePreferences ?? InMemoryThemePreferences();
 
   final FakeAuthRepository auth;
   final FakeBookingsRepository bookings;
@@ -66,6 +69,7 @@ class FakeBackend {
   final FakePushMessaging? push;
   final FakePushTokensRepository? pushTokens;
   final InMemoryPushPreferences pushPreferences;
+  final InMemoryThemePreferences themePreferences;
 
   List<Override> get overrides => [
     authRepositoryProvider.overrideWithValue(auth),
@@ -83,6 +87,7 @@ class FakeBackend {
     pushMessagingProvider.overrideWithValue(push),
     pushTokensRepositoryProvider.overrideWithValue(pushTokens),
     pushPreferencesProvider.overrideWithValue(pushPreferences),
+    themePreferencesProvider.overrideWithValue(themePreferences),
   ];
 
   ProviderContainer container() => ProviderContainer(

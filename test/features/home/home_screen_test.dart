@@ -193,6 +193,7 @@ void main() {
     await pumpHome(tester, FakeBackend(matches: matches));
 
     expect(find.text('CAMPO 1'), findsOneWidget);
+    expect(find.text('Completata'), findsOneWidget);
     expect(find.text('Anna Rossi'), findsOneWidget);
     expect(find.text('Dora Neri'), findsOneWidget);
     expect(find.text('Coeff. coppia 14,50'), findsOneWidget);
