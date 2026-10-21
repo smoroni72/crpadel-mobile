@@ -13,6 +13,9 @@ abstract class PlayerRanking with _$PlayerRanking {
     @Default(0) int position,
     String? rankingBandName,
     String? rankingBandColor,
+    @JsonKey(fromJson: nullableRankingScoreFromJson)
+    @Default(0)
+    double eloScore,
     @Default(0) int matchesPlayed,
     @Default(0) int matchesWon,
   }) = _PlayerRanking;
@@ -20,6 +23,12 @@ abstract class PlayerRanking with _$PlayerRanking {
   factory PlayerRanking.fromJson(Map<String, dynamic> json) =>
       _$PlayerRankingFromJson(json);
 }
+
+double nullableRankingScoreFromJson(Object? value) => switch (value) {
+  num number => number.toDouble(),
+  String text => double.tryParse(text) ?? 0,
+  _ => 0,
+};
 
 /// Statistiche del Profilo, come i 4 riquadri del sito.
 class ProfileStats {

@@ -13,7 +13,6 @@ import '../../bookings/presentation/book_providers.dart';
 import '../../bookings/presentation/widgets/preferred_time_sheet.dart';
 import '../../notifications/presentation/notifications_provider.dart';
 
-/// Voci presenti solo nell'app, fuori dal Profilo che resta uguale al sito.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -24,7 +23,6 @@ class SettingsScreen extends ConsumerWidget {
     final push = ref.watch(pushPermissionProvider);
     final pushEnabled = ref.watch(pushNotificationsEnabledProvider);
     final unread = ref.watch(unreadNotificationsProvider).value ?? 0;
-    final colors = context.colors;
     return Scaffold(
       appBar: AppBar(title: const Text('Impostazioni')),
       body: ListView(
@@ -112,14 +110,6 @@ class SettingsScreen extends ConsumerWidget {
                   last: true,
                 ),
               ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
-            child: Text(
-              "Voci presenti solo nell'app: il resto del Profilo è uguale "
-              'al sito.',
-              style: TextStyle(fontSize: 12, color: colors.textSecondary),
             ),
           ),
         ],

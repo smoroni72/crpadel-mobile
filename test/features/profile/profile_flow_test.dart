@@ -218,6 +218,7 @@ void main() {
     expect(find.text('Orario preferito'), findsOneWidget);
     expect(find.text('Centro notifiche'), findsOneWidget);
     expect(find.textContaining('Non disponibili'), findsOneWidget);
+    expect(find.textContaining('Voci presenti solo'), findsNothing);
 
     await tester.tap(find.text('Cambia password'));
     await tester.pumpAndSettle();
