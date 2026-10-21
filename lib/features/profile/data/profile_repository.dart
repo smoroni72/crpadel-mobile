@@ -10,6 +10,9 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 );
 
 abstract interface class ProfileRepository {
+  /// Prime posizioni della classifica ufficiale del circolo.
+  Future<List<PlayerRanking>> leaderboard({int limit = 10});
+
   /// Statistiche dell'utente in classifica.
   Future<ProfileStats> stats({required String userId, required String email});
 
@@ -30,6 +33,15 @@ class ApiProfileRepository implements ProfileRepository {
   /// Il server restituisce al massimo 200 righe di classifica.
   static const _leaderboardLimit = 200;
   static const _historyLimit = 20;
+
+  @override
+  Future<List<PlayerRanking>> leaderboard({int limit = 10}) async {
+    final response = await _api.get(
+      '/rankings',
+      query: {'sort': 'position', 'limit': limit.clamp(1, _leaderboardLimit)},
+    );
+    return _list(response.data).map(PlayerRanking.fromJson).toList();
+  }
 
   @override
   Future<ProfileStats> stats({

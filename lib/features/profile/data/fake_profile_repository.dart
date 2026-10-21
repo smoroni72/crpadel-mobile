@@ -14,11 +14,13 @@ class FakeProfileRepository implements ProfileRepository {
     ),
     this.history = const [],
     List<Lesson> lessons = const [],
+    this.rankings = const [],
   }) : lessonList = [...lessons];
 
   ProfileStats profileStats;
   List<Booking> history;
   List<Lesson> lessonList;
+  List<PlayerRanking> rankings;
   final cancelledLessons = <String>[];
 
   /// Se impostato, ogni chiamata fallisce con questo errore.
@@ -26,6 +28,12 @@ class FakeProfileRepository implements ProfileRepository {
 
   void _check() {
     if (error != null) throw error!;
+  }
+
+  @override
+  Future<List<PlayerRanking>> leaderboard({int limit = 10}) async {
+    _check();
+    return rankings.take(limit).toList();
   }
 
   @override

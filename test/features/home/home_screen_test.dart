@@ -5,9 +5,13 @@ import 'package:crpadel_mobile/features/bookings/data/fake_bookings_repository.d
 import 'package:crpadel_mobile/features/bookings/domain/booking.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/widgets/booking_card.dart';
 import 'package:crpadel_mobile/features/home/presentation/home_screen.dart';
+import 'package:crpadel_mobile/features/home/data/fake_home_repository.dart';
+import 'package:crpadel_mobile/features/home/domain/home_news.dart';
 import 'package:crpadel_mobile/features/matches/data/fake_matches_repository.dart';
 import 'package:crpadel_mobile/features/matches/domain/padel_match.dart';
 import 'package:crpadel_mobile/features/subscriptions/data/fake_subscriptions_repository.dart';
+import 'package:crpadel_mobile/features/profile/data/fake_profile_repository.dart';
+import 'package:crpadel_mobile/features/profile/domain/profile_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -43,6 +47,60 @@ void main() {
   testWidgets('senza pacchetti il riferimento non compare', (tester) async {
     await pumpHome(tester, FakeBackend());
     expect(find.textContaining('partite nel pacchetto'), findsNothing);
+  });
+
+  testWidgets('mostra podio, classifica e news del circolo', (tester) async {
+    await pumpHome(
+      tester,
+      FakeBackend(
+        profile: FakeProfileRepository(
+          rankings: const [
+            PlayerRanking(
+              playerName: 'Diego Gallucci',
+              position: 1,
+              eloScore: 612,
+              rankingBandName: 'Rosso',
+              rankingBandColor: '#F50505',
+              matchesPlayed: 18,
+              matchesWon: 12,
+            ),
+            PlayerRanking(
+              playerName: 'Fabio Di Costantini',
+              position: 2,
+              eloScore: 590,
+              rankingBandName: 'Arancio',
+              rankingBandColor: '#F2A807',
+              matchesPlayed: 16,
+              matchesWon: 10,
+            ),
+            PlayerRanking(
+              playerName: 'Mario Sanzone',
+              position: 3,
+              eloScore: 570,
+              rankingBandName: 'Arancio',
+              rankingBandColor: '#F2A807',
+              matchesPlayed: 15,
+              matchesWon: 9,
+            ),
+          ],
+        ),
+        home: FakeHomeRepository(const [
+          HomeNews(
+            id: 'n1',
+            title: 'Open Day CRPadel',
+            content: 'Una giornata dedicata ai nuovi giocatori.',
+            category: 'evento',
+            isPinned: true,
+          ),
+        ]),
+      ),
+    );
+
+    expect(find.text('I migliori del momento'), findsOneWidget);
+    expect(find.text('Diego Gallucci'), findsNWidgets(2));
+    expect(find.text('TOP 10 DEL CLUB'), findsOneWidget);
+    expect(find.text('News & aggiornamenti'), findsOneWidget);
+    expect(find.text('Open Day CRPadel'), findsOneWidget);
   });
 
   testWidgets('con un pacchetto compare il riferimento', (tester) async {
