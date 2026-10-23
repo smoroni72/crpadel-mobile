@@ -5,6 +5,7 @@ import 'package:crpadel_mobile/features/matches/domain/padel_match.dart';
 import 'package:crpadel_mobile/features/matches/presentation/matches_screen.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/book_screen.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/complete_booking_screen.dart';
+import 'package:crpadel_mobile/features/home/presentation/home_screen.dart';
 import 'package:crpadel_mobile/features/matches/presentation/widgets/player_ranking_marker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -246,5 +247,21 @@ void main() {
 
     expect(find.byType(CompleteBookingScreen), findsOneWidget);
     expect(find.text('Mer 7 ott · 18:00–19:30'), findsOneWidget);
+
+    await tester.tap(find.text('Conferma e apri partita'));
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen), findsOneWidget);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AppBottomBar),
+        matching: find.text('Prenota'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BookScreen), findsOneWidget);
+    expect(find.text('Crea partita'), findsNothing);
+    expect(find.textContaining('Solo campi liberi'), findsOneWidget);
   });
 }
