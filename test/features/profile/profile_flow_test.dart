@@ -67,6 +67,25 @@ void main() {
     expect(find.text('63%'), findsWidgets);
   });
 
+  testWidgets('ranking distingue chiaramente partite e vittorie', (
+    tester,
+  ) async {
+    final profile = FakeProfileRepository(
+      profileStats: const ProfileStats(
+        underdogMatches: 5,
+        underdogWins: 1,
+        favoriteMatches: 3,
+        favoriteWins: 2,
+      ),
+    );
+    await openProfile(tester, FakeBackend(profile: profile));
+
+    await scrollTo(tester, find.text('Da sfavorito'));
+    expect(find.text('Partite: 5\nVittorie: 1'), findsOneWidget);
+    expect(find.text('Partite: 3\nVittorie: 2'), findsOneWidget);
+    expect(find.textContaining('·'), findsNothing);
+  });
+
   testWidgets('la scheda Abbonamenti compare solo con un pacchetto', (
     tester,
   ) async {

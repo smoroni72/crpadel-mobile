@@ -388,11 +388,13 @@ class _PlayerPerformance extends ConsumerWidget {
               metrics: [
                 (
                   'Da sfavorito',
-                  '${stats.underdogMatches} · ${stats.underdogWins} V',
+                  'Partite: ${stats.underdogMatches}\n'
+                      'Vittorie: ${stats.underdogWins}',
                 ),
                 (
                   'Da favorito',
-                  '${stats.favoriteMatches} · ${stats.favoriteWins} V',
+                  'Partite: ${stats.favoriteMatches}\n'
+                      'Vittorie: ${stats.favoriteWins}',
                 ),
                 (
                   'PR conquistati',
@@ -521,9 +523,11 @@ class _MetricGroup extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: metrics.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 2.35,
+          childAspectRatio: metrics.any((metric) => metric.$2.contains('\n'))
+              ? 1.35
+              : 2.35,
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
         ),
@@ -551,10 +555,12 @@ class _MetricGroup extends StatelessWidget {
                 ),
                 Text(
                   metric.$2,
-                  style: context.fonts.monoStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: context.fonts
+                      .monoStyle(
+                        fontSize: metric.$2.contains('\n') ? 14 : 17,
+                        fontWeight: FontWeight.w700,
+                      )
+                      .copyWith(height: metric.$2.contains('\n') ? 1.35 : null),
                 ),
               ],
             ),
