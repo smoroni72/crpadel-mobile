@@ -21,6 +21,7 @@ import '../domain/profile_models.dart';
 import 'delete_account.dart';
 import 'profile_labels.dart';
 import 'profile_providers.dart';
+import 'widgets/player_mood_avatar.dart';
 
 /// Profilo uguale a quello del sito: card, 4 riquadri, schede, Esci ed
 /// Elimina account. Le voci solo dell'app sono in Impostazioni.
@@ -149,6 +150,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   label: const Text('Elimina account'),
                 ),
               ),
+              const SizedBox(height: 16),
+              const _PlayerPerformance(),
             ],
           ),
         ),
@@ -174,19 +177,22 @@ class _ProfileCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: colors.primaryTint,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(
-                    Icons.person_outline,
-                    size: 32,
-                    color: colors.primary,
-                  ),
-                ),
+                if (s == null)
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: colors.primaryTint,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      Icons.person_outline,
+                      size: 32,
+                      color: colors.primary,
+                    ),
+                  )
+                else
+                  PlayerMoodAvatar(stats: s, size: 64, showLabel: true),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -256,6 +262,249 @@ class _ProfileCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _PlayerPerformance extends ConsumerWidget {
+  const _PlayerPerformance();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(profileStatsProvider).value;
+    if (stats == null) return const SizedBox.shrink();
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.insights_outlined,
+                  color: context.colors.primaryText,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Prestazioni personali',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Text(
+                  stats.trendLabel,
+                  style: TextStyle(
+                    color: stats.trendDelta < -5
+                        ? Colors.red
+                        : stats.trendDelta > 5
+                        ? Colors.green
+                        : context.colors.textSecondary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                _Gauge(
+                  label: 'Vittorie',
+                  value: stats.winRate,
+                  caption: '${stats.matchesWon} vinte',
+                  color: Colors.green,
+                ),
+                _Gauge(
+                  label: 'Sconfitte',
+                  value: stats.lossRate,
+                  caption: '${stats.matchesLost} perse',
+                  color: Colors.red,
+                ),
+                _Gauge(
+                  label: 'Forma',
+                  value: stats.recentFormRate,
+                  caption: '${stats.recentWins}/${stats.recentMatches} recenti',
+                  color: context.colors.primary,
+                ),
+                _Gauge(
+                  label: 'Game vinti',
+                  value: stats.gameWinRate,
+                  caption:
+                      '${stats.gamesWon}/${stats.gamesWon + stats.gamesLost}',
+                  color: Colors.blue,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            _MetricGroup(
+              title: 'Attività',
+              metrics: [
+                ('Ranking', '${stats.rankingMatches}'),
+                ('Amichevoli', '${stats.friendlyMatches}'),
+                ('Tornei', '${stats.tournamentMatches}'),
+                ('Senza esito', '${stats.undecided}'),
+              ],
+            ),
+            const SizedBox(height: 14),
+            _MetricGroup(
+              title: 'Set e game',
+              metrics: [
+                ('Set vinti', '${stats.setsWon}'),
+                ('Set persi', '${stats.setsLost}'),
+                ('% set', '${stats.setWinRate}%'),
+                ('Differenza game', '${stats.gamesWon - stats.gamesLost}'),
+              ],
+            ),
+            const SizedBox(height: 14),
+            _MetricGroup(
+              title: 'Ranking',
+              metrics: [
+                (
+                  'Da sfavorito',
+                  '${stats.underdogMatches} · ${stats.underdogWins} V',
+                ),
+                (
+                  'Da favorito',
+                  '${stats.favoriteMatches} · ${stats.favoriteWins} V',
+                ),
+                (
+                  'PR conquistati',
+                  NumberFormat(
+                    '0.0#',
+                    'it_IT',
+                  ).format(stats.rankingPointsEarned),
+                ),
+                (
+                  'Media PR',
+                  NumberFormat(
+                    '0.0#',
+                    'it_IT',
+                  ).format(stats.rankingPointsAverage),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Gauge extends StatelessWidget {
+  const _Gauge({
+    required this.label,
+    required this.value,
+    required this.caption,
+    required this.color,
+  });
+
+  final String label;
+  final int value;
+  final String caption;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 132,
+    child: Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.colors.divider,
+        borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+      ),
+      child: Column(
+        children: [
+          SizedBox.square(
+            dimension: 66,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  value: value.clamp(0, 100) / 100,
+                  strokeWidth: 7,
+                  color: color,
+                  backgroundColor: context.colors.surface,
+                ),
+                Text(
+                  '$value%',
+                  style: context.fonts.monoStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            caption,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 11, color: context.colors.textSecondary),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _MetricGroup extends StatelessWidget {
+  const _MetricGroup({required this.title, required this.metrics});
+
+  final String title;
+  final List<(String, String)> metrics;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+      const SizedBox(height: 8),
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: metrics.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 2.8,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+        ),
+        itemBuilder: (context, index) {
+          final metric = metrics[index];
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              border: Border.all(color: context.colors.border),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  metric.$1,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+                Text(
+                  metric.$2,
+                  style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ],
+  );
 }
 
 class _BandBadge extends StatelessWidget {
