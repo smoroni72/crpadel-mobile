@@ -85,7 +85,13 @@ class _RankingSpotlight extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionHeader('I migliori del momento'),
+        _SectionHeader(
+          'I migliori del momento',
+          action: TextButton(
+            onPressed: () => context.pushNamed(AppRoutes.rankings),
+            child: const Text('Vedi classifica'),
+          ),
+        ),
         Text(
           'Podio e classifica ufficiale del circolo',
           style: TextStyle(fontSize: 13, color: context.colors.textSecondary),

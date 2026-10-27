@@ -11,7 +11,9 @@ import 'package:intl/date_symbol_data_local.dart';
 void main() {
   setUpAll(() => initializeDateFormatting('it_IT'));
 
-  testWidgets('mostra classifica mensile e giocatore del mese', (tester) async {
+  testWidgets('permette di scegliere classifica generale e mensile', (
+    tester,
+  ) async {
     final repository = FakeProfileRepository(
       rankings: const [
         PlayerRanking(
@@ -51,6 +53,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('Generale'), findsOneWidget);
+    expect(find.text('Mensile'), findsOneWidget);
+    expect(find.text('Classifica generale'), findsOneWidget);
+    expect(find.text('Classifica mensile'), findsNothing);
+
+    await tester.tap(find.text('Mensile'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Classifica mensile'), findsOneWidget);
     expect(find.text('GIOCATORE DEL MESE'), findsOneWidget);
     expect(
@@ -58,6 +68,6 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Mario Rossi'), findsWidgets);
-    expect(find.text('Classifica generale'), findsOneWidget);
+    expect(find.text('Classifica generale'), findsNothing);
   });
 }

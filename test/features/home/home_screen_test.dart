@@ -97,6 +97,7 @@ void main() {
     );
 
     expect(find.text('I migliori del momento'), findsOneWidget);
+    expect(find.text('Vedi classifica'), findsOneWidget);
     expect(find.text('Diego Gallucci'), findsNWidgets(2));
     expect(find.text('TOP 10 DEL CLUB'), findsOneWidget);
     expect(find.text('News & aggiornamenti'), findsOneWidget);
