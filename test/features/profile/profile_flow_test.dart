@@ -64,7 +64,7 @@ void main() {
     expect(find.text('12°'), findsOneWidget);
     expect(find.text('24'), findsOneWidget);
     expect(find.text('15'), findsOneWidget);
-    expect(find.text('63%'), findsOneWidget);
+    expect(find.text('63%'), findsWidgets);
   });
 
   testWidgets('la scheda Abbonamenti compare solo con un pacchetto', (

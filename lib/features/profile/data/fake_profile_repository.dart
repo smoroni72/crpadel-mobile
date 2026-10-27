@@ -15,12 +15,17 @@ class FakeProfileRepository implements ProfileRepository {
     this.history = const [],
     List<Lesson> lessons = const [],
     this.rankings = const [],
+    this.monthlyRankings = const MonthlyRankingResult(
+      month: '2026-10',
+      minimumMatches: 2,
+    ),
   }) : lessonList = [...lessons];
 
   ProfileStats profileStats;
   List<Booking> history;
   List<Lesson> lessonList;
   List<PlayerRanking> rankings;
+  MonthlyRankingResult monthlyRankings;
   final cancelledLessons = <String>[];
 
   /// Se impostato, ogni chiamata fallisce con questo errore.
@@ -34,6 +39,18 @@ class FakeProfileRepository implements ProfileRepository {
   Future<List<PlayerRanking>> leaderboard({int limit = 10}) async {
     _check();
     return rankings.take(limit).toList();
+  }
+
+  @override
+  Future<MonthlyRankingResult> monthlyLeaderboard({
+    required String month,
+  }) async {
+    _check();
+    return MonthlyRankingResult(
+      month: month,
+      minimumMatches: monthlyRankings.minimumMatches,
+      players: monthlyRankings.players,
+    );
   }
 
   @override

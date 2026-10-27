@@ -27,7 +27,7 @@ Fonte: analisi del repository `../CrPadel` (API Fastify, `api/src/routes/*`, mig
 | Partecipare / lasciare | `POST /matches/:id/join` con `team` (`A`/`B`), iscrizione immediata senza approvazione; `POST /matches/:id/leave` (non per l'organizzatore) |
 | Aggiungere giocatori, risultato | `POST /matches/:id/participants` con `club_player_id` e `team` (organizzatore); `PATCH /matches/:id` con `score_team1`, `score_team2` (stesso punteggio, es. `6-4 3-6 TB 10-8`) e `status: completed` |
 | Risultato | `PATCH /matches/:id` (organizzatore: punteggio + `status: completed`) |
-| Profilo e ranking | `GET /rankings?player_email=` (statistiche e fascia), `GET /rankings?sort=position&limit=200` (posizione); storico `GET /bookings`, `GET /lessons`, annullamento lezione `PATCH /lessons/:id`; `POST /auth/change-password` (revoca tutte le sessioni) |
+| Profilo e ranking | `GET /rankings?player_email=` (fascia), `GET /rankings?sort=position&leaderboard_only=true&limit=200` (posizione), `GET /rankings/monthly?month=YYYY-MM` (classifica mensile), `GET /players/directory` seguito da `GET /players/:id/statistics` sul proprio profilo (statistiche complete); storico `GET /bookings`, `GET /lessons`, annullamento lezione `PATCH /lessons/:id`; `POST /auth/change-password` (revoca tutte le sessioni) |
 | Istruttori | `GET /coaches` |
 
 ## Regole di dominio

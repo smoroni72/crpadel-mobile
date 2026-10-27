@@ -79,7 +79,7 @@ Pagina modale a schermo intero con chiusura ✕.
 
 - In alto: titolo "Profilo" e pulsante ingranaggio → Impostazioni.
 - Card: avatar (icona su fondo rosso tenue), nome, email, badge della fascia di ranking (o "Fuori fascia").
-- 4 riquadri: **Posizione** (es. "12°", "—" se non in classifica), **Partite**, **Vittorie**, **Win rate**. Dati da `/rankings?player_email=` e dalla classifica del circolo.
+- 4 riquadri: **Posizione** (es. "12°", "—" se non in classifica), **Partite**, **Vittorie**, **Win rate**. Seguono avatar di forma, indicatori vittorie/sconfitte/forma/game e dettagli su attività, set, game, partite da favorito/sfavorito e punti ranking. Dati da `/rankings?player_email=`, dalla classifica del circolo e da `/players/:id/statistics` limitato al giocatore autenticato.
 - Schede: **Prenotazioni**, **Partite**, **Lezioni**, **Abbonamenti**.
   - Prenotazioni e Lezioni: campo o istruttore, data e fascia oraria, stato (Confermata / Cancellata / Completata) e **Cancella** sulle confermate future.
   - Partite: data, orario, numero di giocatori e stato **in italiano** (il sito oggi mostra il codice dello stato, es. `pending_result`).
