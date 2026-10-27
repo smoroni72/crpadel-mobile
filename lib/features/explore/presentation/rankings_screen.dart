@@ -14,16 +14,21 @@ class RankingsScreen extends ConsumerStatefulWidget {
   ConsumerState<RankingsScreen> createState() => _RankingsScreenState();
 }
 
+enum _RankingView { general, monthly }
+
 class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   late DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
+  _RankingView _view = _RankingView.general;
 
   String get _monthKey => DateFormat('yyyy-MM').format(_month);
 
   Future<void> _refresh() async {
-    await Future.wait([
-      ref.refresh(fullRankingsProvider.future),
-      ref.refresh(monthlyRankingsProvider(_monthKey).future),
-    ]);
+    switch (_view) {
+      case _RankingView.general:
+        final _ = await ref.refresh(fullRankingsProvider.future);
+      case _RankingView.monthly:
+        final _ = await ref.refresh(monthlyRankingsProvider(_monthKey).future);
+    }
   }
 
   Future<void> _selectMonth() async {
@@ -50,46 +55,71 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         children: [
-          _MonthlyHeader(month: _month, onSelectMonth: _selectMonth),
-          const SizedBox(height: 12),
-          AsyncValueView(
-            value: ref.watch(monthlyRankingsProvider(_monthKey)),
-            errorText: 'Non riesco a caricare la classifica mensile',
-            onRetry: () => ref.invalidate(monthlyRankingsProvider(_monthKey)),
-            data: (result) => _MonthlyRankingSection(result: result),
+          SegmentedButton<_RankingView>(
+            showSelectedIcon: false,
+            segments: const [
+              ButtonSegment(
+                value: _RankingView.general,
+                icon: Icon(Icons.format_list_numbered, size: 18),
+                label: Text('Generale'),
+              ),
+              ButtonSegment(
+                value: _RankingView.monthly,
+                icon: Icon(Icons.calendar_month_outlined, size: 18),
+                label: Text('Mensile'),
+              ),
+            ],
+            selected: {_view},
+            onSelectionChanged: (selection) =>
+                setState(() => _view = selection.single),
           ),
-          const SizedBox(height: 28),
-          Text(
-            'Classifica generale',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Graduatoria ufficiale aggiornata',
-            style: TextStyle(color: context.colors.textSecondary),
-          ),
-          const SizedBox(height: 12),
-          AsyncValueView(
-            value: ref.watch(fullRankingsProvider),
-            errorText: 'Non riesco a caricare la classifica',
-            onRetry: () => ref.invalidate(fullRankingsProvider),
-            data: (players) => players.isEmpty
-                ? const Center(child: Text('Nessun giocatore in classifica'))
-                : Column(
-                    children: [
-                      for (var index = 0; index < players.length; index++) ...[
-                        _RankingRow(
-                          player: players[index],
-                          position: players[index].position > 0
-                              ? players[index].position
-                              : index + 1,
-                        ),
-                        if (index < players.length - 1)
-                          const SizedBox(height: 8),
+          const SizedBox(height: 20),
+          if (_view == _RankingView.general) ...[
+            Text(
+              'Classifica generale',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Graduatoria ufficiale aggiornata',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            const SizedBox(height: 12),
+            AsyncValueView(
+              value: ref.watch(fullRankingsProvider),
+              errorText: 'Non riesco a caricare la classifica',
+              onRetry: () => ref.invalidate(fullRankingsProvider),
+              data: (players) => players.isEmpty
+                  ? const Center(child: Text('Nessun giocatore in classifica'))
+                  : Column(
+                      children: [
+                        for (
+                          var index = 0;
+                          index < players.length;
+                          index++
+                        ) ...[
+                          _RankingRow(
+                            player: players[index],
+                            position: players[index].position > 0
+                                ? players[index].position
+                                : index + 1,
+                          ),
+                          if (index < players.length - 1)
+                            const SizedBox(height: 8),
+                        ],
                       ],
-                    ],
-                  ),
-          ),
+                    ),
+            ),
+          ] else ...[
+            _MonthlyHeader(month: _month, onSelectMonth: _selectMonth),
+            const SizedBox(height: 12),
+            AsyncValueView(
+              value: ref.watch(monthlyRankingsProvider(_monthKey)),
+              errorText: 'Non riesco a caricare la classifica mensile',
+              onRetry: () => ref.invalidate(monthlyRankingsProvider(_monthKey)),
+              data: (result) => _MonthlyRankingSection(result: result),
+            ),
+          ],
         ],
       ),
     ),
