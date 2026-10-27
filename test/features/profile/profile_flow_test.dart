@@ -138,6 +138,7 @@ void main() {
     await openProfile(tester, backend);
 
     expect(find.text('Confermata'), findsOneWidget);
+    await scrollTo(tester, find.text('Cancella'));
     await tester.tap(find.text('Cancella'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Annulla prenotazione'));
