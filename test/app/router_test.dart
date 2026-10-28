@@ -113,6 +113,44 @@ void main() {
       expect(find.byType(RegisterScreen), findsOneWidget);
     });
 
+    testWidgets('cambiando account cancella la password precedente', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      final email = find.widgetWithText(TextFormField, 'Email');
+      final password = find.widgetWithText(TextFormField, 'Password');
+
+      await tester.enterText(email, 'primo@crpadel.it');
+      await tester.enterText(password, 'password-precedente');
+      await tester.tap(email);
+      await tester.enterText(email, 'secondo@crpadel.it');
+      await tester.pump();
+
+      expect(tester.widget<TextFormField>(password).controller!.text, isEmpty);
+      expect(find.byTooltip('Usa un altro account'), findsOneWidget);
+    });
+
+    testWidgets('un accesso errato svuota e seleziona la password', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      final email = find.widgetWithText(TextFormField, 'Email');
+      final password = find.widgetWithText(TextFormField, 'Password');
+
+      await tester.enterText(email, 'giocatore@example.com');
+      await tester.enterText(password, 'password-errata');
+      await tester.tap(find.text('Accedi'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Credenziali non valide'), findsOneWidget);
+      expect(tester.widget<TextFormField>(password).controller!.text, isEmpty);
+      final editable = find.descendant(
+        of: password,
+        matching: find.byType(EditableText),
+      );
+      expect(tester.widget<EditableText>(editable).focusNode.hasFocus, isTrue);
+    });
+
     testWidgets('dopo il login le 4 tab navigano', (tester) async {
       await pumpApp(tester);
       await tester.enterText(

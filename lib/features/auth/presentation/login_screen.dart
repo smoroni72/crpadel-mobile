@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
@@ -19,13 +20,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  String? _emailWhenEditingStarted;
   bool _obscure = true;
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
+  }
+
+  String get _normalizedEmail => _email.text.trim().toLowerCase();
+
+  void _startEditingEmail() {
+    _emailWhenEditingStarted ??= _normalizedEmail;
+  }
+
+  void _emailChanged(String _) {
+    final previous = _emailWhenEditingStarted;
+    if (previous != null &&
+        _normalizedEmail != previous &&
+        _password.text.isNotEmpty) {
+      _password.clear();
+    }
+    setState(() {});
+  }
+
+  void _clearCredentials() {
+    TextInput.finishAutofillContext(shouldSave: false);
+    _email.clear();
+    _password.clear();
+    _emailWhenEditingStarted = null;
+    setState(() {});
+    _emailFocus.requestFocus();
   }
 
   Future<void> _submit() async {
@@ -33,6 +64,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await ref
         .read(authControllerProvider.notifier)
         .login(_email.text, _password.text);
+    if (!mounted) return;
+    final result = ref.read(authControllerProvider);
+    if (result.hasError) {
+      _password.clear();
+      setState(() {});
+      _passwordFocus.requestFocus();
+    } else {
+      TextInput.finishAutofillContext();
+    }
   }
 
   @override
@@ -59,11 +99,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 36),
                     TextFormField(
                       controller: _email,
+                      focusNode: _emailFocus,
                       keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
+                      autofillHints: const [AutofillHints.username],
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      onTap: _startEditingEmail,
+                      onChanged: _emailChanged,
+                      decoration: InputDecoration(
                         labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        suffixIcon: _email.text.isEmpty
+                            ? null
+                            : IconButton(
+                                onPressed: _clearCredentials,
+                                tooltip: 'Usa un altro account',
+                                icon: const Icon(Icons.close),
+                              ),
                       ),
                       validator: (value) => value != null && value.contains('@')
                           ? null
@@ -72,8 +124,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _password,
+                      focusNode: _passwordFocus,
                       obscureText: _obscure,
                       autofillHints: const [AutofillHints.password],
+                      autocorrect: false,
+                      enableSuggestions: false,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         prefixIcon: const Icon(Icons.lock_outline),
