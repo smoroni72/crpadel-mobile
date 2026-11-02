@@ -12,6 +12,8 @@ import '../../../core/theme/brand_config.dart';
 import '../../bookings/presentation/book_providers.dart';
 import '../../bookings/presentation/widgets/preferred_time_sheet.dart';
 import '../../notifications/presentation/notifications_provider.dart';
+import '../../app_menu/domain/app_menu_configuration.dart';
+import '../../app_menu/presentation/app_menu_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -23,6 +25,9 @@ class SettingsScreen extends ConsumerWidget {
     final push = ref.watch(pushPermissionProvider);
     final pushEnabled = ref.watch(pushNotificationsEnabledProvider);
     final unread = ref.watch(unreadNotificationsProvider).value ?? 0;
+    final menuConfiguration =
+        ref.watch(appMenuConfigurationProvider).value ??
+        AppMenuConfiguration.allEnabled;
     return Scaffold(
       appBar: AppBar(title: const Text('Impostazioni')),
       body: ListView(
@@ -50,13 +55,14 @@ class SettingsScreen extends ConsumerWidget {
                   value: preferred?.label ?? 'Non impostato',
                   onTap: () => showPreferredTimeSheet(context),
                 ),
-                _Item(
-                  title: 'Centro notifiche',
-                  value: unread == 0
-                      ? 'Nessuna da leggere'
-                      : '$unread da leggere',
-                  onTap: () => context.pushNamed(AppRoutes.notifications),
-                ),
+                if (menuConfiguration.notifications)
+                  _Item(
+                    title: 'Centro notifiche',
+                    value: unread == 0
+                        ? 'Nessuna da leggere'
+                        : '$unread da leggere',
+                    onTap: () => context.pushNamed(AppRoutes.notifications),
+                  ),
                 _SwitchItem(
                   title: 'Avvisi sul dispositivo',
                   subtitle: push == PushPermission.unavailable

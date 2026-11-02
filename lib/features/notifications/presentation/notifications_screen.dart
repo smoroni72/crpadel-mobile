@@ -6,12 +6,93 @@ import 'package:intl/intl.dart';
 import '../../../core/push/push_controller.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/async_value_view.dart';
+import '../../../app/routes.dart';
 import '../data/notifications_repository.dart';
 import '../domain/app_notification.dart';
 import 'notifications_provider.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
+
+  Future<bool> _confirmDelete(
+    BuildContext context, {
+    required String title,
+    required String message,
+  }) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Annulla'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Elimina'),
+            ),
+          ],
+        ),
+      ) ??
+      false;
+
+  Future<void> _deleteOne(
+    BuildContext context,
+    WidgetRef ref,
+    AppNotification item,
+  ) async {
+    final confirmed = await _confirmDelete(
+      context,
+      title: 'Eliminare la notifica?',
+      message: 'La notifica “${item.title}” non sarà più visibile.',
+    );
+    if (!confirmed || !context.mounted) return;
+    try {
+      await ref.read(notificationsRepositoryProvider).delete(item.id);
+      ref.invalidate(notificationsProvider);
+      ref.invalidate(unreadNotificationsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Notifica eliminata')));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Non riesco a eliminare la notifica')),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteAll(BuildContext context, WidgetRef ref) async {
+    final confirmed = await _confirmDelete(
+      context,
+      title: 'Eliminare tutte le notifiche?',
+      message: 'Lo storico delle notifiche verrà svuotato per questo account.',
+    );
+    if (!confirmed || !context.mounted) return;
+    try {
+      await ref.read(notificationsRepositoryProvider).deleteAll();
+      ref.invalidate(notificationsProvider);
+      ref.invalidate(unreadNotificationsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tutte le notifiche sono state eliminate'),
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Non riesco a eliminare le notifiche')),
+        );
+      }
+    }
+  }
 
   Future<void> _open(
     BuildContext context,
@@ -34,6 +115,11 @@ class NotificationsScreen extends ConsumerWidget {
     final items = ref.watch(notificationsProvider);
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Torna alla Home',
+          onPressed: () => context.goNamed(AppRoutes.home),
+          icon: const Icon(Icons.home_outlined),
+        ),
         title: const Text('Notifiche'),
         actions: [
           TextButton(
@@ -43,6 +129,24 @@ class NotificationsScreen extends ConsumerWidget {
               ref.invalidate(unreadNotificationsProvider);
             },
             child: const Text('Segna tutte lette'),
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'Altre azioni',
+            onSelected: (value) {
+              if (value == 'delete-all') _deleteAll(context, ref);
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'delete-all',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline),
+                    SizedBox(width: 12),
+                    Text('Elimina tutte'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -131,6 +235,12 @@ class NotificationsScreen extends ConsumerWidget {
                                         ),
                                       ],
                                     ),
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Elimina notifica',
+                                    onPressed: () =>
+                                        _deleteOne(context, ref, item),
+                                    icon: const Icon(Icons.delete_outline),
                                   ),
                                   if (item.destination != null)
                                     const Icon(Icons.chevron_right),

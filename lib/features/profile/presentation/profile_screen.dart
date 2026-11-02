@@ -16,6 +16,8 @@ import '../../bookings/presentation/book_providers.dart';
 import '../../bookings/presentation/cancel_booking.dart';
 import '../../subscriptions/domain/player_subscription.dart';
 import '../../notifications/presentation/notifications_provider.dart';
+import '../../app_menu/domain/app_menu_configuration.dart';
+import '../../app_menu/presentation/app_menu_provider.dart';
 import '../data/profile_repository.dart';
 import '../domain/profile_models.dart';
 import 'delete_account.dart';
@@ -59,6 +61,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ];
     final tab = tabs.contains(_tab) ? _tab : _Tab.bookings;
     final unread = ref.watch(unreadNotificationsProvider).value ?? 0;
+    final menuConfiguration =
+        ref.watch(appMenuConfigurationProvider).value ??
+        AppMenuConfiguration.allEnabled;
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -82,25 +87,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const Spacer(),
                     const ThemeToggleButton(),
                     const SizedBox(width: 8),
-                    IconButton.outlined(
-                      onPressed: () =>
-                          context.pushNamed(AppRoutes.notifications),
-                      tooltip: 'Centro notifiche',
-                      style: IconButton.styleFrom(
-                        backgroundColor: context.colors.surface,
-                        side: BorderSide(color: context.colors.border),
-                        fixedSize: const Size.square(44),
-                      ),
-                      icon: Badge(
-                        isLabelVisible: unread > 0,
-                        label: Text(unread > 99 ? '99+' : '$unread'),
-                        child: Icon(
-                          Icons.notifications_none,
-                          color: context.colors.text,
+                    if (menuConfiguration.notifications) ...[
+                      IconButton.outlined(
+                        onPressed: () =>
+                            context.pushNamed(AppRoutes.notifications),
+                        tooltip: 'Centro notifiche',
+                        style: IconButton.styleFrom(
+                          backgroundColor: context.colors.surface,
+                          side: BorderSide(color: context.colors.border),
+                          fixedSize: const Size.square(44),
+                        ),
+                        icon: Badge(
+                          isLabelVisible: unread > 0,
+                          label: Text(unread > 99 ? '99+' : '$unread'),
+                          child: Icon(
+                            Icons.notifications_none,
+                            color: context.colors.text,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
+                      const SizedBox(width: 8),
+                    ],
                     IconButton.outlined(
                       onPressed: () => context.goNamed(AppRoutes.settings),
                       tooltip: 'Impostazioni',
