@@ -31,7 +31,7 @@ Tema chiaro e scuro: l'app segue l'impostazione del sistema. I colori sono token
 
 ## Navigazione
 
-Barra in basso con 4 tab: **Home**, **Prenota**, **Partite**, **Profilo**. Stile "a incavo" (template B scelto): la tab attiva sale in un cerchio rosso che galleggia sopra un incavo della barra, con il nome sotto; le altre mostrano icona e nome. Chat, galleria, lezioni e contatti del sito restano fuori dalla prima versione; news e tornei entrano solo come moduli della Home.
+Barra in basso con 4 tab configurabili per circolo: **Home**, **Prenota**, **Partite**, **Profilo**. Stile "a incavo" (template B scelto): la tab attiva sale in un cerchio rosso che galleggia sopra un incavo della barra, con il nome sotto; le altre mostrano icona e nome. Il menu secondario espone, quando abilitate dall’admin web, **Tornei**, **Classifiche**, **Lezioni**, **Gallery**, **Centro notifiche** e **Informazioni sul circolo**.
 
 ## 1. Home (`01-dashboard.html`)
 

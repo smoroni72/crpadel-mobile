@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../app_menu/domain/app_menu_configuration.dart';
+import '../../app_menu/presentation/app_menu_provider.dart';
 import '../../notifications/presentation/notifications_provider.dart';
 
 class ExploreMenuScreen extends ConsumerWidget {
@@ -12,34 +14,43 @@ class ExploreMenuScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unread = ref.watch(unreadNotificationsProvider).value ?? 0;
+    final configuration =
+        ref.watch(appMenuConfigurationProvider).value ??
+        AppMenuConfiguration.allEnabled;
     final items = <_MenuItem>[
-      const _MenuItem(
-        'Tornei',
-        Icons.emoji_events_outlined,
-        AppRoutes.tournaments,
-      ),
-      const _MenuItem(
-        'Classifiche',
-        Icons.leaderboard_outlined,
-        AppRoutes.rankings,
-      ),
-      const _MenuItem('Lezioni', Icons.school_outlined, AppRoutes.lessons),
-      const _MenuItem(
-        'Gallery',
-        Icons.photo_library_outlined,
-        AppRoutes.gallery,
-      ),
-      _MenuItem(
-        'Centro notifiche',
-        Icons.notifications_none,
-        AppRoutes.notifications,
-        badge: unread,
-      ),
-      const _MenuItem(
-        'Informazioni sul circolo',
-        Icons.location_on_outlined,
-        AppRoutes.clubInfo,
-      ),
+      if (configuration.tournaments)
+        const _MenuItem(
+          'Tornei',
+          Icons.emoji_events_outlined,
+          AppRoutes.tournaments,
+        ),
+      if (configuration.rankings)
+        const _MenuItem(
+          'Classifiche',
+          Icons.leaderboard_outlined,
+          AppRoutes.rankings,
+        ),
+      if (configuration.lessons)
+        const _MenuItem('Lezioni', Icons.school_outlined, AppRoutes.lessons),
+      if (configuration.gallery)
+        const _MenuItem(
+          'Gallery',
+          Icons.photo_library_outlined,
+          AppRoutes.gallery,
+        ),
+      if (configuration.notifications)
+        _MenuItem(
+          'Centro notifiche',
+          Icons.notifications_none,
+          AppRoutes.notifications,
+          badge: unread,
+        ),
+      if (configuration.clubInfo)
+        const _MenuItem(
+          'Informazioni sul circolo',
+          Icons.location_on_outlined,
+          AppRoutes.clubInfo,
+        ),
     ];
     return Scaffold(
       appBar: AppBar(title: const Text('Menu')),

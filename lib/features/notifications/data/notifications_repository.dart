@@ -13,6 +13,8 @@ abstract interface class NotificationsRepository {
   Future<int> unreadCount();
   Future<void> markRead(String id);
   Future<void> markAllRead();
+  Future<void> delete(String id);
+  Future<void> deleteAll();
 }
 
 class ApiNotificationsRepository implements NotificationsRepository {
@@ -43,4 +45,12 @@ class ApiNotificationsRepository implements NotificationsRepository {
   @override
   Future<void> markAllRead() async =>
       _api.post('/communications/me/notifications/read-all');
+
+  @override
+  Future<void> delete(String id) async =>
+      _api.delete('/communications/me/notifications/$id');
+
+  @override
+  Future<void> deleteAll() async =>
+      _api.delete('/communications/me/notifications');
 }

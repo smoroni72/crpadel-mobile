@@ -1,19 +1,52 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_theme.dart';
+import '../features/app_menu/domain/app_menu_configuration.dart';
 
 class AppTab {
-  const AppTab(this.label, this.icon, this.selectedIcon);
+  const AppTab(
+    this.label,
+    this.icon,
+    this.selectedIcon,
+    this.feature,
+    this.branchIndex,
+  );
   final String label;
   final IconData icon;
   final IconData selectedIcon;
+  final AppMenuFeature feature;
+  final int branchIndex;
 }
 
 const appTabs = [
-  AppTab('Home', Icons.home_outlined, Icons.home_rounded),
-  AppTab('Prenota', Icons.calendar_month_outlined, Icons.calendar_month),
-  AppTab('Partite', Icons.sports_tennis_outlined, Icons.sports_tennis),
-  AppTab('Profilo', Icons.person_outline, Icons.person_rounded),
+  AppTab(
+    'Home',
+    Icons.home_outlined,
+    Icons.home_rounded,
+    AppMenuFeature.home,
+    0,
+  ),
+  AppTab(
+    'Prenota',
+    Icons.calendar_month_outlined,
+    Icons.calendar_month,
+    AppMenuFeature.bookings,
+    1,
+  ),
+  AppTab(
+    'Partite',
+    Icons.sports_tennis_outlined,
+    Icons.sports_tennis,
+    AppMenuFeature.matches,
+    2,
+  ),
+  AppTab(
+    'Profilo',
+    Icons.person_outline,
+    Icons.person_rounded,
+    AppMenuFeature.profile,
+    3,
+  ),
 ];
 
 /// Barra in basso "a incavo" (template B): la tab attiva sale in un cerchio
@@ -23,10 +56,12 @@ class AppBottomBar extends StatelessWidget {
     super.key,
     required this.currentIndex,
     required this.onSelected,
+    this.tabs = appTabs,
   });
 
   final int currentIndex;
   final ValueChanged<int> onSelected;
+  final List<AppTab> tabs;
 
   /// Spazio sopra la barra occupato da metà cerchio.
   static const _overlap = 28.0;
@@ -44,7 +79,7 @@ class AppBottomBar extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final itemWidth =
-              (constraints.maxWidth - 2 * _sidePadding) / appTabs.length;
+              (constraints.maxWidth - 2 * _sidePadding) / tabs.length;
           double centerOf(double index) =>
               _sidePadding + itemWidth * (index + 0.5);
           return TweenAnimationBuilder<double>(
@@ -66,14 +101,14 @@ class AppBottomBar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  for (var i = 0; i < appTabs.length; i++)
+                  for (var i = 0; i < tabs.length; i++)
                     Positioned(
                       left: _sidePadding + itemWidth * i,
                       top: _overlap,
                       width: itemWidth,
                       height: _barHeight,
                       child: _TabButton(
-                        tab: appTabs[i],
+                        tab: tabs[i],
                         selected: i == currentIndex,
                         onTap: () => onSelected(i),
                       ),
@@ -92,7 +127,7 @@ class AppBottomBar extends StatelessWidget {
                         child: AnimatedSwitcher(
                           duration: _duration,
                           child: Icon(
-                            appTabs[currentIndex].selectedIcon,
+                            tabs[currentIndex].selectedIcon,
                             key: ValueKey(currentIndex),
                             color: colors.onPrimary,
                             size: 24,

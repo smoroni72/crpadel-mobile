@@ -11,6 +11,8 @@ import '../../../core/utils/dates.dart';
 import '../../../core/utils/colors.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../app_menu/domain/app_menu_configuration.dart';
+import '../../app_menu/presentation/app_menu_provider.dart';
 import '../../bookings/presentation/upcoming_bookings_provider.dart';
 import '../../bookings/presentation/widgets/booking_card.dart';
 import '../../matches/presentation/day_matches_provider.dart';
@@ -82,15 +84,20 @@ class _RankingSpotlight extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ranking = ref.watch(homeLeaderboardProvider);
+    final configuration =
+        ref.watch(appMenuConfigurationProvider).value ??
+        AppMenuConfiguration.allEnabled;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SectionHeader(
           'I migliori del momento',
-          action: TextButton(
-            onPressed: () => context.pushNamed(AppRoutes.rankings),
-            child: const Text('Vedi classifica'),
-          ),
+          action: configuration.rankings
+              ? TextButton(
+                  onPressed: () => context.pushNamed(AppRoutes.rankings),
+                  child: const Text('Vedi classifica'),
+                )
+              : null,
         ),
         Text(
           'Podio e classifica ufficiale del circolo',
@@ -567,6 +574,9 @@ class _Header extends ConsumerWidget {
     final colors = context.colors;
     final firstName = user?.fullName.trim().split(' ').first ?? '';
     final unread = ref.watch(unreadNotificationsProvider).value ?? 0;
+    final configuration =
+        ref.watch(appMenuConfigurationProvider).value ??
+        AppMenuConfiguration.allEnabled;
     return Row(
       children: [
         Expanded(
@@ -586,27 +596,30 @@ class _Header extends ConsumerWidget {
         ),
         const ThemeToggleButton(),
         const SizedBox(width: 8),
-        IconButton.outlined(
-          onPressed: () => context.pushNamed(AppRoutes.notifications),
-          tooltip: 'Notifiche',
-          style: IconButton.styleFrom(
-            backgroundColor: colors.surface,
-            side: BorderSide(color: colors.border),
-            fixedSize: const Size.square(44),
+        if (configuration.notifications) ...[
+          IconButton.outlined(
+            onPressed: () => context.pushNamed(AppRoutes.notifications),
+            tooltip: 'Notifiche',
+            style: IconButton.styleFrom(
+              backgroundColor: colors.surface,
+              side: BorderSide(color: colors.border),
+              fixedSize: const Size.square(44),
+            ),
+            icon: Badge(
+              isLabelVisible: unread > 0,
+              label: Text(unread > 99 ? '99+' : '$unread'),
+              child: Icon(Icons.notifications_none, color: colors.text),
+            ),
           ),
-          icon: Badge(
-            isLabelVisible: unread > 0,
-            label: Text(unread > 99 ? '99+' : '$unread'),
-            child: Icon(Icons.notifications_none, color: colors.text),
+          const SizedBox(width: 8),
+        ],
+        if (configuration.hasExploreItems)
+          IconButton.filled(
+            onPressed: () => context.pushNamed(AppRoutes.exploreMenu),
+            tooltip: 'Menu',
+            style: IconButton.styleFrom(fixedSize: const Size.square(44)),
+            icon: const Icon(Icons.menu),
           ),
-        ),
-        const SizedBox(width: 8),
-        IconButton.filled(
-          onPressed: () => context.pushNamed(AppRoutes.exploreMenu),
-          tooltip: 'Menu',
-          style: IconButton.styleFrom(fixedSize: const Size.square(44)),
-          icon: const Icon(Icons.menu),
-        ),
       ],
     );
   }

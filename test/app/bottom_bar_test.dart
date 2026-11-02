@@ -1,5 +1,6 @@
 import 'package:crpadel_mobile/app/bottom_bar.dart';
 import 'package:crpadel_mobile/core/theme/app_theme.dart';
+import 'package:crpadel_mobile/features/app_menu/domain/app_menu_configuration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -8,6 +9,7 @@ void main() {
     WidgetTester tester, {
     required ThemeData theme,
     int index = 0,
+    List<AppTab> tabs = appTabs,
   }) async {
     final taps = <int>[];
     await tester.pumpWidget(
@@ -17,6 +19,7 @@ void main() {
           bottomNavigationBar: AppBottomBar(
             currentIndex: index,
             onSelected: taps.add,
+            tabs: tabs,
           ),
         ),
       ),
@@ -54,5 +57,27 @@ void main() {
     await pumpBar(tester, theme: AppTheme.dark(), index: 3);
     expect(tester.takeException(), isNull);
     expect(find.byIcon(Icons.person_rounded), findsOneWidget);
+  });
+
+  testWidgets('mostra soltanto le tab abilitate', (tester) async {
+    final taps = await pumpBar(
+      tester,
+      theme: AppTheme.light(),
+      tabs: const [
+        AppTab('Home', Icons.home_outlined, Icons.home, AppMenuFeature.home, 0),
+        AppTab(
+          'Profilo',
+          Icons.person_outline,
+          Icons.person,
+          AppMenuFeature.profile,
+          3,
+        ),
+      ],
+    );
+
+    expect(find.text('Prenota'), findsNothing);
+    expect(find.text('Partite'), findsNothing);
+    await tester.tap(find.text('Profilo'));
+    expect(taps, [1]);
   });
 }

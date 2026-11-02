@@ -1,5 +1,8 @@
 import 'package:crpadel_mobile/app/app.dart';
 import 'package:crpadel_mobile/features/explore/presentation/explore_menu_screen.dart';
+import 'package:crpadel_mobile/features/app_menu/domain/app_menu_configuration.dart';
+import 'package:crpadel_mobile/features/app_menu/presentation/app_menu_provider.dart';
+import 'package:crpadel_mobile/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,5 +43,35 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
+  });
+
+  testWidgets('nasconde le sezioni disattivate dall’admin', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appMenuConfigurationProvider.overrideWith(
+            (_) async => const AppMenuConfiguration(
+              tournaments: false,
+              lessons: false,
+              gallery: false,
+              notifications: false,
+            ),
+          ),
+        ],
+        retry: (_, _) => null,
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const ExploreMenuScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Classifiche'), findsOneWidget);
+    expect(find.text('Informazioni sul circolo'), findsOneWidget);
+    expect(find.text('Tornei'), findsNothing);
+    expect(find.text('Lezioni'), findsNothing);
+    expect(find.text('Gallery'), findsNothing);
+    expect(find.text('Centro notifiche'), findsNothing);
   });
 }
