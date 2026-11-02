@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   setUpAll(() => initializeDateFormatting('it_IT'));
@@ -56,6 +57,7 @@ void main() {
     expect(find.text('Generale'), findsOneWidget);
     expect(find.text('Mensile'), findsOneWidget);
     expect(find.text('Classifica generale'), findsOneWidget);
+    expect(find.text('1180.0'), findsOneWidget);
     expect(find.text('Classifica mensile'), findsNothing);
 
     await tester.tap(find.text('Mensile'));
@@ -75,5 +77,11 @@ void main() {
 
     expect(find.text('Seleziona il mese'), findsOneWidget);
     expect(find.byType(CalendarDatePicker), findsNothing);
+    final now = DateTime.now();
+    final futureLabel = DateFormat(
+      'MMMM yyyy',
+      'it_IT',
+    ).format(DateTime(now.year + 1, now.month));
+    expect(find.text(futureLabel), findsNothing);
   });
 }

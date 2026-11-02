@@ -17,8 +17,17 @@ class RankingsScreen extends ConsumerStatefulWidget {
 enum _RankingView { general, monthly }
 
 class _RankingsScreenState extends ConsumerState<RankingsScreen> {
-  late DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
+  late DateTime _month;
   _RankingView _view = _RankingView.general;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    // Il giocatore del mese si apre sull'ultimo mese concluso. In questo modo
+    // nei primi giorni del mese non viene mostrata una classifica ancora vuota.
+    _month = DateTime(now.year, now.month - 1);
+  }
 
   String get _monthKey => DateFormat('yyyy-MM').format(_month);
 
@@ -34,7 +43,9 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   Future<void> _selectMonth() async {
     final now = DateTime.now();
     final firstMonth = DateTime(now.year - 2);
-    final lastMonth = DateTime(now.year + 1, 12);
+    // Non proporre mesi futuri: non possono contenere punti ranking e portano
+    // soltanto a una schermata vuota.
+    final lastMonth = DateTime(now.year, now.month);
     final months = <DateTime>[];
     for (
       var month = lastMonth;
