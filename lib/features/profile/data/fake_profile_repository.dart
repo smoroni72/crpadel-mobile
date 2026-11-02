@@ -19,6 +19,7 @@ class FakeProfileRepository implements ProfileRepository {
       month: '2026-10',
       minimumMatches: 2,
     ),
+    this.decadeRankings = const DecadeRankingResult(),
   }) : lessonList = [...lessons];
 
   ProfileStats profileStats;
@@ -26,6 +27,7 @@ class FakeProfileRepository implements ProfileRepository {
   List<Lesson> lessonList;
   List<PlayerRanking> rankings;
   MonthlyRankingResult monthlyRankings;
+  DecadeRankingResult decadeRankings;
   final cancelledLessons = <String>[];
 
   /// Se impostato, ogni chiamata fallisce con questo errore.
@@ -51,6 +53,12 @@ class FakeProfileRepository implements ProfileRepository {
       minimumMatches: monthlyRankings.minimumMatches,
       players: monthlyRankings.players,
     );
+  }
+
+  @override
+  Future<DecadeRankingResult> decadeLeaderboard({String? periodStart}) async {
+    _check();
+    return decadeRankings;
   }
 
   @override

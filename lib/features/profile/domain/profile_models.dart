@@ -166,6 +166,68 @@ class MonthlyRankingResult {
   MonthlyRanking? get playerOfTheMonth => players.firstOrNull;
 }
 
+class RankingDecadePeriod {
+  const RankingDecadePeriod({required this.start, required this.end});
+
+  final String start;
+  final String end;
+
+  factory RankingDecadePeriod.fromJson(Map<String, dynamic> json) =>
+      RankingDecadePeriod(
+        start: json['period_start'] as String? ?? '',
+        end: json['period_end'] as String? ?? '',
+      );
+}
+
+class DecadeRankingPlayer {
+  const DecadeRankingPlayer({
+    required this.playerRef,
+    required this.playerName,
+    required this.position,
+    required this.eloScore,
+    required this.coefficient,
+    this.rankingBandName,
+    this.rankingBandColor,
+  });
+
+  final String playerRef;
+  final String playerName;
+  final int position;
+  final double eloScore;
+  final double coefficient;
+  final String? rankingBandName;
+  final String? rankingBandColor;
+
+  factory DecadeRankingPlayer.fromJson(Map<String, dynamic> json) =>
+      DecadeRankingPlayer(
+        playerRef: json['player_ref'] as String? ?? '',
+        playerName: json['player_name'] as String? ?? '',
+        position: (json['position'] as num?)?.toInt() ?? 0,
+        eloScore: _number(json['elo_score']),
+        coefficient: _number(json['coefficient']),
+        rankingBandName: json['ranking_band_name'] as String?,
+        rankingBandColor: json['ranking_band_color'] as String?,
+      );
+}
+
+class DecadeRankingResult {
+  const DecadeRankingResult({
+    this.periodStart = '',
+    this.periodEnd = '',
+    this.frozenAt = '',
+    this.minimumMatches = 0,
+    this.availablePeriods = const [],
+    this.players = const [],
+  });
+
+  final String periodStart;
+  final String periodEnd;
+  final String frozenAt;
+  final int minimumMatches;
+  final List<RankingDecadePeriod> availablePeriods;
+  final List<DecadeRankingPlayer> players;
+}
+
 double _number(Object? value) => switch (value) {
   num number => number.toDouble(),
   String text => double.tryParse(text) ?? 0,

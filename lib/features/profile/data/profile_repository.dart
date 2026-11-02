@@ -15,6 +15,8 @@ abstract interface class ProfileRepository {
 
   Future<MonthlyRankingResult> monthlyLeaderboard({required String month});
 
+  Future<DecadeRankingResult> decadeLeaderboard({String? periodStart});
+
   /// Statistiche dell'utente in classifica.
   Future<ProfileStats> stats({required String userId, required String email});
 
@@ -65,6 +67,34 @@ class ApiProfileRepository implements ProfileRepository {
       players: (body['data'] as List<dynamic>? ?? const [])
           .cast<Map<String, dynamic>>()
           .map(MonthlyRanking.fromJson)
+          .toList(),
+    );
+  }
+
+  @override
+  Future<DecadeRankingResult> decadeLeaderboard({String? periodStart}) async {
+    final response = await _api.get(
+      '/rankings/decades',
+      query: {
+        if (periodStart != null && periodStart.isNotEmpty)
+          'period_start': periodStart,
+      },
+    );
+    final body = response.data as Map<String, dynamic>;
+    final meta = body['meta'] as Map<String, dynamic>? ?? const {};
+    return DecadeRankingResult(
+      periodStart: meta['period_start'] as String? ?? '',
+      periodEnd: meta['period_end'] as String? ?? '',
+      frozenAt: meta['frozen_at'] as String? ?? '',
+      minimumMatches: (meta['minimum_matches'] as num?)?.toInt() ?? 0,
+      availablePeriods:
+          (meta['available_periods'] as List<dynamic>? ?? const [])
+              .cast<Map<String, dynamic>>()
+              .map(RankingDecadePeriod.fromJson)
+              .toList(),
+      players: (body['data'] as List<dynamic>? ?? const [])
+          .cast<Map<String, dynamic>>()
+          .map(DecadeRankingPlayer.fromJson)
           .toList(),
     );
   }
