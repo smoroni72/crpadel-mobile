@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 void main() {
   setUpAll(() => initializeDateFormatting('it_IT'));
 
-  testWidgets('permette di scegliere classifica generale e mensile', (
+  testWidgets('permette di scegliere classifica generale, mensile e decadi', (
     tester,
   ) async {
     final repository = FakeProfileRepository(
@@ -41,6 +41,27 @@ void main() {
           ),
         ],
       ),
+      decadeRankings: const DecadeRankingResult(
+        periodStart: '2026-10-21',
+        periodEnd: '2026-10-31',
+        frozenAt: '2026-10-20',
+        minimumMatches: 7,
+        availablePeriods: [
+          RankingDecadePeriod(start: '2026-10-21', end: '2026-10-31'),
+          RankingDecadePeriod(start: '2026-10-11', end: '2026-10-20'),
+        ],
+        players: [
+          DecadeRankingPlayer(
+            playerRef: 'p1',
+            playerName: 'Mario Rossi',
+            position: 1,
+            eloScore: 1175.4,
+            coefficient: 7,
+            rankingBandName: 'Viola',
+            rankingBandColor: '#CC00DD',
+          ),
+        ],
+      ),
     );
     await tester.pumpWidget(
       ProviderScope(
@@ -56,6 +77,7 @@ void main() {
 
     expect(find.text('Generale'), findsOneWidget);
     expect(find.text('Mensile'), findsOneWidget);
+    expect(find.text('Decadi'), findsOneWidget);
     expect(find.text('Classifica generale'), findsOneWidget);
     expect(find.text('1180.0'), findsOneWidget);
     expect(find.text('Classifica mensile'), findsNothing);
@@ -83,5 +105,22 @@ void main() {
       'it_IT',
     ).format(DateTime(now.year + 1, now.month));
     expect(find.text(futureLabel), findsNothing);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Decadi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Classifiche delle decadi'), findsOneWidget);
+    expect(
+      find.text('Fotografia ufficiale congelata al 20 ottobre 2026'),
+      findsOneWidget,
+    );
+    expect(find.text('Viola · coeff. 7,00'), findsOneWidget);
+
+    await tester.tap(find.text('21 ott – 31 ottobre 2026'));
+    await tester.pumpAndSettle();
+    expect(find.text('Seleziona la decade'), findsOneWidget);
+    expect(find.text('11 ott – 20 ottobre 2026'), findsOneWidget);
   });
 }

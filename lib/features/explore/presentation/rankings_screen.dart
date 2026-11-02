@@ -14,11 +14,12 @@ class RankingsScreen extends ConsumerStatefulWidget {
   ConsumerState<RankingsScreen> createState() => _RankingsScreenState();
 }
 
-enum _RankingView { general, monthly }
+enum _RankingView { general, monthly, decades }
 
 class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   late DateTime _month;
   _RankingView _view = _RankingView.general;
+  String? _decadeStart;
 
   @override
   void initState() {
@@ -37,6 +38,10 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
         final _ = await ref.refresh(fullRankingsProvider.future);
       case _RankingView.monthly:
         final _ = await ref.refresh(monthlyRankingsProvider(_monthKey).future);
+      case _RankingView.decades:
+        final _ = await ref.refresh(
+          decadeRankingsProvider(_decadeStart).future,
+        );
     }
   }
 
@@ -103,6 +108,56 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
     }
   }
 
+  Future<void> _selectDecade(DecadeRankingResult result) async {
+    final selected = await showModalBottomSheet<RankingDecadePeriod>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.62,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                child: Text(
+                  'Seleziona la decade',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: result.availablePeriods.length,
+                  itemBuilder: (context, index) {
+                    final period = result.availablePeriods[index];
+                    final isSelected = period.start == result.periodStart;
+                    return ListTile(
+                      leading: const Icon(Icons.history),
+                      title: Text(_periodLabel(period.start, period.end)),
+                      subtitle: Text(
+                        'Fotografia congelata al ${_dateLabel(_dayBefore(period.start))}',
+                      ),
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check_circle,
+                              color: context.colors.primaryText,
+                            )
+                          : null,
+                      selected: isSelected,
+                      onTap: () => Navigator.pop(context, period),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (selected != null) setState(() => _decadeStart = selected.start);
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Classifiche')),
@@ -124,6 +179,11 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                 value: _RankingView.monthly,
                 icon: Icon(Icons.calendar_month_outlined, size: 18),
                 label: Text('Mensile'),
+              ),
+              ButtonSegment(
+                value: _RankingView.decades,
+                icon: Icon(Icons.history, size: 18),
+                label: Text('Decadi'),
               ),
             ],
             selected: {_view},
@@ -167,7 +227,7 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                       ],
                     ),
             ),
-          ] else ...[
+          ] else if (_view == _RankingView.monthly) ...[
             _MonthlyHeader(month: _month, onSelectMonth: _selectMonth),
             const SizedBox(height: 12),
             AsyncValueView(
@@ -176,7 +236,157 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
               onRetry: () => ref.invalidate(monthlyRankingsProvider(_monthKey)),
               data: (result) => _MonthlyRankingSection(result: result),
             ),
+          ] else ...[
+            AsyncValueView(
+              value: ref.watch(decadeRankingsProvider(_decadeStart)),
+              errorText: 'Non riesco a caricare le classifiche delle decadi',
+              onRetry: () =>
+                  ref.invalidate(decadeRankingsProvider(_decadeStart)),
+              data: (result) => _DecadeRankingSection(
+                result: result,
+                onSelectPeriod: () => _selectDecade(result),
+              ),
+            ),
           ],
+        ],
+      ),
+    ),
+  );
+}
+
+class _DecadeRankingSection extends StatelessWidget {
+  const _DecadeRankingSection({
+    required this.result,
+    required this.onSelectPeriod,
+  });
+
+  final DecadeRankingResult result;
+  final VoidCallback onSelectPeriod;
+
+  @override
+  Widget build(BuildContext context) {
+    if (result.periodStart.isEmpty) {
+      return const Center(
+        child: Text('Nessuna classifica storica disponibile'),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Classifiche delle decadi',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Consulta posizione, colore e coefficiente congelati nel periodo',
+          style: TextStyle(color: context.colors.textSecondary),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: onSelectPeriod,
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(50),
+            alignment: Alignment.centerLeft,
+          ),
+          icon: const Icon(Icons.history, size: 19),
+          label: Text(_periodLabel(result.periodStart, result.periodEnd)),
+        ),
+        const SizedBox(height: 10),
+        Card(
+          color: context.colors.primaryTint,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Fotografia ufficiale congelata al ${_dateLabel(result.frozenAt)}',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Soglia di visibilità: ${result.minimumMatches} partite. Colori e coefficienti restano validi per tutta la decade.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (result.players.isEmpty)
+          const Center(child: Text('Nessun giocatore in questa classifica'))
+        else
+          for (var index = 0; index < result.players.length; index++) ...[
+            _DecadeRankingRow(
+              player: result.players[index],
+              position: result.players[index].position > 0
+                  ? result.players[index].position
+                  : index + 1,
+            ),
+            if (index < result.players.length - 1) const SizedBox(height: 8),
+          ],
+      ],
+    );
+  }
+}
+
+class _DecadeRankingRow extends StatelessWidget {
+  const _DecadeRankingRow({required this.player, required this.position});
+
+  final DecadeRankingPlayer player;
+  final int position;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 38,
+            child: Text(
+              '#$position',
+              style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+          Container(
+            width: 13,
+            height: 13,
+            decoration: BoxDecoration(
+              color: _color(player.rankingBandColor),
+              shape: BoxShape.circle,
+              border: Border.all(color: context.colors.border),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  player.playerName,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                Text(
+                  '${player.rankingBandName ?? 'Senza fascia'} · coeff. ${player.coefficient.toStringAsFixed(2).replaceAll('.', ',')}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            player.eloScore.toStringAsFixed(1),
+            style: context.fonts
+                .monoStyle(fontWeight: FontWeight.w700)
+                .copyWith(color: context.colors.primaryText),
+          ),
         ],
       ),
     ),
@@ -415,6 +625,30 @@ class _RankingRow extends StatelessWidget {
 String _monthLabel(DateTime value) {
   final label = DateFormat('MMMM yyyy', 'it_IT').format(value);
   return '${label[0].toUpperCase()}${label.substring(1)}';
+}
+
+String _periodLabel(String start, String end) {
+  final startDate = DateTime.tryParse(start);
+  final endDate = DateTime.tryParse(end);
+  if (startDate == null || endDate == null) return '$start – $end';
+  final startLabel = DateFormat('d MMM', 'it_IT').format(startDate);
+  final endLabel = DateFormat('d MMMM yyyy', 'it_IT').format(endDate);
+  return '$startLabel – $endLabel';
+}
+
+String _dateLabel(String value) {
+  final date = DateTime.tryParse(value);
+  return date == null ? value : DateFormat('d MMMM yyyy', 'it_IT').format(date);
+}
+
+String _dayBefore(String value) {
+  final date = DateTime.tryParse(value);
+  return date == null
+      ? value
+      : date
+            .subtract(const Duration(days: 1))
+            .toIso8601String()
+            .substring(0, 10);
 }
 
 String _points(double value) => NumberFormat('0.0', 'it_IT').format(value);

@@ -205,6 +205,52 @@ void main() {
     expect(adapter.requests.single.path, '/rankings/monthly');
   });
 
+  test('classifica decadi: legge periodi, fotografia e coefficienti', () async {
+    final adapter = FakeAdapter(
+      (_) => (
+        200,
+        {
+          'data': [
+            {
+              'player_ref': 'p1',
+              'player_name': 'Mario Rossi',
+              'position': 3,
+              'elo_score': 1172.4,
+              'ranking_band_name': 'Blu',
+              'ranking_band_color': '#0066FF',
+              'coefficient': 6.5,
+            },
+          ],
+          'meta': {
+            'period_start': '2026-10-21',
+            'period_end': '2026-10-31',
+            'frozen_at': '2026-10-20',
+            'minimum_matches': 7,
+            'available_periods': [
+              {'period_start': '2026-10-21', 'period_end': '2026-10-31'},
+              {'period_start': '2026-10-11', 'period_end': '2026-10-20'},
+            ],
+          },
+        },
+      ),
+    );
+    final repository = ApiProfileRepository(fakeApiClient(adapter));
+
+    final result = await repository.decadeLeaderboard(
+      periodStart: '2026-10-21',
+    );
+
+    expect(result.frozenAt, '2026-10-20');
+    expect(result.minimumMatches, 7);
+    expect(result.availablePeriods, hasLength(2));
+    expect(result.players.single.rankingBandName, 'Blu');
+    expect(result.players.single.coefficient, 6.5);
+    expect(adapter.requests.single.path, '/rankings/decades');
+    expect(adapter.requests.single.queryParameters, {
+      'period_start': '2026-10-21',
+    });
+  });
+
   test('storico prenotazioni e lezioni dalla più recente', () async {
     final adapter = FakeAdapter((options) {
       if (options.path == '/lessons') {

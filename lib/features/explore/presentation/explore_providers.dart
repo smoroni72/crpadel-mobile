@@ -29,6 +29,13 @@ final monthlyRankingsProvider =
           ref.read(profileRepositoryProvider).monthlyLeaderboard(month: month),
     );
 
+final decadeRankingsProvider =
+    FutureProvider.family<DecadeRankingResult, String?>(
+      (ref, periodStart) => ref
+          .read(profileRepositoryProvider)
+          .decadeLeaderboard(periodStart: periodStart),
+    );
+
 final publicCoachesProvider = FutureProvider<List<Coach>>(
   (ref) => ref.read(bookingsRepositoryProvider).coaches(),
 );
