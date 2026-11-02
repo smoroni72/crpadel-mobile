@@ -69,5 +69,11 @@ void main() {
     );
     expect(find.text('Mario Rossi'), findsWidgets);
     expect(find.text('Classifica generale'), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.calendar_month_outlined).last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Seleziona il mese'), findsOneWidget);
+    expect(find.byType(CalendarDatePicker), findsNothing);
   });
 }

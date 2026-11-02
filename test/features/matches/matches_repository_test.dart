@@ -97,5 +97,27 @@ void main() {
       adapter.requests.single.queryParameters['organizer_email'],
       'mario@example.com',
     );
+    expect(adapter.requests.single.queryParameters['limit'], 500);
+  });
+
+  test('carica in una sola richiesta i giorni con partite', () async {
+    final adapter = FakeAdapter(
+      (_) => (
+        200,
+        {
+          'data': [matchJson],
+        },
+      ),
+    );
+    final repository = ApiMatchesRepository(fakeApiClient(adapter));
+
+    await repository.between(DateTime(2026, 10, 5), DateTime(2026, 10, 9));
+
+    expect(adapter.requests.single.queryParameters, {
+      'from': '2026-10-05',
+      'to': '2026-10-09',
+      'sort': 'date',
+      'limit': 500,
+    });
   });
 }

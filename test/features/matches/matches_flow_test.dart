@@ -7,6 +7,8 @@ import 'package:crpadel_mobile/features/bookings/presentation/book_screen.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/complete_booking_screen.dart';
 import 'package:crpadel_mobile/features/home/presentation/home_screen.dart';
 import 'package:crpadel_mobile/features/matches/presentation/widgets/player_ranking_marker.dart';
+import 'package:crpadel_mobile/features/app_menu/domain/app_menu_configuration.dart';
+import 'package:crpadel_mobile/features/app_menu/presentation/app_menu_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -226,6 +228,47 @@ void main() {
     expect(find.text('CAMPO 2'), findsOneWidget);
     expect(find.text('CAMPO 1'), findsOneWidget);
     expect(find.text('CAMPO 3'), findsNothing);
+    expect(find.text('Dal'), findsOneWidget);
+    expect(find.text('Al'), findsOneWidget);
+  });
+
+  testWidgets('evidenzia con un pallino i giorni che hanno partite', (
+    tester,
+  ) async {
+    await openMatches(tester, backendWith());
+    expect(find.byKey(const ValueKey('matches-2026-10-07')), findsOneWidget);
+  });
+
+  testWidgets('nasconde Crea partita quando il circolo la disattiva', (
+    tester,
+  ) async {
+    final backend = backendWith();
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...backend.overrides,
+          appMenuConfigurationProvider.overrideWith(
+            (ref) async => const AppMenuConfiguration(createMatches: false),
+          ),
+        ],
+        retry: (_, _) => null,
+        child: const CrPadelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AppBottomBar),
+        matching: find.text('Partite'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MatchesScreen), findsOneWidget);
+    expect(find.text('Crea partita'), findsNothing);
   });
 
   testWidgets('Crea partita apre la scelta del campo già in modalità partita', (

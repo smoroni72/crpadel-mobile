@@ -31,6 +31,15 @@ class FakeMatchesRepository implements MatchesRepository {
   }
 
   @override
+  Future<List<PadelMatch>> between(DateTime from, DateTime to) async {
+    if (error != null) throw error!;
+    return matches
+        .where((match) => !match.date.isBefore(from) && !match.date.isAfter(to))
+        .toList()
+      ..sort((a, b) => a.start.compareTo(b.start));
+  }
+
+  @override
   Future<List<PadelMatch>> mine({required String email}) async {
     if (error != null) throw error!;
     return matches.where((m) => m.involves(myUserId)).toList();

@@ -11,12 +11,14 @@ class DayStrip extends StatelessWidget {
     required this.onSelected,
     required this.onPrevious,
     required this.onNext,
+    this.matchDates = const {},
   });
 
   final DateTime selected;
   final ValueChanged<DateTime> onSelected;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
+  final Set<String> matchDates;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class DayStrip extends StatelessWidget {
             child: _DayChip(
               day: day,
               selected: day == selected,
+              hasMatches: matchDates.contains(Dates.api(day)),
               onTap: () => onSelected(day),
             ),
           ),
@@ -54,11 +57,13 @@ class _DayChip extends StatelessWidget {
   const _DayChip({
     required this.day,
     required this.selected,
+    required this.hasMatches,
     required this.onTap,
   });
 
   final DateTime day;
   final bool selected;
+  final bool hasMatches;
   final VoidCallback onTap;
 
   @override
@@ -96,6 +101,23 @@ class _DayChip extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: selected ? colors.onPrimary : colors.text,
                   ),
+                ),
+                SizedBox(
+                  height: 7,
+                  child: hasMatches
+                      ? Container(
+                          key: ValueKey('matches-${Dates.api(day)}'),
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                            border: selected
+                                ? Border.all(color: colors.onPrimary, width: 1)
+                                : null,
+                          ),
+                        )
+                      : null,
                 ),
               ],
             ),

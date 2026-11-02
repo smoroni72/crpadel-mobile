@@ -21,6 +21,7 @@ void main() {
             'gallery': false,
             'notifications': true,
             'club_info': true,
+            'create_matches': false,
           },
         },
       ),
@@ -35,11 +36,13 @@ void main() {
     expect(configuration.matches, isFalse);
     expect(configuration.rankings, isTrue);
     expect(configuration.clubInfo, isTrue);
+    expect(configuration.createMatches, isFalse);
   });
 
   test('campi non presenti restano attivi per compatibilità', () {
     final configuration = AppMenuConfiguration.fromJson(const {});
     expect(configuration.hasExploreItems, isTrue);
     expect(configuration.bookings, isTrue);
+    expect(configuration.createMatches, isTrue);
   });
 }

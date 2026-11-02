@@ -16,7 +16,7 @@ Fonte: analisi del repository `../CrPadel` (API Fastify, `api/src/routes/*`, mig
 | --- | --- |
 | Accesso | `POST /auth/login`, `/auth/register`, `/auth/forgot-password`, `/auth/resend-verification`, `/auth/refresh`, `/auth/logout`, `/auth/change-password`; `GET /auth/me` |
 | Circolo | `GET /tenancy/current`, `GET /tenancy/clubs`, `GET /courts` |
-| Menu app | `GET /tenancy/mobile-menu` restituisce le voci abilitate per il circolo; la configurazione viene aggiornata dagli amministratori nella webapp |
+| Menu app | `GET /tenancy/mobile-menu` restituisce le voci abilitate per il circolo e il permesso operativo `create_matches`; la configurazione viene aggiornata dagli amministratori nella webapp e il backend applica il blocco anche alle richieste dirette |
 | Pacchetti | `GET /subscriptions/mine` (con `matches_available`) |
 | Le mie prenotazioni | `GET /bookings` (filtrato sull'utente); annullamento `PATCH /bookings/:id` con `{ "status": "cancelled" }` |
 | Griglia campi | `GET /bookings/schedule?date=YYYY-MM-DD&opening_hour=7&closing_hour=23` → righe da 30', stato per campo `free` / `booked` / `match` / `lesson` / `training`, con `is_owner` e `can_use` |

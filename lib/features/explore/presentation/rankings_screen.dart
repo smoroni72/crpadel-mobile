@@ -32,14 +32,60 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   }
 
   Future<void> _selectMonth() async {
-    final selected = await showDatePicker(
+    final now = DateTime.now();
+    final firstMonth = DateTime(now.year - 2);
+    final lastMonth = DateTime(now.year + 1, 12);
+    final months = <DateTime>[];
+    for (
+      var month = lastMonth;
+      !month.isBefore(firstMonth);
+      month = DateTime(month.year, month.month - 1)
+    ) {
+      months.add(month);
+    }
+    final selected = await showModalBottomSheet<DateTime>(
       context: context,
-      initialDate: _month,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(DateTime.now().year + 1, 12, 31),
-      helpText: 'Seleziona un giorno del mese',
-      cancelText: 'Annulla',
-      confirmText: 'Scegli mese',
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.72,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                child: Text(
+                  'Seleziona il mese',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: months.length,
+                  itemBuilder: (context, index) {
+                    final month = months[index];
+                    final selected =
+                        month.year == _month.year &&
+                        month.month == _month.month;
+                    return ListTile(
+                      title: Text(_monthLabel(month)),
+                      trailing: selected
+                          ? Icon(
+                              Icons.check_circle,
+                              color: context.colors.primaryText,
+                            )
+                          : null,
+                      selected: selected,
+                      onTap: () => Navigator.pop(context, month),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
     if (selected != null) {
       setState(() => _month = DateTime(selected.year, selected.month));
@@ -344,9 +390,7 @@ class _RankingRow extends StatelessWidget {
             ),
           ),
           Text(
-            player.eloScore.toStringAsFixed(
-              player.eloScore == player.eloScore.roundToDouble() ? 0 : 1,
-            ),
+            player.eloScore.toStringAsFixed(1),
             style: context.fonts
                 .monoStyle(fontWeight: FontWeight.w700)
                 .copyWith(color: context.colors.primaryText),

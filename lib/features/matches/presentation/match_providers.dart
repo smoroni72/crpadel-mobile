@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
-import '../../../core/providers.dart';
+import '../../../core/utils/dates.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../bookings/presentation/upcoming_bookings_provider.dart';
 import '../data/matches_repository.dart';
@@ -26,20 +26,29 @@ class MineOnlyController extends Notifier<bool> {
   void set(bool value) => state = value;
 }
 
-/// Partite dell'utente da oggi in avanti, dalla più vicina.
-final myUpcomingMatchesProvider = FutureProvider<List<PadelMatch>>((ref) async {
+/// Tutte le partite dell'utente, passate e future.
+final myMatchesProvider = FutureProvider<List<PadelMatch>>((ref) async {
   final user = ref.watch(authControllerProvider).value;
   if (user == null) return const [];
-  final today = dateOnly(ref.read(clockProvider)());
   final matches = await ref
       .read(matchesRepositoryProvider)
       .mine(email: user.email);
-  return matches
-      .where(
-        (m) => m.status != MatchStatus.cancelled && !m.date.isBefore(today),
-      )
-      .toList()
-    ..sort((a, b) => a.start.compareTo(b.start));
+  return matches.where((m) => m.status != MatchStatus.cancelled).toList()
+    ..sort((a, b) => b.start.compareTo(a.start));
+});
+
+/// Giorni con almeno una partita nella striscia visibile.
+final matchDatesProvider = FutureProvider.family<Set<String>, DateTime>((
+  ref,
+  center,
+) async {
+  final from = DateTime(center.year, center.month, center.day - 2);
+  final to = DateTime(center.year, center.month, center.day + 2);
+  final matches = await ref.read(matchesRepositoryProvider).between(from, to);
+  return {
+    for (final match in matches)
+      if (match.status != MatchStatus.cancelled) Dates.api(match.date),
+  };
 });
 
 final matchDetailProvider = FutureProvider.family<PadelMatch, String>(
@@ -101,7 +110,7 @@ class MatchActions {
     _ref
       ..invalidate(matchDetailProvider(matchId))
       ..invalidate(dayMatchesProvider)
-      ..invalidate(myUpcomingMatchesProvider)
+      ..invalidate(myMatchesProvider)
       ..invalidate(upcomingBookingsProvider);
     return null;
   }

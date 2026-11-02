@@ -10,6 +10,7 @@ class AppMenuConfiguration {
     this.gallery = true,
     this.notifications = true,
     this.clubInfo = true,
+    this.createMatches = true,
   });
 
   factory AppMenuConfiguration.fromJson(Map<String, dynamic> json) =>
@@ -24,6 +25,7 @@ class AppMenuConfiguration {
         gallery: json['gallery'] as bool? ?? true,
         notifications: json['notifications'] as bool? ?? true,
         clubInfo: json['club_info'] as bool? ?? true,
+        createMatches: json['create_matches'] as bool? ?? true,
       );
 
   final bool home;
@@ -36,6 +38,10 @@ class AppMenuConfiguration {
   final bool gallery;
   final bool notifications;
   final bool clubInfo;
+
+  /// Permesso operativo separato dalla visibilità della voce Partite.
+  /// Admin e super admin vengono comunque autorizzati dal backend.
+  final bool createMatches;
 
   static const allEnabled = AppMenuConfiguration();
 

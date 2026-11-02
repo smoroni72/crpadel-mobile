@@ -14,6 +14,9 @@ abstract interface class MatchesRepository {
   /// Partite del circolo nel giorno indicato, in ordine di orario.
   Future<List<PadelMatch>> byDate(DateTime day);
 
+  /// Partite comprese nell'intervallo, estremi inclusi.
+  Future<List<PadelMatch>> between(DateTime from, DateTime to);
+
   /// Partite che l'utente organizza o a cui partecipa, dalle più recenti.
   Future<List<PadelMatch>> mine({required String email});
 
@@ -63,12 +66,26 @@ class ApiMatchesRepository implements MatchesRepository {
   }
 
   @override
+  Future<List<PadelMatch>> between(DateTime from, DateTime to) async {
+    final response = await _api.get(
+      '/matches',
+      query: {
+        'from': Dates.api(from),
+        'to': Dates.api(to),
+        'sort': 'date',
+        'limit': 500,
+      },
+    );
+    return _parse(response.data)..sort((a, b) => a.start.compareTo(b.start));
+  }
+
+  @override
   Future<List<PadelMatch>> mine({required String email}) async {
     // Per un giocatore l'API usa l'utente autenticato: include anche le
     // partite in cui è solo partecipante.
     final response = await _api.get(
       '/matches',
-      query: {'organizer_email': email, 'sort': '-date', 'limit': 100},
+      query: {'organizer_email': email, 'sort': '-date', 'limit': 500},
     );
     return _parse(response.data);
   }
