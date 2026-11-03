@@ -7,6 +7,8 @@ import '../features/auth/presentation/auth_controller.dart';
 import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
+import '../features/auth/domain/app_user.dart';
+import '../features/admin/presentation/admin_screens.dart';
 import '../features/bookings/presentation/book_screen.dart';
 import '../features/bookings/presentation/complete_booking_controller.dart';
 import '../features/bookings/presentation/complete_booking_screen.dart';
@@ -125,6 +127,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.clubInfo,
         builder: (_, _) => const ClubInfoScreen(),
       ),
+      GoRoute(
+        path: AppPaths.admin,
+        name: AppRoutes.admin,
+        builder: (_, _) => const AdminHomeScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.adminMatches,
+        name: AppRoutes.adminMatches,
+        builder: (_, _) => const AdminMatchesScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.adminBookings,
+        name: AppRoutes.adminBookings,
+        builder: (_, _) => const AdminBookingsScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.adminPlayers,
+        name: AppRoutes.adminPlayers,
+        builder: (_, _) => const AdminPlayersScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.adminCommunications,
+        name: AppRoutes.adminCommunications,
+        builder: (_, _) => const AdminCommunicationsScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -218,6 +245,11 @@ String? appRedirect({
   }
   final loggedIn = auth.hasValue && auth.value != null;
   if (!loggedIn) return isPublic ? null : AppPaths.login;
+  final user = auth.value;
+  if (location.startsWith(AppPaths.admin) &&
+      (user is! AppUser || !user.isAdmin)) {
+    return AppPaths.home;
+  }
   if (isPublic ||
       location == AppPaths.splash ||
       location == AppPaths.chooseClub) {

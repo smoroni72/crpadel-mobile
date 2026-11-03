@@ -71,9 +71,12 @@ class _Body extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final me = ref.watch(authControllerProvider).value?.id ?? '';
+    final user = ref.watch(authControllerProvider).value;
+    final me = user?.id ?? '';
     final actions = ref.read(matchActionsProvider);
     final organizer = match.isOrganizer(me);
+    final canManage =
+        organizer || (user?.canAccessAdminMenu('matches') ?? false);
     final participant = match.isParticipant(me);
     final open = match.status == MatchStatus.open;
     final colors = context.colors;
@@ -97,6 +100,12 @@ class _Body extends ConsumerWidget {
           if (organizer)
             _Pill(
               text: 'Organizzi tu',
+              background: colors.navy,
+              foreground: colors.onNavy,
+            ),
+          if (!organizer && canManage)
+            _Pill(
+              text: 'Gestione admin',
               background: colors.navy,
               foreground: colors.onNavy,
             ),
@@ -143,7 +152,7 @@ class _Body extends ConsumerWidget {
 
     // Azioni.
     final buttons = <Widget>[];
-    if (organizer && open && match.teamWithFreeSpot != null) {
+    if (canManage && open && match.teamWithFreeSpot != null) {
       buttons.add(
         OutlinedButton.icon(
           onPressed: () async {
@@ -165,7 +174,7 @@ class _Body extends ConsumerWidget {
         ),
       );
     }
-    if (organizer &&
+    if (canManage &&
         (match.status == MatchStatus.pendingResult ||
             match.status == MatchStatus.inProgress)) {
       buttons.add(
@@ -182,7 +191,7 @@ class _Body extends ConsumerWidget {
         ),
       );
     }
-    if (!organizer && participant && open) {
+    if (!canManage && participant && open) {
       buttons.add(
         OutlinedButton(
           style: OutlinedButton.styleFrom(foregroundColor: colors.primaryText),
@@ -203,7 +212,7 @@ class _Body extends ConsumerWidget {
         ),
       );
     }
-    if (!organizer && !participant && match.hasFreeSpots) {
+    if (!canManage && !participant && match.hasFreeSpots) {
       // Si entra direttamente, senza approvazione. Con posto in entrambe le
       // squadre si sceglie dove giocare.
       final teams = [
@@ -226,7 +235,7 @@ class _Body extends ConsumerWidget {
         );
       }
     }
-    if (organizer && open) {
+    if (canManage && open) {
       buttons.add(
         OutlinedButton.icon(
           onPressed: () async {

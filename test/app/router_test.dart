@@ -3,6 +3,7 @@ import 'package:crpadel_mobile/app/bottom_bar.dart';
 import 'package:crpadel_mobile/app/router.dart';
 import 'package:crpadel_mobile/app/routes.dart';
 import 'package:crpadel_mobile/features/auth/data/fake_auth_repository.dart';
+import 'package:crpadel_mobile/features/auth/domain/app_user.dart';
 import 'package:crpadel_mobile/features/auth/presentation/login_screen.dart';
 import 'package:crpadel_mobile/features/auth/presentation/register_screen.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/book_screen.dart';
@@ -79,6 +80,33 @@ void main() {
           auth: const AsyncData(user),
         ),
         AppPaths.home,
+      );
+    });
+
+    test('protegge le pagine admin dal collegamento diretto', () {
+      expect(
+        appRedirect(
+          location: AppPaths.admin,
+          club: 'crpadel',
+          auth: const AsyncData(user),
+        ),
+        AppPaths.home,
+      );
+      expect(
+        appRedirect(
+          location: AppPaths.adminMatches,
+          club: 'crpadel',
+          auth: const AsyncData(
+            AppUser(
+              id: 'admin-1',
+              email: 'admin@crpadel.it',
+              fullName: 'Admin',
+              role: 'admin',
+              adminMenuPermissions: ['matches'],
+            ),
+          ),
+        ),
+        isNull,
       );
     });
   });
