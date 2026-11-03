@@ -91,24 +91,60 @@ class _AdminMatchHistoryScreenState
                       ],
                     ),
                     const SizedBox(height: 12),
-                    DropdownButtonFormField<String?>(
-                      initialValue: playerId,
-                      decoration: const InputDecoration(
-                        labelText: 'Giocatore',
-                        prefixIcon: Icon(Icons.person_search_outlined),
-                      ),
-                      items: [
-                        const DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text('Tutti i giocatori'),
-                        ),
-                        for (final player in players)
-                          DropdownMenuItem<String?>(
-                            value: player.id,
-                            child: Text(player.name),
-                          ),
-                      ],
-                      onChanged: (value) => setState(() => playerId = value),
+                    Autocomplete<AdminPlayer>(
+                      displayStringForOption: (player) => player.name,
+                      optionsBuilder: (value) {
+                        final query = value.text.trim().toLowerCase();
+                        return players
+                            .where((player) {
+                              if (query.isEmpty) return true;
+                              return player.name.toLowerCase().contains(
+                                    query,
+                                  ) ||
+                                  player.email.toLowerCase().contains(query);
+                            })
+                            .take(12);
+                      },
+                      fieldViewBuilder:
+                          (context, controller, focusNode, onSubmitted) =>
+                              ValueListenableBuilder<TextEditingValue>(
+                                valueListenable: controller,
+                                builder: (context, value, _) => TextField(
+                                  controller: controller,
+                                  focusNode: focusNode,
+                                  textCapitalization: TextCapitalization.words,
+                                  textInputAction: TextInputAction.search,
+                                  onChanged: (_) {
+                                    if (playerId != null) {
+                                      setState(() => playerId = null);
+                                    }
+                                  },
+                                  onSubmitted: (_) => onSubmitted(),
+                                  decoration: InputDecoration(
+                                    labelText: 'Giocatore',
+                                    hintText: 'Scrivi nome o email',
+                                    helperText: playerId == null
+                                        ? 'Tutti i giocatori'
+                                        : 'Filtro applicato',
+                                    prefixIcon: const Icon(
+                                      Icons.person_search_outlined,
+                                    ),
+                                    suffixIcon: value.text.isEmpty
+                                        ? null
+                                        : IconButton(
+                                            tooltip: 'Mostra tutti',
+                                            onPressed: () {
+                                              controller.clear();
+                                              focusNode.requestFocus();
+                                              setState(() => playerId = null);
+                                            },
+                                            icon: const Icon(Icons.clear),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                      onSelected: (player) =>
+                          setState(() => playerId = player.id),
                     ),
                   ],
                 ),
