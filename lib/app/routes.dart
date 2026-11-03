@@ -29,6 +29,9 @@ abstract final class AppRoutes {
   static const adminBookings = 'amministrazione-prenotazioni';
   static const adminPlayers = 'amministrazione-giocatori';
   static const adminCommunications = 'amministrazione-comunicazioni';
+  static const adminMatchHistory = 'amministrazione-storico-partite';
+  static const adminUsers = 'amministrazione-utenti';
+  static const adminStatistics = 'amministrazione-statistiche';
 }
 
 abstract final class AppPaths {
@@ -60,6 +63,9 @@ abstract final class AppPaths {
   static const adminBookings = '/amministrazione/prenotazioni';
   static const adminPlayers = '/amministrazione/giocatori';
   static const adminCommunications = '/amministrazione/comunicazioni';
+  static const adminMatchHistory = '/amministrazione/storico-partite';
+  static const adminUsers = '/amministrazione/utenti';
+  static const adminStatistics = '/amministrazione/statistiche';
 
   /// Percorsi raggiungibili senza aver fatto l'accesso.
   static bool isPublic(String location) => location.startsWith(login);

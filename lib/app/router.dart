@@ -9,6 +9,7 @@ import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
 import '../features/auth/domain/app_user.dart';
 import '../features/admin/presentation/admin_screens.dart';
+import '../features/admin/presentation/admin_additional_screens.dart';
 import '../features/bookings/presentation/book_screen.dart';
 import '../features/bookings/presentation/complete_booking_controller.dart';
 import '../features/bookings/presentation/complete_booking_screen.dart';
@@ -152,6 +153,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.adminCommunications,
         builder: (_, _) => const AdminCommunicationsScreen(),
       ),
+      GoRoute(
+        path: AppPaths.adminMatchHistory,
+        name: AppRoutes.adminMatchHistory,
+        builder: (_, _) => const AdminMatchHistoryScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.adminUsers,
+        name: AppRoutes.adminUsers,
+        builder: (_, _) => const AdminUsersScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.adminStatistics,
+        name: AppRoutes.adminStatistics,
+        builder: (_, _) => const AdminStatisticsScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -249,6 +265,24 @@ String? appRedirect({
   if (location.startsWith(AppPaths.admin) &&
       (user is! AppUser || !user.isAdmin)) {
     return AppPaths.home;
+  }
+  if (user is AppUser && location.startsWith(AppPaths.admin)) {
+    final requiredMenu = switch (location) {
+      final value when value.startsWith(AppPaths.adminMatchHistory) =>
+        'matches',
+      final value when value.startsWith(AppPaths.adminMatches) => 'matches',
+      final value when value.startsWith(AppPaths.adminBookings) => 'bookings',
+      final value when value.startsWith(AppPaths.adminPlayers) => 'players',
+      final value when value.startsWith(AppPaths.adminUsers) => 'users',
+      final value when value.startsWith(AppPaths.adminStatistics) =>
+        'statistics',
+      final value when value.startsWith(AppPaths.adminCommunications) =>
+        'push_notifications',
+      _ => null,
+    };
+    if (requiredMenu != null && !user.canAccessAdminMenu(requiredMenu)) {
+      return AppPaths.admin;
+    }
   }
   if (isPublic ||
       location == AppPaths.splash ||

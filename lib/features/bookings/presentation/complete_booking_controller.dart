@@ -66,6 +66,8 @@ class CompleteBookingState {
     this.matchLevel = 'qualsiasi',
     this.submitting = false,
     this.error,
+    this.bookingFor,
+    this.forceCadence = false,
   });
 
   final BookingType type;
@@ -79,6 +81,8 @@ class CompleteBookingState {
 
   /// Messaggio da mostrare sotto il pulsante di conferma.
   final String? error;
+  final DirectoryPlayer? bookingFor;
+  final bool forceCadence;
 
   int get playerCount => players.whereType<DirectoryPlayer>().length;
 
@@ -92,6 +96,8 @@ class CompleteBookingState {
     String? matchLevel,
     bool? submitting,
     String? Function()? error,
+    DirectoryPlayer? Function()? bookingFor,
+    bool? forceCadence,
   }) => CompleteBookingState(
     type: type ?? this.type,
     coachId: coachId != null ? coachId() : this.coachId,
@@ -100,6 +106,8 @@ class CompleteBookingState {
     matchLevel: matchLevel ?? this.matchLevel,
     submitting: submitting ?? this.submitting,
     error: error != null ? error() : this.error,
+    bookingFor: bookingFor != null ? bookingFor() : this.bookingFor,
+    forceCadence: forceCadence ?? this.forceCadence,
   );
 }
 
@@ -166,6 +174,9 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
 
   void setMatchLevel(String code) => state = state.copyWith(matchLevel: code);
 
+  void setBookingFor(DirectoryPlayer? player) =>
+      state = state.copyWith(bookingFor: () => player, error: () => null);
+
   /// Mette o toglie l'utente dal primo posto libero ("Gioco anch'io").
   void setPlaysToo(bool value, DirectoryPlayer? self) {
     final players = [...state.players];
@@ -199,11 +210,23 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
       startMinutes: slot.startMinutes,
       type: state.type,
       coachId: state.type.needsCoach ? state.coachId : null,
+      playerName: state.bookingFor?.fullName,
+      forceCadence: state.forceCadence,
     );
     final Booking booking;
     try {
       booking = await ref.read(bookingsRepositoryProvider).create(request);
     } on ApiException catch (e) {
+      if (e.code == 'BOOKING_CADENCE_OVERRIDE_REQUIRED') {
+        state = state.copyWith(
+          submitting: false,
+          forceCadence: true,
+          error: () =>
+              'Questo orario lascia un intervallo inutilizzabile. '
+              'Premi di nuovo Conferma per forzare la prenotazione.',
+        );
+        return null;
+      }
       if (e.statusCode == 409) {
         _refresh();
         state = state.copyWith(submitting: false);

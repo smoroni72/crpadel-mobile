@@ -108,6 +108,37 @@ void main() {
         ),
         isNull,
       );
+      expect(
+        appRedirect(
+          location: AppPaths.adminUsers,
+          club: 'crpadel',
+          auth: const AsyncData(
+            AppUser(
+              id: 'admin-1',
+              email: 'admin@crpadel.it',
+              fullName: 'Admin',
+              role: 'admin',
+              adminMenuPermissions: ['matches'],
+            ),
+          ),
+        ),
+        AppPaths.admin,
+      );
+      expect(
+        appRedirect(
+          location: AppPaths.adminUsers,
+          club: 'crpadel',
+          auth: const AsyncData(
+            AppUser(
+              id: 'super-admin-1',
+              email: 'superadmin@crpadel.it',
+              fullName: 'Super Admin',
+              role: 'super_admin',
+            ),
+          ),
+        ),
+        isNull,
+      );
     });
   });
 

@@ -11,6 +11,7 @@ import '../../../core/utils/colors.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../admin/presentation/admin_menu_button.dart';
 import '../../bookings/domain/booking.dart';
 import '../../bookings/presentation/book_providers.dart';
 import '../../bookings/presentation/cancel_booking.dart';
@@ -61,7 +62,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ];
     final tab = tabs.contains(_tab) ? _tab : _Tab.bookings;
     final unread = ref.watch(unreadNotificationsProvider).value ?? 0;
-    final user = ref.watch(authControllerProvider).value;
     final menuConfiguration =
         ref.watch(appMenuConfigurationProvider).value ??
         AppMenuConfiguration.allEnabled;
@@ -87,6 +87,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const Spacer(),
                     const ThemeToggleButton(),
+                    const SizedBox(width: 8),
+                    const AdminMenuButton(),
                     const SizedBox(width: 8),
                     if (menuConfiguration.notifications) ...[
                       IconButton.outlined(
@@ -127,33 +129,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 12),
                 const _ProfileCard(),
                 const SizedBox(height: 14),
-                if (user?.isAdmin == true) ...[
-                  Card(
-                    color: context.colors.navy,
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.admin_panel_settings_outlined,
-                        color: context.colors.onNavy,
-                      ),
-                      title: Text(
-                        'Area amministrativa',
-                        style: TextStyle(color: context.colors.onNavy),
-                      ),
-                      subtitle: Text(
-                        'Gestisci il circolo dall’app',
-                        style: TextStyle(
-                          color: context.colors.onNavy.withValues(alpha: .75),
-                        ),
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right,
-                        color: context.colors.onNavy,
-                      ),
-                      onTap: () => context.pushNamed(AppRoutes.admin),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                ],
                 const _PlayerPerformance(),
                 const SizedBox(height: 20),
                 _Tabs(

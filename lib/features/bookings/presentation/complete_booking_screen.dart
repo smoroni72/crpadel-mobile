@@ -117,6 +117,33 @@ class CompleteBookingScreen extends ConsumerWidget {
             _CoachField(value: state.coachId, onChanged: controller.setCoach),
           ],
           const SizedBox(height: 18),
+          if (user?.canAccessAdminMenu('bookings') ?? false) ...[
+            _Label('Prenotazione amministrativa'),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.person_search_outlined),
+              title: Text(
+                state.bookingFor?.fullName ?? 'Prenota per un giocatore',
+              ),
+              subtitle: const Text(
+                'Facoltativo: se vuoto la prenotazione resta a tuo nome',
+              ),
+              trailing: state.bookingFor == null
+                  ? const Icon(Icons.chevron_right)
+                  : IconButton(
+                      onPressed: () => controller.setBookingFor(null),
+                      icon: const Icon(Icons.close),
+                    ),
+              onTap: () async {
+                final selected = await showPlayerPicker(
+                  context,
+                  excluded: const {},
+                );
+                if (selected != null) controller.setBookingFor(selected);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
           _Summary(
             rows: [
               ('Campo', slot.court.name),
@@ -125,7 +152,10 @@ class CompleteBookingScreen extends ConsumerWidget {
                 '${Dates.shortDay(slot.date)} · '
                     '${hhmm(slot.startMinutes)}–${hhmm(end)}',
               ),
-              ('Prenotato da', '${user?.fullName ?? ''} (tu)'),
+              (
+                'Prenotato per',
+                state.bookingFor?.fullName ?? '${user?.fullName ?? ''} (tu)',
+              ),
             ],
           ),
           if (state.type == BookingType.court) ...[

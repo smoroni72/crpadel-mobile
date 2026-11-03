@@ -11,6 +11,7 @@ import '../../../core/utils/dates.dart';
 import '../../../core/utils/colors.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../admin/presentation/admin_menu_button.dart';
 import '../../app_menu/domain/app_menu_configuration.dart';
 import '../../app_menu/presentation/app_menu_provider.dart';
 import '../../bookings/presentation/upcoming_bookings_provider.dart';
@@ -596,6 +597,8 @@ class _Header extends ConsumerWidget {
         ),
         const ThemeToggleButton(),
         const SizedBox(width: 8),
+        const AdminMenuButton(),
+        if (user?.isAdmin == true) const SizedBox(width: 8),
         if (configuration.notifications) ...[
           IconButton.outlined(
             onPressed: () => context.pushNamed(AppRoutes.notifications),
