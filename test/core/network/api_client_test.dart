@@ -1,5 +1,6 @@
 import 'package:crpadel_mobile/core/network/api_client.dart';
 import 'package:crpadel_mobile/core/network/token_storage.dart';
+import 'package:crpadel_mobile/features/auth/data/account_deletion_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -105,5 +106,21 @@ void main() {
       ),
     );
     expect(adapter.requests, hasLength(1));
+  });
+
+  test('elimina account con password e rimuove il token locale', () async {
+    final adapter = FakeAdapter((_) => (200, {'success': true}));
+    final api = buildClient(adapter);
+    await api.setAccessToken('token-account');
+
+    await ApiAccountDeletionRepository(
+      api,
+    ).deleteAccount(password: 'password-segreta');
+
+    expect(adapter.requests, hasLength(1));
+    expect(adapter.requests.single.method, 'DELETE');
+    expect(adapter.requests.single.path, '/auth/me');
+    expect(adapter.requests.single.data, {'password': 'password-segreta'});
+    expect(storage.token, isNull);
   });
 }

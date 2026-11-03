@@ -4,7 +4,9 @@ Fonte: analisi del repository `../CrPadel` (API Fastify, `api/src/routes/*`, mig
 
 ## Convenzioni
 
-- Base URL: `API_BASE_URL` (staging `https://test.crpadel.it/api/v1`).
+- Base URL: `API_BASE_URL`. Il valore predefinito è la produzione
+  `https://crpadel.it/api/v1`; per lo staging usare esplicitamente
+  `https://test.crpadel.it/api/v1`.
 - Circolo: header `X-Club-Slug` (default `crpadel`). Il ruolo nel circolo corrente si legge da `GET /tenancy/current` (`membership_role`), **non** da `user.club_role` di `/auth/me`, che si riferisce sempre al circolo di default.
 - Risposte `{ data: ... }`; errori `{ error, details? }` con messaggi in italiano. Conflitto di slot → 409.
 - Access token: JWT Bearer da 15 minuti, restituito da `POST /auth/login`. Refresh: solo tramite cookie `crpadel_refresh` (path `/api/v1/auth`), già gestito dall'`ApiClient`.
@@ -14,7 +16,7 @@ Fonte: analisi del repository `../CrPadel` (API Fastify, `api/src/routes/*`, mig
 
 | Schermata | Endpoint |
 | --- | --- |
-| Accesso | `POST /auth/login`, `/auth/register`, `/auth/forgot-password`, `/auth/resend-verification`, `/auth/refresh`, `/auth/logout`, `/auth/change-password`; `GET /auth/me` |
+| Accesso | `POST /auth/login`, `/auth/register`, `/auth/forgot-password`, `/auth/resend-verification`, `/auth/refresh`, `/auth/logout`, `/auth/change-password`; `GET /auth/me`; eliminazione account `DELETE /auth/me` con `{ "password": "..." }` |
 | Circolo | `GET /tenancy/current`, `GET /tenancy/clubs`, `GET /courts` |
 | Menu app | `GET /tenancy/mobile-menu` restituisce le voci abilitate per il circolo e il permesso operativo `create_matches`; la configurazione viene aggiornata dagli amministratori nella webapp e il backend applica il blocco anche alle richieste dirette |
 | Pacchetti | `GET /subscriptions/mine` (con `matches_available`) |
@@ -55,7 +57,7 @@ Finché non esistono, l'app usa implementazioni fake (vedi `CLAUDE.md`).
 | 7 | Refresh token via body | Robustezza mobile | Facoltativo: oggi il cookie jar funziona |
 | 8 | Elenco pubblico dei circoli, configurazione del brand e testi per circolo | Multi-circolo (Fase 0b), Home | Vedi sotto. Da fare dopo che Edoardo chiude il lavoro in corso: non è bloccante, l'app usa il fake e i valori predefiniti |
 | 9 | `GET /bookings` senza filtro "da data" | Home, "Le tue prenotazioni" | Facoltativo: parametro `from=YYYY-MM-DD`. Oggi l'app chiede le 100 più recenti e scarta le passate |
-| 10 | Eliminazione del proprio account | Profilo, pubblicazione su App Store | Endpoint per l'utente autenticato (es. `DELETE /me` con conferma della password) che anonimizza o cancella i dati. Oggi il pulsante "Elimina Account" del sito chiama la funzione `deleteUserAccount`, non ancora migrata da Base44: risponde 501 e non funziona nemmeno sul sito |
+| 10 | ~~Eliminazione del proprio account~~ | Profilo, pubblicazione su App Store | **Completata:** `DELETE /auth/me` richiede la password, elimina account e sessioni e scollega lo storico sportivo e contabile. |
 | 11 | Tipi di partita attivi leggibili dai giocatori | Completa la prenotazione | Ogni circolo attiva i suoi tipi (`club_match_type_settings`), ma `GET /match-type-settings` è riservato agli admin. Proposta: `GET /match-types` per gli iscritti (solo attivi, codice ed etichetta), oppure i tipi dentro la configurazione del circolo (n. 8). Oggi l'app propone Ranking e Amichevole e mostra l'errore del server se il tipo non è attivo |
 | 12 | Posizione in classifica del singolo giocatore | Profilo | `GET /rankings?player_email=` calcola `position` con `row_number()` dopo il filtro, quindi risponde sempre 1. L'app (come il sito) la ricava dalla classifica completa, che però arriva al massimo a 200 righe. Proposta: calcolare la posizione su tutto il circolo prima del filtro |
 

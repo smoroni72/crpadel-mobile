@@ -6,8 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../auth/data/account_deletion_repository.dart';
 import '../../auth/presentation/auth_controller.dart';
 
-/// Conferma ed elimina l'account, come sul sito. Finché il backend non ha
-/// l'endpoint (lacuna n. 10) spiega che la funzione non è disponibile.
+/// Conferma ed elimina definitivamente l'account.
 Future<void> confirmDeleteAccount(BuildContext context, WidgetRef ref) async {
   final repository = ref.read(accountDeletionRepositoryProvider);
   final messenger = ScaffoldMessenger.of(context);
@@ -94,8 +93,9 @@ class _DeleteDialogState extends State<_DeleteDialog> {
                 borderRadius: BorderRadius.circular(AppTheme.controlRadius),
               ),
               child: Text(
-                "L'azione è irreversibile. Verranno cancellati il tuo account, "
-                'le tue prenotazioni, la tua classifica e i tuoi dati personali.',
+                "L'azione è irreversibile. Verranno cancellati il tuo account "
+                "e l'accesso all'app. Lo storico sportivo e contabile resta al "
+                'circolo, ma non sarà più collegato al tuo account.',
                 style: TextStyle(color: colors.primaryText),
               ),
             ),
