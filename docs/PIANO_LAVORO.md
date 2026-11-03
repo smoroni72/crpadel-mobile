@@ -72,7 +72,9 @@ Accettazione: partecipare, abbandonare e inserire il risultato funzionano su sta
 - [x] Profilo uguale al sito: 4 riquadri statistiche, schede Prenotazioni / Partite / Lezioni / Abbonamenti (mockup `05-profilo.html`, `05b-profilo-abbonamenti.html`).
 - [x] Impostazioni (solo app): Circolo, Orario preferito, Notifiche, Cambia password (mockup `05c-impostazioni.html`).
 - [x] Cambia password (poi si torna al login: il server chiude tutte le sessioni); Esci.
-- [x] **Elimina account** con conferma (lacuna n. 10: fake `FAKE_ACCOUNT_DELETION=true`; senza, spiega che non è ancora disponibile). Obbligatorio prima della pubblicazione su App Store.
+- [x] **Elimina account** con conferma della password tramite `DELETE /auth/me`.
+  Lo storico sportivo e contabile resta al circolo senza collegamento
+  all'account eliminato. Obbligatorio per la pubblicazione su App Store.
 
 ## Fase 5 – Notifiche push (FCM) e deep link
 

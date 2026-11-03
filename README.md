@@ -30,6 +30,10 @@ Configurazione esplicita:
 flutter run --dart-define=API_BASE_URL=https://test.crpadel.it/api/v1 --dart-define=CLUB_SLUG=crpadel
 ```
 
+Senza `API_BASE_URL` l'app usa l'ambiente di produzione
+`https://crpadel.it/api/v1`. Passare esplicitamente l'URL di test solo per le
+build di sviluppo e collaudo.
+
 Per un altro ambiente cambiare i valori tramite `--dart-define`. Non salvare password, token o chiavi nel repository.
 
 ## Verifiche
