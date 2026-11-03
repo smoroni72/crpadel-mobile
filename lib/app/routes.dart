@@ -24,6 +24,11 @@ abstract final class AppRoutes {
   static const lessons = 'lezioni';
   static const gallery = 'gallery';
   static const clubInfo = 'informazioni-circolo';
+  static const admin = 'amministrazione';
+  static const adminMatches = 'amministrazione-partite';
+  static const adminBookings = 'amministrazione-prenotazioni';
+  static const adminPlayers = 'amministrazione-giocatori';
+  static const adminCommunications = 'amministrazione-comunicazioni';
 }
 
 abstract final class AppPaths {
@@ -50,6 +55,11 @@ abstract final class AppPaths {
   static const lessons = '/lezioni';
   static const gallery = '/gallery';
   static const clubInfo = '/informazioni-circolo';
+  static const admin = '/amministrazione';
+  static const adminMatches = '/amministrazione/partite';
+  static const adminBookings = '/amministrazione/prenotazioni';
+  static const adminPlayers = '/amministrazione/giocatori';
+  static const adminCommunications = '/amministrazione/comunicazioni';
 
   /// Percorsi raggiungibili senza aver fatto l'accesso.
   static bool isPublic(String location) => location.startsWith(login);

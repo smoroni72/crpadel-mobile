@@ -10,13 +10,22 @@ import 'match_card.dart';
 
 /// [MatchCard] collegata al dettaglio e a "Partecipa".
 class ConnectedMatchCard extends ConsumerWidget {
-  const ConnectedMatchCard({super.key, required this.match});
+  const ConnectedMatchCard({
+    super.key,
+    required this.match,
+    this.adminMode = false,
+  });
 
   final PadelMatch match;
+  final bool adminMode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userId = ref.watch(authControllerProvider).value?.id ?? '';
+    final user = ref.watch(authControllerProvider).value;
+    final userId = user?.id ?? '';
+    final canManage =
+        match.isOrganizer(userId) ||
+        (user?.canAccessAdminMenu('matches') ?? false);
     return MatchCard(
       match: match,
       myUserId: userId,
@@ -24,7 +33,7 @@ class ConnectedMatchCard extends ConsumerWidget {
         AppRoutes.matchDetail,
         pathParameters: {'id': match.id},
       ),
-      onCancel: match.isOrganizer(userId) && match.status == MatchStatus.open
+      onCancel: canManage && match.status == MatchStatus.open
           ? () async {
               final confirmed = await showDialog<bool>(
                 context: context,
@@ -56,18 +65,20 @@ class ConnectedMatchCard extends ConsumerWidget {
               );
             }
           : null,
-      onJoin: () async {
-        final messenger = ScaffoldMessenger.of(context);
-        final error = await ref.read(matchActionsProvider).join(match);
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              error ??
-                  'Sei nella partita delle ${match.slot?.startLabel ?? ''}',
-            ),
-          ),
-        );
-      },
+      onJoin: adminMode
+          ? null
+          : () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final error = await ref.read(matchActionsProvider).join(match);
+              messenger.showSnackBar(
+                SnackBar(
+                  content: Text(
+                    error ??
+                        'Sei nella partita delle ${match.slot?.startLabel ?? ''}',
+                  ),
+                ),
+              );
+            },
     );
   }
 }
