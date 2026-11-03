@@ -26,6 +26,8 @@ class NewBooking {
     required this.startMinutes,
     required this.type,
     this.coachId,
+    this.playerName,
+    this.forceCadence = false,
   });
 
   final String courtId;
@@ -33,6 +35,8 @@ class NewBooking {
   final int startMinutes;
   final BookingType type;
   final String? coachId;
+  final String? playerName;
+  final bool forceCadence;
 
   int get endMinutes => startMinutes + type.minutes;
 
@@ -47,6 +51,8 @@ class NewBooking {
     'end_hour': endMinutes / 60,
     'booking_type': type.name,
     if (coachId != null) 'coach_id': coachId,
+    if (playerName != null) 'player_name': playerName,
+    if (forceCadence) 'force_cadence': true,
   };
 }
 

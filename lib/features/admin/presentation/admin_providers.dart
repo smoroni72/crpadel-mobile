@@ -22,3 +22,6 @@ final adminPlayersProvider = FutureProvider.family<List<AdminPlayer>, String>(
 final adminCommunicationsProvider = FutureProvider<List<AdminCommunication>>(
   (ref) => ref.read(adminRepositoryProvider).communications(),
 );
+final adminUsersProvider = FutureProvider.family<List<AdminUser>, String>(
+  (ref, search) => ref.read(adminRepositoryProvider).users(search: search),
+);

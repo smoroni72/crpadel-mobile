@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../matches/presentation/day_matches_provider.dart';
+import '../../admin/presentation/admin_menu_button.dart';
 import '../data/bookings_repository.dart';
 import '../domain/booking.dart';
 import '../domain/booking_request.dart';
@@ -237,6 +238,8 @@ class _Header extends ConsumerWidget {
             style: style,
             icon: const Icon(Icons.chevron_right),
           ),
+          const SizedBox(width: 6),
+          const AdminMenuButton(),
         ],
       ),
     );

@@ -8,6 +8,7 @@ import '../../../core/theme/theme_controller.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../app_menu/presentation/app_menu_provider.dart';
+import '../../admin/presentation/admin_menu_button.dart';
 import '../domain/padel_match.dart';
 import 'day_matches_provider.dart';
 import 'match_providers.dart';
@@ -68,6 +69,8 @@ class MatchesScreen extends ConsumerWidget {
                     const SizedBox(width: 8),
                   ],
                   const ThemeToggleButton(),
+                  const SizedBox(width: 8),
+                  const AdminMenuButton(),
                 ],
               ),
               const SizedBox(height: 14),

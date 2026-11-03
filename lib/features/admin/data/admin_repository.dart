@@ -69,6 +69,67 @@ class AdminRepository {
     ).cast<Map<String, dynamic>>().map(AdminPlayer.fromJson).toList();
   }
 
+  Future<AdminPlayer> createPlayer({
+    required String fullName,
+    required String birthDate,
+    required String gender,
+    String? email,
+    String? phone,
+    String? preferredSide,
+  }) async {
+    final response = await _api.post(
+      '/players',
+      data: {
+        'full_name': fullName.trim(),
+        'birth_date': birthDate,
+        'gender': gender,
+        'email': email?.trim().toLowerCase(),
+        'phone': phone?.trim(),
+        'preferred_side': preferredSide,
+        'is_active': true,
+      },
+    );
+    return AdminPlayer.fromJson(
+      (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>,
+    );
+  }
+
+  Future<List<AdminUser>> users({String search = ''}) async {
+    final response = await _api.get(
+      '/users',
+      query: {
+        'limit': 200,
+        if (search.trim().isNotEmpty) 'search': search.trim(),
+      },
+    );
+    return _data(
+      response.data,
+    ).cast<Map<String, dynamic>>().map(AdminUser.fromJson).toList();
+  }
+
+  Future<AdminUser> createUser({
+    required String fullName,
+    required String email,
+    required String password,
+    required String role,
+    List<String> permissions = const [],
+  }) async {
+    final response = await _api.post(
+      '/users',
+      data: {
+        'full_name': fullName.trim(),
+        'email': email.trim().toLowerCase(),
+        'password': password,
+        'role': role,
+        'email_verified': true,
+        'admin_menu_permissions': permissions,
+      },
+    );
+    return AdminUser.fromJson(
+      (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>,
+    );
+  }
+
   Future<List<AdminCommunication>> communications() async {
     final response = await _api.get('/communications');
     return _data(
@@ -195,4 +256,31 @@ class AdminCommunication {
         recipientCount: (json['recipient_count'] as num?)?.toInt() ?? 0,
         createdAt: DateTime.tryParse((json['created_at'] ?? '').toString()),
       );
+}
+
+class AdminUser {
+  const AdminUser({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.role,
+    required this.active,
+    required this.verified,
+  });
+
+  final String id;
+  final String name;
+  final String email;
+  final String role;
+  final bool active;
+  final bool verified;
+
+  factory AdminUser.fromJson(Map<String, dynamic> json) => AdminUser(
+    id: json['id'].toString(),
+    name: (json['full_name'] ?? '—').toString(),
+    email: (json['email'] ?? '').toString(),
+    role: (json['role'] ?? 'user').toString(),
+    active: json['is_active'] as bool? ?? true,
+    verified: json['email_verified'] as bool? ?? false,
+  );
 }

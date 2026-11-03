@@ -5,13 +5,16 @@ import 'package:intl/intl.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../matches/data/matches_repository.dart';
 import '../../matches/domain/padel_match.dart';
 import '../../matches/presentation/widgets/connected_match_card.dart';
+import '../../matches/presentation/widgets/day_strip.dart';
 import '../data/admin_repository.dart';
 import 'admin_providers.dart';
+import 'admin_menu_button.dart';
 
 class AdminHomeScreen extends ConsumerWidget {
   const AdminHomeScreen({super.key});
@@ -28,6 +31,13 @@ class AdminHomeScreen extends ConsumerWidget {
           Icons.sports_tennis,
           AppRoutes.adminMatches,
         ),
+      if (user.canAccessAdminMenu('matches'))
+        const _AdminEntry(
+          'Storico partite',
+          'Filtra per periodo e giocatore',
+          Icons.history,
+          AppRoutes.adminMatchHistory,
+        ),
       if (user.canAccessAdminMenu('bookings'))
         const _AdminEntry(
           'Prenotazioni',
@@ -41,6 +51,20 @@ class AdminHomeScreen extends ConsumerWidget {
           'Cerca anagrafiche e dati ranking',
           Icons.groups_outlined,
           AppRoutes.adminPlayers,
+        ),
+      if (user.canAccessAdminMenu('users'))
+        const _AdminEntry(
+          'Utenti',
+          'Crea e controlla gli account di accesso',
+          Icons.manage_accounts_outlined,
+          AppRoutes.adminUsers,
+        ),
+      if (user.canAccessAdminMenu('statistics'))
+        const _AdminEntry(
+          'Statistiche',
+          'Andamento del circolo nel periodo',
+          Icons.query_stats,
+          AppRoutes.adminStatistics,
         ),
       if (user.canAccessAdminMenu('rankings'))
         const _AdminEntry(
@@ -58,7 +82,10 @@ class AdminHomeScreen extends ConsumerWidget {
         ),
     ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Amministrazione')),
+      appBar: AppBar(
+        title: const Text('Amministrazione'),
+        actions: const [AdminMenuButton()],
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(adminOverviewProvider.future),
         child: ListView(
@@ -191,54 +218,77 @@ class _AdminEntry {
   final String route;
 }
 
-final _adminMatchesProvider = FutureProvider<List<PadelMatch>>((ref) {
-  final now = DateTime.now();
-  return ref
-      .read(matchesRepositoryProvider)
-      .between(
-        now.subtract(const Duration(days: 60)),
-        now.add(const Duration(days: 60)),
-      );
-});
+final _adminMatchesProvider = FutureProvider.family<List<PadelMatch>, DateTime>(
+  (ref, day) => ref.read(matchesRepositoryProvider).byDate(day),
+);
 
-class AdminMatchesScreen extends ConsumerWidget {
+class AdminMatchesScreen extends ConsumerStatefulWidget {
   const AdminMatchesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final matches = ref.watch(_adminMatchesProvider);
+  ConsumerState<AdminMatchesScreen> createState() => _AdminMatchesScreenState();
+}
+
+class _AdminMatchesScreenState extends ConsumerState<AdminMatchesScreen> {
+  var day = DateTime.now();
+
+  @override
+  Widget build(BuildContext context) {
+    final matches = ref.watch(_adminMatchesProvider(day));
     return Scaffold(
-      appBar: AppBar(title: const Text('Partite e risultati')),
+      appBar: AppBar(
+        title: const Text('Calendario partite'),
+        actions: [
+          IconButton(
+            tooltip: 'Storico partite',
+            onPressed: () => context.pushNamed(AppRoutes.adminMatchHistory),
+            icon: const Icon(Icons.history),
+          ),
+          const AdminMenuButton(),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go('${AppPaths.book}?mode=match'),
+        icon: const Icon(Icons.add),
+        label: const Text('Nuova partita'),
+      ),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(_adminMatchesProvider.future),
+        onRefresh: () => ref.refresh(_adminMatchesProvider(day).future),
         child: AsyncValueView(
           value: matches,
           errorText: 'Non riesco a caricare le partite',
-          onRetry: () => ref.invalidate(_adminMatchesProvider),
+          onRetry: () => ref.invalidate(_adminMatchesProvider(day)),
           data: (items) {
-            final sorted = [...items]
-              ..sort((a, b) {
-                final aPending =
-                    a.status == MatchStatus.pendingResult ||
-                    a.status == MatchStatus.inProgress;
-                final bPending =
-                    b.status == MatchStatus.pendingResult ||
-                    b.status == MatchStatus.inProgress;
-                if (aPending != bPending) return aPending ? -1 : 1;
-                return b.start.compareTo(a.start);
-              });
             return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
               children: [
+                DayStrip(
+                  selected: day,
+                  onSelected: (value) => setState(() => day = value),
+                  onPrevious: () => setState(
+                    () => day = day.subtract(const Duration(days: 5)),
+                  ),
+                  onNext: () =>
+                      setState(() => day = day.add(const Duration(days: 5))),
+                ),
+                const SizedBox(height: 12),
                 Text(
-                  'I risultati da inserire sono mostrati per primi.',
+                  '${Dates.longDay(day)} · ${items.length} ${items.length == 1 ? 'partita' : 'partite'}',
                   style: TextStyle(color: context.colors.textSecondary),
                 ),
                 const SizedBox(height: 12),
-                for (final match in sorted) ...[
-                  ConnectedMatchCard(match: match, adminMode: true),
-                  const SizedBox(height: 12),
-                ],
+                if (items.isEmpty)
+                  const Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(22),
+                      child: Text('Nessuna partita in questa giornata.'),
+                    ),
+                  )
+                else
+                  for (final match in items) ...[
+                    ConnectedMatchCard(match: match, adminMode: true),
+                    const SizedBox(height: 12),
+                  ],
               ],
             );
           },
@@ -255,7 +305,15 @@ class AdminBookingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bookings = ref.watch(adminBookingsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Prenotazioni')),
+      appBar: AppBar(
+        title: const Text('Prenotazioni campi'),
+        actions: const [AdminMenuButton()],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.goNamed(AppRoutes.book),
+        icon: const Icon(Icons.add),
+        label: const Text('Nuova prenotazione'),
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(adminBookingsProvider.future),
         child: AsyncValueView(
@@ -263,7 +321,7 @@ class AdminBookingsScreen extends ConsumerWidget {
           errorText: 'Non riesco a caricare le prenotazioni',
           onRetry: () => ref.invalidate(adminBookingsProvider),
           data: (items) => ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             itemCount: items.length,
             separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (_, index) {
@@ -314,7 +372,15 @@ class _AdminPlayersScreenState extends ConsumerState<AdminPlayersScreen> {
   Widget build(BuildContext context) {
     final players = ref.watch(adminPlayersProvider(search));
     return Scaffold(
-      appBar: AppBar(title: const Text('Giocatori')),
+      appBar: AppBar(
+        title: const Text('Giocatori'),
+        actions: const [AdminMenuButton()],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _createPlayer(context),
+        icon: const Icon(Icons.person_add_alt_1),
+        label: const Text('Nuovo giocatore'),
+      ),
       body: Column(
         children: [
           Padding(
@@ -342,7 +408,7 @@ class _AdminPlayersScreenState extends ConsumerState<AdminPlayersScreen> {
                 onRefresh: () =>
                     ref.refresh(adminPlayersProvider(search).future),
                 child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
                   itemCount: items.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 6),
                   itemBuilder: (_, index) {
@@ -369,6 +435,151 @@ class _AdminPlayersScreenState extends ConsumerState<AdminPlayersScreen> {
       ),
     );
   }
+
+  Future<void> _createPlayer(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final name = TextEditingController();
+    final email = TextEditingController();
+    final phone = TextEditingController();
+    DateTime? birthDate;
+    var gender = 'male';
+    String? preferredSide;
+    final accepted = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Nuovo giocatore'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: name,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    labelText: 'Nome e cognome *',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: email,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: phone,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(labelText: 'Telefono'),
+                ),
+                const SizedBox(height: 10),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Data di nascita *'),
+                  subtitle: Text(
+                    birthDate == null ? 'Seleziona' : Dates.numeric(birthDate!),
+                  ),
+                  trailing: const Icon(Icons.calendar_today_outlined),
+                  onTap: () async {
+                    final selected = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime(1985),
+                      firstDate: DateTime(1920),
+                      lastDate: DateTime.now(),
+                      locale: const Locale('it', 'IT'),
+                    );
+                    if (selected != null) {
+                      setDialogState(() => birthDate = selected);
+                    }
+                  },
+                ),
+                DropdownButtonFormField<String>(
+                  initialValue: gender,
+                  decoration: const InputDecoration(labelText: 'Sesso *'),
+                  items: const [
+                    DropdownMenuItem(value: 'male', child: Text('Maschile')),
+                    DropdownMenuItem(value: 'female', child: Text('Femminile')),
+                    DropdownMenuItem(value: 'other', child: Text('Altro')),
+                  ],
+                  onChanged: (value) =>
+                      setDialogState(() => gender = value ?? 'male'),
+                ),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String?>(
+                  initialValue: preferredSide,
+                  decoration: const InputDecoration(
+                    labelText: 'Lato preferito',
+                  ),
+                  items: const [
+                    DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('Non indicato'),
+                    ),
+                    DropdownMenuItem<String?>(
+                      value: 'SX',
+                      child: Text('Sinistra'),
+                    ),
+                    DropdownMenuItem<String?>(
+                      value: 'DX',
+                      child: Text('Destra'),
+                    ),
+                  ],
+                  onChanged: (value) =>
+                      setDialogState(() => preferredSide = value),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Annulla'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (name.text.trim().isEmpty || birthDate == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Inserisci nome e data di nascita'),
+                    ),
+                  );
+                  return;
+                }
+                Navigator.pop(context, true);
+              },
+              child: const Text('Crea'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (accepted != true || !mounted || birthDate == null) return;
+    try {
+      await ref
+          .read(adminRepositoryProvider)
+          .createPlayer(
+            fullName: name.text,
+            birthDate: Dates.api(birthDate!),
+            gender: gender,
+            email: email.text.isEmpty ? null : email.text,
+            phone: phone.text.isEmpty ? null : phone.text,
+            preferredSide: preferredSide,
+          );
+      ref.invalidate(adminPlayersProvider);
+      if (mounted) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Giocatore creato')),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(SnackBar(content: Text('$error')));
+      }
+    }
+    name.dispose();
+    email.dispose();
+    phone.dispose();
+  }
 }
 
 class AdminCommunicationsScreen extends ConsumerWidget {
@@ -378,7 +589,10 @@ class AdminCommunicationsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final communications = ref.watch(adminCommunicationsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Comunicazioni')),
+      appBar: AppBar(
+        title: const Text('Comunicazioni'),
+        actions: const [AdminMenuButton()],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _compose(context, ref),
         icon: const Icon(Icons.add),
