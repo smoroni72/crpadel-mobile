@@ -39,10 +39,9 @@ class AdminRepository {
         return status == 'pending_result' || status == 'in_progress';
       }).length,
       bookings: bookings.length,
-      players:
-          ((playersBody?['meta'] as Map<String, dynamic>?)?['total'] as num?)
-              ?.toInt() ??
-          0,
+      players: _intValue(
+        (playersBody?['meta'] as Map<String, dynamic>?)?['total'],
+      ),
     );
   }
 
@@ -153,7 +152,7 @@ class AdminRepository {
     );
     final data =
         (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
-    return (data['recipient_count'] as num?)?.toInt() ?? 0;
+    return _intValue(data['recipient_count']);
   }
 
   List<dynamic> _data(Object? body) =>
@@ -227,9 +226,9 @@ class AdminPlayer {
     id: json['id'].toString(),
     name: (json['full_name'] ?? '—').toString(),
     email: (json['email'] ?? '').toString(),
-    matches: (json['ranking_matches_played'] as num?)?.toInt() ?? 0,
-    wins: (json['ranking_matches_won'] as num?)?.toInt() ?? 0,
-    points: (json['ranking_real_points'] as num?)?.toDouble() ?? 0,
+    matches: _intValue(json['ranking_matches_played']),
+    wins: _intValue(json['ranking_matches_won']),
+    points: _doubleValue(json['ranking_real_points']),
     status: (json['registration_status'] ?? '').toString(),
   );
 }
@@ -253,7 +252,7 @@ class AdminCommunication {
         title: (json['title'] ?? '').toString(),
         body: (json['body'] ?? '').toString(),
         status: (json['status'] ?? '').toString(),
-        recipientCount: (json['recipient_count'] as num?)?.toInt() ?? 0,
+        recipientCount: _intValue(json['recipient_count']),
         createdAt: DateTime.tryParse((json['created_at'] ?? '').toString()),
       );
 }
@@ -280,7 +279,27 @@ class AdminUser {
     name: (json['full_name'] ?? '—').toString(),
     email: (json['email'] ?? '').toString(),
     role: (json['role'] ?? 'user').toString(),
-    active: json['is_active'] as bool? ?? true,
-    verified: json['email_verified'] as bool? ?? false,
+    active: _boolValue(json['is_active'], fallback: true),
+    verified: _boolValue(json['email_verified']),
   );
 }
+
+int _intValue(Object? value) => switch (value) {
+  num number => number.toInt(),
+  String text => num.tryParse(text.replaceAll(',', '.'))?.toInt() ?? 0,
+  _ => 0,
+};
+
+double _doubleValue(Object? value) => switch (value) {
+  num number => number.toDouble(),
+  String text => double.tryParse(text.replaceAll(',', '.')) ?? 0,
+  _ => 0,
+};
+
+bool _boolValue(Object? value, {bool fallback = false}) => switch (value) {
+  bool boolean => boolean,
+  num number => number != 0,
+  String text when text.toLowerCase() == 'true' || text == '1' => true,
+  String text when text.toLowerCase() == 'false' || text == '0' => false,
+  _ => fallback,
+};
