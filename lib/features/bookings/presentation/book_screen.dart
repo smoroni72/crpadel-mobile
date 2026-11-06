@@ -23,10 +23,14 @@ class BookScreen extends ConsumerStatefulWidget {
     super.key,
     this.createMatch = false,
     this.createLesson = false,
+    this.completionRouteName = AppRoutes.completeBooking,
+    this.title = 'Prenota',
   });
 
   final bool createMatch;
   final bool createLesson;
+  final String completionRouteName;
+  final String title;
 
   @override
   ConsumerState<BookScreen> createState() => _BookScreenState();
@@ -45,7 +49,7 @@ class _BookScreenState extends ConsumerState<BookScreen> {
         bottom: false,
         child: Column(
           children: [
-            const _Header(),
+            _Header(title: widget.title),
             if (widget.createMatch)
               _MatchSetupPanel(
                 matchType: _matchType,
@@ -71,6 +75,7 @@ class _BookScreenState extends ConsumerState<BookScreen> {
                         createLesson: widget.createLesson,
                         matchType: _matchType,
                         matchLevel: _matchLevel,
+                        completionRouteName: widget.completionRouteName,
                       ),
               ),
             ),
@@ -194,7 +199,9 @@ class _MatchSetupPanel extends StatelessWidget {
 }
 
 class _Header extends ConsumerWidget {
-  const _Header();
+  const _Header({required this.title});
+
+  final String title;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -213,9 +220,18 @@ class _Header extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
       child: Row(
         children: [
+          if (Navigator.of(context).canPop()) ...[
+            IconButton.outlined(
+              onPressed: context.pop,
+              tooltip: 'Indietro',
+              style: style,
+              icon: const Icon(Icons.arrow_back),
+            ),
+            const SizedBox(width: 10),
+          ],
           Expanded(
             child: Text(
-              'Prenota',
+              title,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ),
@@ -285,6 +301,7 @@ class _CourtGrid extends ConsumerStatefulWidget {
     required this.createLesson,
     required this.matchType,
     required this.matchLevel,
+    required this.completionRouteName,
   });
 
   final DaySchedule grid;
@@ -293,6 +310,7 @@ class _CourtGrid extends ConsumerStatefulWidget {
   final bool createLesson;
   final String matchType;
   final String matchLevel;
+  final String completionRouteName;
 
   @override
   ConsumerState<_CourtGrid> createState() => _CourtGridState();
@@ -344,7 +362,7 @@ class _CourtGridState extends ConsumerState<_CourtGrid> {
       return;
     }
     await context.pushNamed(
-      AppRoutes.completeBooking,
+      widget.completionRouteName,
       extra: BookingSlot(
         court: court,
         date: widget.day,

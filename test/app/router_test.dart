@@ -1,11 +1,13 @@
 import 'package:crpadel_mobile/app/app.dart';
 import 'package:crpadel_mobile/app/bottom_bar.dart';
+import 'package:crpadel_mobile/app/app_shell.dart';
 import 'package:crpadel_mobile/app/router.dart';
 import 'package:crpadel_mobile/app/routes.dart';
 import 'package:crpadel_mobile/features/auth/data/fake_auth_repository.dart';
 import 'package:crpadel_mobile/features/auth/domain/app_user.dart';
 import 'package:crpadel_mobile/features/auth/presentation/login_screen.dart';
 import 'package:crpadel_mobile/features/auth/presentation/register_screen.dart';
+import 'package:crpadel_mobile/features/admin/presentation/admin_screens.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/book_screen.dart';
 import 'package:crpadel_mobile/features/home/presentation/home_screen.dart';
 import 'package:crpadel_mobile/features/matches/presentation/matches_screen.dart';
@@ -13,6 +15,7 @@ import 'package:crpadel_mobile/features/profile/presentation/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../helpers/app_overrides.dart';
 
@@ -242,6 +245,45 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(ProfileScreen), findsOneWidget);
+    });
+
+    testWidgets('un admin apre la creazione partita dal calendario', (
+      tester,
+    ) async {
+      const admin = AppUser(
+        id: 'admin-1',
+        email: 'admin@crpadel.it',
+        fullName: 'Admin',
+        role: 'admin',
+        adminMenuPermissions: ['matches'],
+      );
+      final repository = FakeAuthRepository(sessionUser: admin);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: FakeBackend(auth: repository).overrides,
+          retry: (_, _) => null,
+          child: const CrPadelApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      GoRouter.of(
+        tester.element(find.byType(HomeScreen)),
+      ).goNamed(AppRoutes.adminMatches);
+      await tester.pumpAndSettle();
+      expect(find.byType(AdminMatchesScreen), findsOneWidget);
+
+      await tester.tap(find.text('Nuova partita'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(BookScreen), findsOneWidget);
+      expect(find.text('Crea partita'), findsNWidgets(2));
+      expect(find.byType(AppShell), findsNothing);
+
+      await tester.tap(find.byTooltip('Indietro'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AdminMatchesScreen), findsOneWidget);
     });
 
     testWidgets('parte con tema scuro e il sole attiva quello chiaro', (

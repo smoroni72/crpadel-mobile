@@ -139,6 +139,27 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const AdminMatchesScreen(),
       ),
       GoRoute(
+        path: AppPaths.adminCreateMatch,
+        name: AppRoutes.adminCreateMatch,
+        builder: (_, _) => const BookScreen(
+          createMatch: true,
+          completionRouteName: AppRoutes.adminCompleteMatch,
+          title: 'Crea partita',
+        ),
+        routes: [
+          GoRoute(
+            path: AppPaths.adminCompleteMatch,
+            name: AppRoutes.adminCompleteMatch,
+            redirect: (_, state) =>
+                state.extra is BookingSlot ? null : AppPaths.adminMatches,
+            pageBuilder: (_, state) => MaterialPage(
+              fullscreenDialog: true,
+              child: CompleteBookingScreen(slot: state.extra! as BookingSlot),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
         path: AppPaths.adminBookings,
         name: AppRoutes.adminBookings,
         builder: (_, _) => const AdminBookingsScreen(),

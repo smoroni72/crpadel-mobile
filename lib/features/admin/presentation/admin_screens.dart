@@ -248,7 +248,7 @@ class _AdminMatchesScreenState extends ConsumerState<AdminMatchesScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('${AppPaths.book}?mode=match'),
+        onPressed: () => context.pushNamed(AppRoutes.adminCreateMatch),
         icon: const Icon(Icons.add),
         label: const Text('Nuova partita'),
       ),
