@@ -10,6 +10,7 @@ import '../features/auth/presentation/register_screen.dart';
 import '../features/auth/domain/app_user.dart';
 import '../features/admin/presentation/admin_screens.dart';
 import '../features/admin/presentation/admin_additional_screens.dart';
+import '../features/admin/presentation/admin_create_match_screen.dart';
 import '../features/bookings/presentation/book_screen.dart';
 import '../features/bookings/presentation/complete_booking_controller.dart';
 import '../features/bookings/presentation/complete_booking_screen.dart';
@@ -141,11 +142,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppPaths.adminCreateMatch,
         name: AppRoutes.adminCreateMatch,
-        builder: (_, _) => const BookScreen(
-          createMatch: true,
-          completionRouteName: AppRoutes.adminCompleteMatch,
-          title: 'Crea partita',
-        ),
+        builder: (_, _) => const AdminCreateMatchScreen(),
         routes: [
           GoRoute(
             path: AppPaths.adminCompleteMatch,
@@ -154,7 +151,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 state.extra is BookingSlot ? null : AppPaths.adminMatches,
             pageBuilder: (_, state) => MaterialPage(
               fullscreenDialog: true,
-              child: CompleteBookingScreen(slot: state.extra! as BookingSlot),
+              child: CompleteBookingScreen(
+                slot: state.extra! as BookingSlot,
+                successRouteName: AppRoutes.adminMatches,
+              ),
             ),
           ),
         ],

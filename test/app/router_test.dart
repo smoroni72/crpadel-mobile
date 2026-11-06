@@ -8,7 +8,9 @@ import 'package:crpadel_mobile/features/auth/domain/app_user.dart';
 import 'package:crpadel_mobile/features/auth/presentation/login_screen.dart';
 import 'package:crpadel_mobile/features/auth/presentation/register_screen.dart';
 import 'package:crpadel_mobile/features/admin/presentation/admin_screens.dart';
+import 'package:crpadel_mobile/features/admin/presentation/admin_create_match_screen.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/book_screen.dart';
+import 'package:crpadel_mobile/features/bookings/presentation/complete_booking_screen.dart';
 import 'package:crpadel_mobile/features/home/presentation/home_screen.dart';
 import 'package:crpadel_mobile/features/matches/presentation/matches_screen.dart';
 import 'package:crpadel_mobile/features/profile/presentation/profile_screen.dart';
@@ -247,7 +249,7 @@ void main() {
       expect(find.byType(ProfileScreen), findsOneWidget);
     });
 
-    testWidgets('un admin apre la creazione partita dal calendario', (
+    testWidgets('un admin crea la partita scegliendo campo e orario', (
       tester,
     ) async {
       const admin = AppUser(
@@ -277,10 +279,38 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.byType(BookScreen), findsOneWidget);
-      expect(find.text('Crea partita'), findsNWidgets(2));
+      expect(find.byType(AdminCreateMatchScreen), findsOneWidget);
+      expect(find.byType(BookScreen), findsNothing);
+      expect(find.text('Crea partita'), findsOneWidget);
+      expect(find.text('Data della partita'), findsOneWidget);
+      expect(find.text('Campo'), findsOneWidget);
+      expect(find.text('Orario'), findsOneWidget);
+      expect(find.text('Continua con giocatori e dettagli'), findsOneWidget);
       expect(find.byType(AppShell), findsNothing);
 
+      tester
+          .widget<DropdownButtonFormField<String>>(
+            find.byType(DropdownButtonFormField<String>),
+          )
+          .onChanged!
+          .call('c1');
+      await tester.pumpAndSettle();
+
+      tester
+          .widget<DropdownButtonFormField<int>>(
+            find.byType(DropdownButtonFormField<int>),
+          )
+          .onChanged!
+          .call(18 * 60);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Continua con giocatori e dettagli'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CompleteBookingScreen), findsOneWidget);
+      expect(find.text('Mer 7 ott · 18:00–19:30'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Chiudi'));
+      await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Indietro'));
       await tester.pumpAndSettle();
       expect(find.byType(AdminMatchesScreen), findsOneWidget);

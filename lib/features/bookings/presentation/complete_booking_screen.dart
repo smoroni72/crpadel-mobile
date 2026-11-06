@@ -16,9 +16,14 @@ import 'widgets/player_picker_sheet.dart';
 
 /// Pagina modale a schermo intero: tipo, istruttore, giocatori, conferma.
 class CompleteBookingScreen extends ConsumerWidget {
-  const CompleteBookingScreen({super.key, required this.slot});
+  const CompleteBookingScreen({
+    super.key,
+    required this.slot,
+    this.successRouteName = AppRoutes.home,
+  });
 
   final BookingSlot slot;
+  final String successRouteName;
 
   Future<void> _submit(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
@@ -28,12 +33,12 @@ class CompleteBookingScreen extends ConsumerWidget {
     if (!context.mounted || outcome == null) return;
     switch (outcome) {
       case BookingConfirmed():
-        context.goNamed(AppRoutes.home);
+        context.goNamed(successRouteName);
         messenger.showSnackBar(
           const SnackBar(content: Text('Prenotazione confermata')),
         );
       case MatchNotOpened(:final message):
-        context.goNamed(AppRoutes.home);
+        context.goNamed(successRouteName);
         messenger.showSnackBar(
           SnackBar(
             content: Text(
