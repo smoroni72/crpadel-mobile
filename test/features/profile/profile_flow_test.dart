@@ -86,6 +86,35 @@ void main() {
     expect(find.textContaining('·'), findsNothing);
   });
 
+  testWidgets('profilo mostra i due indicatori delle regole ranking', (
+    tester,
+  ) async {
+    final profile = FakeProfileRepository(
+      profileStats: const ProfileStats(
+        rankingAlerts: RankingAlerts(
+          periodEnd: '2026-11-10',
+          favoriteRuleEnabled: true,
+          favoriteStreak: 3,
+          favoriteThreshold: 3,
+          favoriteRisk: true,
+          inactivityRuleEnabled: true,
+          matchesPlayedInDecade: 0,
+          matchesScheduledInDecade: 1,
+          inactivityMinimumMatches: 1,
+          inactivityPenaltyPoints: -1,
+          inactivityRisk: true,
+        ),
+      ),
+    );
+    await openProfile(tester, FakeBackend(profile: profile));
+
+    expect(find.text('Situazione ranking'), findsOneWidget);
+    expect(find.text('Partite consecutive da favorito'), findsOneWidget);
+    expect(find.text('Presenza nella decade'), findsOneWidget);
+    expect(find.text('3 / 3'), findsOneWidget);
+    expect(find.text('0 / 1'), findsOneWidget);
+  });
+
   testWidgets('la scheda Abbonamenti compare solo con un pacchetto', (
     tester,
   ) async {

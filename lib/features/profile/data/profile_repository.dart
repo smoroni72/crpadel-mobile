@@ -64,6 +64,12 @@ class ApiProfileRepository implements ProfileRepository {
     return MonthlyRankingResult(
       month: meta['month'] as String? ?? month,
       minimumMatches: (meta['minimum_matches'] as num?)?.toInt() ?? 1,
+      playerOfMonthMinimumMatches:
+          (meta['player_of_month_minimum_matches'] as num?)?.toInt() ?? 4,
+      generalLeaderboardMinimumMatches:
+          (meta['general_leaderboard_minimum_matches'] as num?)?.toInt() ?? 0,
+      playerOfMonthRequiresGeneralLeaderboard:
+          meta['player_of_month_requires_general_leaderboard'] != false,
       players: (body['data'] as List<dynamic>? ?? const [])
           .cast<Map<String, dynamic>>()
           .map(MonthlyRanking.fromJson)
@@ -134,6 +140,8 @@ class ApiProfileRepository implements ProfileRepository {
     }
     if (own == null && index < 0 && detail == null) return const ProfileStats();
     final totals = detail?['totals'] as Map<String, dynamic>? ?? const {};
+    final rankingAlertsJson =
+        detail?['ranking_alerts'] as Map<String, dynamic>? ?? const {};
     final matches = (detail?['matches'] as List<dynamic>? ?? const [])
         .cast<Map<String, dynamic>>()
         .where(
@@ -174,6 +182,7 @@ class ApiProfileRepository implements ProfileRepository {
       recentWins: recentWins,
       bandName: own?.rankingBandName,
       bandColor: own?.rankingBandColor,
+      rankingAlerts: RankingAlerts.fromJson(rankingAlertsJson),
     );
   }
 

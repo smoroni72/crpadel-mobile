@@ -23,6 +23,7 @@ import '../../subscriptions/presentation/subscription_summary_card.dart';
 import '../../subscriptions/presentation/subscriptions_provider.dart';
 import '../../notifications/presentation/notifications_provider.dart';
 import '../../profile/domain/profile_models.dart';
+import '../../profile/presentation/profile_providers.dart';
 import '../domain/home_news.dart';
 import 'home_providers.dart';
 import 'package:intl/intl.dart';
@@ -38,6 +39,7 @@ class HomeScreen extends ConsumerWidget {
       ref.refresh(dayMatchesProvider(day).future),
       ref.refresh(homeLeaderboardProvider.future),
       ref.refresh(homeNewsProvider.future),
+      ref.refresh(profileStatsProvider.future),
     ]).catchError((_) => <Object?>[]);
   }
 
@@ -64,6 +66,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
               ],
+              const _RankingAlertBanner(),
               const _RankingSpotlight(),
               const SizedBox(height: 24),
               const _NewsSection(),
@@ -77,6 +80,92 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _RankingAlertBanner extends ConsumerWidget {
+  const _RankingAlertBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final alerts = ref.watch(profileStatsProvider).value?.rankingAlerts;
+    if (alerts == null || !alerts.hasRisk) return const SizedBox.shrink();
+    final messages = <String>[
+      if (alerts.favoriteRisk)
+        'Hai raggiunto ${alerts.favoriteStreak} partite consecutive da favorito: un’altra partita da favorito può annullare i punti classifica.',
+      if (alerts.inactivityRisk)
+        'Non hai ancora giocato nella decade: senza una partita entro ${_shortDate(alerts.periodEnd)} subirai ${NumberFormat('0.##', 'it_IT').format(alerts.inactivityPenaltyPoints)} punto in classifica.',
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Material(
+        color: Colors.red.withValues(alpha: .10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: Colors.red.withValues(alpha: .42)),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => context.pushNamed(AppRoutes.profile),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CircleAvatar(
+                  backgroundColor: Color(0x22F44336),
+                  child: Icon(
+                    Icons.notification_important_outlined,
+                    color: Colors.red,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'ATTENZIONE RANKING',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: .5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      for (final message in messages)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 3),
+                          child: Text(
+                            message,
+                            style: const TextStyle(height: 1.3),
+                          ),
+                        ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Apri il profilo per vedere i dettagli',
+                        style: TextStyle(
+                          color: context.colors.primaryText,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Colors.red),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _shortDate(String value) {
+  final date = DateTime.tryParse(value);
+  return date == null ? value : DateFormat('d MMMM', 'it_IT').format(date);
 }
 
 class _RankingSpotlight extends ConsumerWidget {

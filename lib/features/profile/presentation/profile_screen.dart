@@ -129,6 +129,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 12),
                 const _ProfileCard(),
                 const SizedBox(height: 14),
+                const _RankingRulesCard(),
+                const SizedBox(height: 14),
                 const _PlayerPerformance(),
                 const SizedBox(height: 20),
                 _Tabs(
@@ -257,6 +259,174 @@ class _ProfileCard extends ConsumerWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RankingRulesCard extends ConsumerWidget {
+  const _RankingRulesCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(profileStatsProvider).value;
+    if (stats == null) return const SizedBox.shrink();
+    final alerts = stats.rankingAlerts;
+    final deadline = DateTime.tryParse(alerts.periodEnd);
+    final deadlineLabel = deadline == null
+        ? alerts.periodEnd
+        : DateFormat('d MMMM', 'it_IT').format(deadline);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: alerts.hasRisk
+                        ? Colors.orange.withValues(alpha: .14)
+                        : Colors.green.withValues(alpha: .12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    alerts.hasRisk
+                        ? Icons.notification_important_outlined
+                        : Icons.verified_user_outlined,
+                    color: alerts.hasRisk ? Colors.orange : Colors.green,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Situazione ranking',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text(
+                        alerts.hasRisk
+                            ? 'Attenzione: una regola può incidere sui punti'
+                            : 'Nessuna penalizzazione attiva',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: alerts.hasRisk
+                              ? Colors.orange
+                              : context.colors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            _RankingRuleTile(
+              icon: Icons.trending_up,
+              title: 'Partite consecutive da favorito',
+              value: alerts.favoriteRuleEnabled
+                  ? '${alerts.favoriteStreak} / ${alerts.favoriteThreshold}'
+                  : 'Non attiva',
+              warning: alerts.favoriteRisk,
+              description: alerts.favoriteRisk
+                  ? 'Soglia raggiunta: una nuova partita ancora da favorito assegna ${NumberFormat('0.##', 'it_IT').format(alerts.favoritePointsAfterThreshold)} punti classifica.'
+                  : alerts.favoriteRuleEnabled
+                  ? 'Il contatore torna a zero giocando a coefficiente pari o inferiore agli avversari.'
+                  : 'Questa regola non è attiva nel periodo corrente.',
+            ),
+            const SizedBox(height: 10),
+            _RankingRuleTile(
+              icon: alerts.injuryExempt
+                  ? Icons.health_and_safety_outlined
+                  : Icons.event_busy_outlined,
+              title: 'Presenza nella decade',
+              value: alerts.injuryExempt
+                  ? 'Congelato'
+                  : '${alerts.matchesPlayedInDecade} / ${alerts.inactivityMinimumMatches}',
+              warning: alerts.inactivityRisk,
+              description: alerts.injuryExempt
+                  ? 'Esenzione per infortunio attiva: nessuna penalizzazione per assenza.'
+                  : alerts.inactivityRisk
+                  ? 'Entro il $deadlineLabel serve una partita ranking: altrimenti ${NumberFormat('0.##', 'it_IT').format(alerts.inactivityPenaltyPoints)} punto in classifica.${alerts.matchesScheduledInDecade > 0 ? ' Hai ${alerts.matchesScheduledInDecade} partita/e già in calendario.' : ''}'
+                  : alerts.inactivityRuleEnabled
+                  ? 'Requisito della decade raggiunto. Nessuna penalizzazione per assenza.'
+                  : 'Questa regola non è attiva nel periodo corrente.',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RankingRuleTile extends StatelessWidget {
+  const _RankingRuleTile({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.warning,
+    required this.description,
+  });
+
+  final IconData icon;
+  final String title;
+  final String value;
+  final bool warning;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = warning ? Colors.red : Colors.green;
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .08),
+        border: Border.all(color: color.withValues(alpha: .30)),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 23),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    Text(
+                      value,
+                      style: context.fonts
+                          .monoStyle(fontWeight: FontWeight.w700)
+                          .copyWith(color: color),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.3,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

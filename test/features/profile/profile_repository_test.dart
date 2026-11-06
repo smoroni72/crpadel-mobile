@@ -87,6 +87,23 @@ void main() {
             200,
             {
               'data': {
+                'ranking_alerts': {
+                  'period_start': '2026-11-01',
+                  'period_end': '2026-11-10',
+                  'days_remaining': 4,
+                  'favorite_rule_enabled': true,
+                  'favorite_streak': 3,
+                  'favorite_threshold': 3,
+                  'favorite_points_after_threshold': 0,
+                  'favorite_risk': true,
+                  'inactivity_rule_enabled': true,
+                  'matches_played_in_decade': 0,
+                  'matches_scheduled_in_decade': 1,
+                  'inactivity_minimum_matches': 1,
+                  'inactivity_penalty_points': -1,
+                  'inactivity_risk': true,
+                  'injury_exempt': false,
+                },
                 'totals': {
                   'matches_played': 20,
                   'wins': 12,
@@ -171,6 +188,10 @@ void main() {
       expect(stats.recentFormRate, 60);
       expect(stats.formLabel, 'Buona');
       expect(stats.trendLabel, 'Stabile');
+      expect(stats.rankingAlerts.favoriteRisk, isTrue);
+      expect(stats.rankingAlerts.favoriteStreak, 3);
+      expect(stats.rankingAlerts.inactivityRisk, isTrue);
+      expect(stats.rankingAlerts.matchesScheduledInDecade, 1);
     },
   );
 
@@ -188,9 +209,17 @@ void main() {
               'monthly_score': 131.67,
               'matches_played': 3,
               'matches_won': 2,
+              'classification_delta': 4.21,
+              'general_leaderboard_qualified': true,
+              'player_of_month_eligible': true,
             },
           ],
-          'meta': {'month': '2026-10', 'minimum_matches': 3},
+          'meta': {
+            'month': '2026-10',
+            'minimum_matches': 3,
+            'player_of_month_minimum_matches': 3,
+            'general_leaderboard_minimum_matches': 6,
+          },
         },
       ),
     );
@@ -202,6 +231,8 @@ void main() {
     expect(result.minimumMatches, 3);
     expect(result.playerOfTheMonth?.playerName, 'Mario Rossi');
     expect(result.players.single.monthlyScore, 131.67);
+    expect(result.players.single.classificationDelta, 4.21);
+    expect(result.players.single.playerOfMonthEligible, isTrue);
     expect(adapter.requests.single.path, '/rankings/monthly');
   });
 

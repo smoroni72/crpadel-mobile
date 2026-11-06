@@ -38,6 +38,19 @@ void main() {
             monthlyScore: 131.7,
             matchesPlayed: 3,
             matchesWon: 2,
+            classificationDelta: 4.2,
+            generalLeaderboardQualified: true,
+            playerOfMonthEligible: true,
+          ),
+          MonthlyRanking(
+            position: 2,
+            playerRef: 'p2',
+            playerName: 'Luigi Bianchi',
+            pointsEarned: 48,
+            monthlyScore: 160,
+            matchesPlayed: 3,
+            matchesWon: 3,
+            classificationDelta: 8,
           ),
         ],
       ),
@@ -87,12 +100,16 @@ void main() {
 
     expect(find.text('Classifica mensile'), findsOneWidget);
     expect(find.text('GIOCATORE DEL MESE'), findsOneWidget);
-    expect(
-      find.text('Servono almeno 2 partite nel mese per comparire'),
-      findsOneWidget,
-    );
+    expect(find.text('Ordina per'), findsOneWidget);
+    expect(find.text('Solo idonei'), findsOneWidget);
     expect(find.text('Mario Rossi'), findsWidgets);
+    expect(find.text('Luigi Bianchi'), findsOneWidget);
     expect(find.text('Classifica generale'), findsNothing);
+
+    await tester.tap(find.text('Solo idonei'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mario Rossi'), findsWidgets);
+    expect(find.text('Luigi Bianchi'), findsNothing);
 
     await tester.tap(find.byIcon(Icons.calendar_month_outlined).last);
     await tester.pumpAndSettle();

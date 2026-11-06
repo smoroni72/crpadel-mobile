@@ -113,6 +113,35 @@ void main() {
     expect(find.text('Mattina 10 · scade 12/12'), findsOneWidget);
   });
 
+  testWidgets('evidenzia in home i rischi ranking del giocatore', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      FakeBackend(
+        profile: FakeProfileRepository(
+          profileStats: const ProfileStats(
+            rankingAlerts: RankingAlerts(
+              periodEnd: '2026-10-10',
+              favoriteRuleEnabled: true,
+              favoriteStreak: 3,
+              favoriteThreshold: 3,
+              favoriteRisk: true,
+              inactivityRuleEnabled: true,
+              inactivityMinimumMatches: 1,
+              inactivityPenaltyPoints: -1,
+              inactivityRisk: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('ATTENZIONE RANKING'), findsOneWidget);
+    expect(find.textContaining('3 partite consecutive'), findsOneWidget);
+    expect(find.textContaining('Non hai ancora giocato'), findsOneWidget);
+  });
+
   testWidgets('prenotazioni future con la partita collegata', (tester) async {
     await pumpHome(
       tester,

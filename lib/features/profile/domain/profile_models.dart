@@ -30,6 +30,73 @@ double nullableRankingScoreFromJson(Object? value) => switch (value) {
   _ => 0,
 };
 
+class RankingAlerts {
+  const RankingAlerts({
+    this.currentDate = '',
+    this.periodStart = '',
+    this.periodEnd = '',
+    this.daysRemaining = 0,
+    this.favoriteRuleEnabled = false,
+    this.favoriteStreak = 0,
+    this.favoriteThreshold = 3,
+    this.favoritePointsAfterThreshold = 0,
+    this.favoriteRisk = false,
+    this.inactivityRuleEnabled = false,
+    this.matchesPlayedInDecade = 0,
+    this.matchesScheduledInDecade = 0,
+    this.inactivityMinimumMatches = 1,
+    this.inactivityPenaltyPoints = -1,
+    this.inactivityRisk = false,
+    this.injuryExempt = false,
+    this.injuryExemptSince,
+  });
+
+  final String currentDate;
+  final String periodStart;
+  final String periodEnd;
+  final int daysRemaining;
+  final bool favoriteRuleEnabled;
+  final int favoriteStreak;
+  final int favoriteThreshold;
+  final double favoritePointsAfterThreshold;
+  final bool favoriteRisk;
+  final bool inactivityRuleEnabled;
+  final int matchesPlayedInDecade;
+  final int matchesScheduledInDecade;
+  final int inactivityMinimumMatches;
+  final double inactivityPenaltyPoints;
+  final bool inactivityRisk;
+  final bool injuryExempt;
+  final String? injuryExemptSince;
+
+  bool get hasRisk => favoriteRisk || inactivityRisk;
+
+  factory RankingAlerts.fromJson(Map<String, dynamic> json) => RankingAlerts(
+    currentDate: json['current_date'] as String? ?? '',
+    periodStart: json['period_start'] as String? ?? '',
+    periodEnd: json['period_end'] as String? ?? '',
+    daysRemaining: (json['days_remaining'] as num?)?.toInt() ?? 0,
+    favoriteRuleEnabled: json['favorite_rule_enabled'] == true,
+    favoriteStreak: (json['favorite_streak'] as num?)?.toInt() ?? 0,
+    favoriteThreshold: (json['favorite_threshold'] as num?)?.toInt() ?? 3,
+    favoritePointsAfterThreshold: _number(
+      json['favorite_points_after_threshold'],
+    ),
+    favoriteRisk: json['favorite_risk'] == true,
+    inactivityRuleEnabled: json['inactivity_rule_enabled'] == true,
+    matchesPlayedInDecade:
+        (json['matches_played_in_decade'] as num?)?.toInt() ?? 0,
+    matchesScheduledInDecade:
+        (json['matches_scheduled_in_decade'] as num?)?.toInt() ?? 0,
+    inactivityMinimumMatches:
+        (json['inactivity_minimum_matches'] as num?)?.toInt() ?? 1,
+    inactivityPenaltyPoints: _number(json['inactivity_penalty_points']),
+    inactivityRisk: json['inactivity_risk'] == true,
+    injuryExempt: json['injury_exempt'] == true,
+    injuryExemptSince: json['injury_exempt_since'] as String?,
+  );
+}
+
 /// Statistiche del Profilo, come i 4 riquadri del sito.
 class ProfileStats {
   const ProfileStats({
@@ -55,6 +122,7 @@ class ProfileStats {
     this.rankingPointsAverage = 0,
     this.recentMatches = 0,
     this.recentWins = 0,
+    this.rankingAlerts = const RankingAlerts(),
   });
 
   /// Posizione in classifica; `null` se l'utente non è in classifica.
@@ -80,6 +148,7 @@ class ProfileStats {
   final double rankingPointsAverage;
   final int recentMatches;
   final int recentWins;
+  final RankingAlerts rankingAlerts;
 
   /// Percentuale di vittorie arrotondata, come sul sito.
   int get winRate =>
@@ -129,6 +198,9 @@ class MonthlyRanking {
     required this.monthlyScore,
     required this.matchesPlayed,
     required this.matchesWon,
+    this.classificationDelta = 0,
+    this.generalLeaderboardQualified = false,
+    this.playerOfMonthEligible = false,
   });
 
   final int position;
@@ -138,6 +210,9 @@ class MonthlyRanking {
   final double monthlyScore;
   final int matchesPlayed;
   final int matchesWon;
+  final double classificationDelta;
+  final bool generalLeaderboardQualified;
+  final bool playerOfMonthEligible;
 
   int get matchesLost => matchesPlayed - matchesWon;
 
@@ -149,6 +224,9 @@ class MonthlyRanking {
     monthlyScore: _number(json['monthly_score']),
     matchesPlayed: (json['matches_played'] as num?)?.toInt() ?? 0,
     matchesWon: (json['matches_won'] as num?)?.toInt() ?? 0,
+    classificationDelta: _number(json['classification_delta']),
+    generalLeaderboardQualified: json['general_leaderboard_qualified'] == true,
+    playerOfMonthEligible: json['player_of_month_eligible'] == true,
   );
 }
 
@@ -156,14 +234,21 @@ class MonthlyRankingResult {
   const MonthlyRankingResult({
     required this.month,
     required this.minimumMatches,
+    this.playerOfMonthMinimumMatches = 4,
+    this.generalLeaderboardMinimumMatches = 0,
+    this.playerOfMonthRequiresGeneralLeaderboard = true,
     this.players = const [],
   });
 
   final String month;
   final int minimumMatches;
+  final int playerOfMonthMinimumMatches;
+  final int generalLeaderboardMinimumMatches;
+  final bool playerOfMonthRequiresGeneralLeaderboard;
   final List<MonthlyRanking> players;
 
-  MonthlyRanking? get playerOfTheMonth => players.firstOrNull;
+  MonthlyRanking? get playerOfTheMonth =>
+      players.where((player) => player.playerOfMonthEligible).firstOrNull;
 }
 
 class RankingDecadePeriod {

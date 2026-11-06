@@ -16,9 +16,13 @@ class RankingsScreen extends ConsumerStatefulWidget {
 
 enum _RankingView { general, monthly, decades }
 
+enum _MonthlySort { classificationDelta, pointsEarned }
+
 class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   late DateTime _month;
   _RankingView _view = _RankingView.general;
+  _MonthlySort _monthlySort = _MonthlySort.classificationDelta;
+  bool _onlyEligible = false;
   String? _decadeStart;
 
   @override
@@ -230,11 +234,23 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
           ] else if (_view == _RankingView.monthly) ...[
             _MonthlyHeader(month: _month, onSelectMonth: _selectMonth),
             const SizedBox(height: 12),
+            _MonthlyFilters(
+              sort: _monthlySort,
+              onlyEligible: _onlyEligible,
+              onSortChanged: (value) => setState(() => _monthlySort = value),
+              onOnlyEligibleChanged: (value) =>
+                  setState(() => _onlyEligible = value),
+            ),
+            const SizedBox(height: 12),
             AsyncValueView(
               value: ref.watch(monthlyRankingsProvider(_monthKey)),
               errorText: 'Non riesco a caricare la classifica mensile',
               onRetry: () => ref.invalidate(monthlyRankingsProvider(_monthKey)),
-              data: (result) => _MonthlyRankingSection(result: result),
+              data: (result) => _MonthlyRankingSection(
+                result: result,
+                sort: _monthlySort,
+                onlyEligible: _onlyEligible,
+              ),
             ),
           ] else ...[
             AsyncValueView(
@@ -429,15 +445,96 @@ class _MonthlyHeader extends StatelessWidget {
   );
 }
 
+class _MonthlyFilters extends StatelessWidget {
+  const _MonthlyFilters({
+    required this.sort,
+    required this.onlyEligible,
+    required this.onSortChanged,
+    required this.onOnlyEligibleChanged,
+  });
+
+  final _MonthlySort sort;
+  final bool onlyEligible;
+  final ValueChanged<_MonthlySort> onSortChanged;
+  final ValueChanged<bool> onOnlyEligibleChanged;
+
+  @override
+  Widget build(BuildContext context) => Wrap(
+    spacing: 10,
+    runSpacing: 10,
+    children: [
+      SizedBox(
+        width: 220,
+        child: DropdownButtonFormField<_MonthlySort>(
+          initialValue: sort,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            labelText: 'Ordina per',
+            prefixIcon: Icon(Icons.swap_vert),
+          ),
+          items: const [
+            DropdownMenuItem(
+              value: _MonthlySort.classificationDelta,
+              child: Text('Delta classifica'),
+            ),
+            DropdownMenuItem(
+              value: _MonthlySort.pointsEarned,
+              child: Text('PR totali'),
+            ),
+          ],
+          onChanged: (value) {
+            if (value != null) onSortChanged(value);
+          },
+        ),
+      ),
+      FilterChip(
+        selected: onlyEligible,
+        avatar: Icon(
+          onlyEligible ? Icons.verified : Icons.verified_outlined,
+          size: 18,
+        ),
+        label: const Text('Solo idonei'),
+        onSelected: onOnlyEligibleChanged,
+      ),
+    ],
+  );
+}
+
 class _MonthlyRankingSection extends StatelessWidget {
-  const _MonthlyRankingSection({required this.result});
+  const _MonthlyRankingSection({
+    required this.result,
+    required this.sort,
+    required this.onlyEligible,
+  });
 
   final MonthlyRankingResult result;
+  final _MonthlySort sort;
+  final bool onlyEligible;
 
   @override
   Widget build(BuildContext context) {
-    final winner = result.playerOfTheMonth;
-    if (winner == null) {
+    final players =
+        result.players
+            .where((player) => !onlyEligible || player.playerOfMonthEligible)
+            .toList()
+          ..sort((left, right) {
+            final leftValue = sort == _MonthlySort.classificationDelta
+                ? left.classificationDelta
+                : left.pointsEarned;
+            final rightValue = sort == _MonthlySort.classificationDelta
+                ? right.classificationDelta
+                : right.pointsEarned;
+            final byValue = rightValue.compareTo(leftValue);
+            if (byValue != 0) return byValue;
+            final byPoints = right.pointsEarned.compareTo(left.pointsEarned);
+            if (byPoints != 0) return byPoints;
+            return left.playerName.compareTo(right.playerName);
+          });
+    final eligible = players
+        .where((player) => player.playerOfMonthEligible)
+        .toList();
+    final winner = eligible.firstOrNull;
+    if (players.isEmpty) {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(28),
@@ -449,7 +546,9 @@ class _MonthlyRankingSection extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Nessun punto ranking assegnato nel mese',
+                onlyEligible
+                    ? 'Nessun giocatore idoneo nel mese'
+                    : 'Nessun punto ranking assegnato nel mese',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: context.colors.textSecondary),
               ),
@@ -462,100 +561,137 @@ class _MonthlyRankingSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Servono almeno ${result.minimumMatches} partite nel mese per comparire',
+          'Player del mese: almeno ${result.playerOfMonthMinimumMatches} partite e presenza nella classifica generale (${result.generalLeaderboardMinimumMatches} PG).',
           style: TextStyle(fontSize: 12, color: context.colors.primaryText),
         ),
         const SizedBox(height: 10),
-        Card(
-          color: const Color(0xFFFFC107).withValues(alpha: 0.12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  backgroundColor: Color(0x33FFC107),
-                  child: Icon(Icons.emoji_events, color: Color(0xFFFFB300)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'GIOCATORE DEL MESE',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.primaryText,
-                        ),
-                      ),
-                      Text(
-                        winner.playerName,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Text(
-                        '${winner.matchesPlayed} partite · ${winner.matchesWon} vinte',
-                        style: TextStyle(color: context.colors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  _points(winner.monthlyScore),
-                  style: context.fonts
-                      .monoStyle(fontSize: 18, fontWeight: FontWeight.w700)
-                      .copyWith(color: const Color(0xFFFFB300)),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        for (final player in result.players) ...[
+        if (winner != null) ...[
           Card(
+            color: const Color(0xFFFFC107).withValues(alpha: 0.12),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  SizedBox(
-                    width: 34,
-                    child: Text(
-                      '#${player.position}',
-                      style: context.fonts.monoStyle(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                  const CircleAvatar(
+                    backgroundColor: Color(0x33FFC107),
+                    child: Icon(Icons.emoji_events, color: Color(0xFFFFB300)),
                   ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          player.playerName,
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          'GIOCATORE DEL MESE',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: context.colors.primaryText,
+                          ),
                         ),
                         Text(
-                          '${player.matchesPlayed} PG · ${player.matchesWon} V · ${_points(player.pointsEarned)} PR',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: context.colors.textSecondary,
+                          winner.playerName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
                           ),
+                        ),
+                        Text(
+                          '${winner.matchesPlayed} partite · ${winner.matchesWon} vinte',
+                          style: TextStyle(color: context.colors.textSecondary),
                         ),
                       ],
                     ),
                   ),
                   Text(
-                    _points(player.monthlyScore),
+                    _monthlyValue(winner, sort),
                     style: context.fonts
-                        .monoStyle(fontWeight: FontWeight.w700)
-                        .copyWith(color: context.colors.primaryText),
+                        .monoStyle(fontSize: 18, fontWeight: FontWeight.w700)
+                        .copyWith(color: const Color(0xFFFFB300)),
                   ),
                 ],
               ),
             ),
+          ),
+        ] else
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Nessun giocatore ha ancora raggiunto tutti i requisiti per il Player del mese.',
+                style: TextStyle(color: context.colors.textSecondary),
+              ),
+            ),
+          ),
+        const SizedBox(height: 8),
+        for (final entry in players.indexed) ...[
+          Builder(
+            builder: (context) {
+              final player = entry.$2;
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 11,
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 34,
+                        child: Text(
+                          '#${entry.$1 + 1}',
+                          style: context.fonts.monoStyle(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    player.playerName,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                if (player.playerOfMonthEligible) ...[
+                                  const SizedBox(width: 5),
+                                  const Icon(
+                                    Icons.verified,
+                                    size: 15,
+                                    color: Colors.green,
+                                  ),
+                                ],
+                              ],
+                            ),
+                            Text(
+                              '${player.matchesPlayed} PG · ${player.matchesWon} V · ${_points(player.pointsEarned)} PR · Δ ${_signedPoints(player.classificationDelta)}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: context.colors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _monthlyValue(player, sort),
+                        style: context.fonts
+                            .monoStyle(fontWeight: FontWeight.w700)
+                            .copyWith(color: context.colors.primaryText),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 8),
         ],
@@ -563,6 +699,14 @@ class _MonthlyRankingSection extends StatelessWidget {
     );
   }
 }
+
+String _monthlyValue(MonthlyRanking player, _MonthlySort sort) =>
+    sort == _MonthlySort.classificationDelta
+    ? _signedPoints(player.classificationDelta)
+    : _points(player.pointsEarned);
+
+String _signedPoints(double value) =>
+    '${value > 0 ? '+' : ''}${_points(value)}';
 
 class _RankingRow extends StatelessWidget {
   const _RankingRow({required this.player, required this.position});
