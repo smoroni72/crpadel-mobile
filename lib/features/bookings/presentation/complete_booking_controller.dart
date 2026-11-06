@@ -5,6 +5,7 @@ import '../../../core/utils/dates.dart';
 import '../../matches/data/matches_repository.dart';
 import '../../matches/domain/directory_player.dart';
 import '../../matches/presentation/day_matches_provider.dart';
+import '../../matches/presentation/match_providers.dart';
 import '../data/bookings_repository.dart';
 import '../domain/booking.dart';
 import '../domain/booking_request.dart';
@@ -331,5 +332,6 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
     ref.invalidate(availabilityProvider);
     ref.invalidate(upcomingBookingsProvider);
     ref.invalidate(dayMatchesProvider(slot.date));
+    ref.invalidate(matchDatesProvider);
   }
 }

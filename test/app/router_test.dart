@@ -13,6 +13,8 @@ import 'package:crpadel_mobile/features/bookings/presentation/book_screen.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/complete_booking_screen.dart';
 import 'package:crpadel_mobile/features/home/presentation/home_screen.dart';
 import 'package:crpadel_mobile/features/matches/presentation/matches_screen.dart';
+import 'package:crpadel_mobile/features/matches/data/fake_matches_repository.dart';
+import 'package:crpadel_mobile/features/matches/domain/padel_match.dart';
 import 'package:crpadel_mobile/features/profile/presentation/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../helpers/app_overrides.dart';
+import '../helpers/fixtures.dart';
 
 void main() {
   group('appRedirect', () {
@@ -319,6 +322,64 @@ void main() {
       expect(backend.matches.created, hasLength(1));
       expect(backend.matches.created.single.timeSlot, '08:00-09:30');
     });
+
+    testWidgets(
+      'il calendario admin evidenzia i giorni e filtra i risultati mancanti',
+      (tester) async {
+        const admin = AppUser(
+          id: 'admin-1',
+          email: 'admin@crpadel.it',
+          fullName: 'Admin',
+          role: 'admin',
+          adminMenuPermissions: ['matches'],
+        );
+        final backend = FakeBackend(
+          auth: FakeAuthRepository(sessionUser: admin),
+          matches: FakeMatchesRepository(
+            matches: [
+              match(
+                id: 'pending',
+                court: 'Campo da completare',
+                status: MatchStatus.pendingResult,
+              ),
+              match(
+                id: 'completed',
+                court: 'Campo completato',
+                status: MatchStatus.completed,
+                score: '6-2 6-3',
+              ),
+            ],
+          ),
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: backend.overrides,
+            retry: (_, _) => null,
+            child: const CrPadelApp(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        GoRouter.of(
+          tester.element(find.byType(HomeScreen)),
+        ).goNamed(AppRoutes.adminMatches);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const ValueKey('matches-2026-10-07')),
+          findsOneWidget,
+        );
+        expect(find.text('CAMPO DA COMPLETARE'), findsOneWidget);
+        expect(find.text('CAMPO COMPLETATO'), findsOneWidget);
+        expect(find.text('Risultato da inserire (1)'), findsOneWidget);
+
+        await tester.tap(find.text('Risultato da inserire (1)'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('CAMPO DA COMPLETARE'), findsOneWidget);
+        expect(find.text('CAMPO COMPLETATO'), findsNothing);
+      },
+    );
 
     testWidgets('parte con tema scuro e il sole attiva quello chiaro', (
       tester,
