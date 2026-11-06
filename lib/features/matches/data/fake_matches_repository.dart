@@ -89,6 +89,26 @@ class FakeMatchesRepository implements MatchesRepository {
   }
 
   @override
+  Future<PadelMatch> update(String matchId, UpdateMatch request) async {
+    if (error != null) throw error!;
+    final current = _find(matchId);
+    return _replace(
+      current.copyWith(
+        date: DateTime.parse(request.date),
+        timeSlot: request.timeSlot,
+        courtName: request.courtId,
+        players: request.players ?? current.players,
+      ),
+    );
+  }
+
+  @override
+  Future<void> delete(String matchId) async {
+    if (error != null) throw error!;
+    matches = matches.where((match) => match.id != matchId).toList();
+  }
+
+  @override
   Future<List<DirectoryPlayer>> playersDirectory() async {
     if (error != null) throw error!;
     return directory;

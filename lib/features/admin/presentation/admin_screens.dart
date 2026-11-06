@@ -17,6 +17,7 @@ import '../../matches/presentation/widgets/day_strip.dart';
 import '../data/admin_repository.dart';
 import 'admin_providers.dart';
 import 'admin_menu_button.dart';
+import 'admin_player_statistics_screen.dart';
 
 class AdminHomeScreen extends ConsumerWidget {
   const AdminHomeScreen({super.key});
@@ -453,6 +454,12 @@ class _AdminPlayersScreenState extends ConsumerState<AdminPlayersScreen> {
                     final item = items[index];
                     return Card(
                       child: ListTile(
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                AdminPlayerStatisticsScreen(player: item),
+                          ),
+                        ),
                         leading: CircleAvatar(
                           child: Text(item.name.isEmpty ? '?' : item.name[0]),
                         ),
@@ -461,7 +468,7 @@ class _AdminPlayersScreenState extends ConsumerState<AdminPlayersScreen> {
                           '${item.email}\n${item.matches} PG · ${item.wins} V · ${item.points.toStringAsFixed(2)} PR',
                         ),
                         isThreeLine: true,
-                        trailing: Text(item.status),
+                        trailing: const Icon(Icons.chevron_right),
                       ),
                     );
                   },

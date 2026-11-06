@@ -19,6 +19,11 @@ final adminBookingsProvider = FutureProvider<List<AdminBooking>>(
 final adminPlayersProvider = FutureProvider.family<List<AdminPlayer>, String>(
   (ref, search) => ref.read(adminRepositoryProvider).players(search: search),
 );
+final adminPlayerStatisticsProvider =
+    FutureProvider.family<AdminPlayerStatistics, String>(
+      (ref, playerId) =>
+          ref.read(adminRepositoryProvider).playerStatistics(playerId),
+    );
 final adminCommunicationsProvider = FutureProvider<List<AdminCommunication>>(
   (ref) => ref.read(adminRepositoryProvider).communications(),
 );
