@@ -36,7 +36,9 @@ class NewMatch {
     this.teamsByPlayerId = const {},
   });
 
-  final String bookingId;
+  /// Prenotazione collegata, assente per le partite registrate direttamente
+  /// dall'amministrazione dopo che sono state disputate.
+  final String? bookingId;
 
   /// `YYYY-MM-DD`
   final String date;
@@ -56,7 +58,7 @@ class NewMatch {
   final Map<String, String> teamsByPlayerId;
 
   Map<String, dynamic> toJson() => {
-    'booking_id': bookingId,
+    if (bookingId != null) 'booking_id': bookingId,
     'date': date,
     'court_id': courtId,
     'time_slot': timeSlot,

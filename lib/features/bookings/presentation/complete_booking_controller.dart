@@ -22,6 +22,7 @@ class BookingSlot {
     this.initialType,
     this.initialMatchType,
     this.initialMatchLevel,
+    this.directMatch = false,
   });
 
   final CourtRef court;
@@ -33,6 +34,7 @@ class BookingSlot {
   final BookingType? initialType;
   final String? initialMatchType;
   final String? initialMatchLevel;
+  final bool directMatch;
 
   @override
   bool operator ==(Object other) =>
@@ -43,7 +45,8 @@ class BookingSlot {
       other.freeMinutes == freeMinutes &&
       other.initialType == initialType &&
       other.initialMatchType == initialMatchType &&
-      other.initialMatchLevel == initialMatchLevel;
+      other.initialMatchLevel == initialMatchLevel &&
+      other.directMatch == directMatch;
 
   @override
   int get hashCode => Object.hash(
@@ -54,6 +57,7 @@ class BookingSlot {
     initialType,
     initialMatchType,
     initialMatchLevel,
+    directMatch,
   );
 }
 
@@ -120,6 +124,11 @@ sealed class BookingOutcome {
 class BookingConfirmed extends BookingOutcome {
   const BookingConfirmed(this.booking);
   final Booking booking;
+}
+
+/// Partita registrata direttamente, senza creare una prenotazione.
+class MatchRegistered extends BookingOutcome {
+  const MatchRegistered();
 }
 
 /// Lo spazio è stato occupato nel frattempo (409): si torna alla griglia.
@@ -204,6 +213,8 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
   Future<BookingOutcome?> submit() async {
     if (!canSubmit) return null;
     state = state.copyWith(submitting: true, error: () => null);
+    if (slot.directMatch) return _submitDirectMatch();
+
     final request = NewBooking(
       courtId: slot.court.id,
       date: slot.date,
@@ -274,6 +285,46 @@ class CompleteBookingController extends Notifier<CompleteBookingState> {
     if (ref.mounted) state = state.copyWith(submitting: false);
     return outcome;
   }
+
+  Future<BookingOutcome?> _submitDirectMatch() async {
+    try {
+      await ref.read(matchesRepositoryProvider).create(_matchRequest());
+    } on ApiException catch (e) {
+      if (e.statusCode == 409) {
+        _refresh();
+        state = state.copyWith(submitting: false);
+        return BookingConflict(e.message);
+      }
+      state = state.copyWith(submitting: false, error: () => e.message);
+      return null;
+    } catch (_) {
+      state = state.copyWith(
+        submitting: false,
+        error: () => 'Registrazione non riuscita. Controlla la connessione.',
+      );
+      return null;
+    }
+    _refresh();
+    if (ref.mounted) state = state.copyWith(submitting: false);
+    return const MatchRegistered();
+  }
+
+  NewMatch _matchRequest({String? bookingId}) => NewMatch(
+    bookingId: bookingId,
+    date: Dates.api(slot.date),
+    courtId: slot.court.id,
+    timeSlot:
+        '${hhmm(slot.startMinutes)}-'
+        '${hhmm(slot.startMinutes + BookingType.court.minutes)}',
+    matchType: state.matchType,
+    level: state.matchLevel,
+    players: state.players.whereType<DirectoryPlayer>().toList(),
+    teamsByPlayerId: {
+      for (var index = 0; index < state.players.length; index++)
+        if (state.players[index] case final player?)
+          player.id: index < 2 ? 'A' : 'B',
+    },
+  );
 
   void _refresh() {
     ref.invalidate(scheduleProvider(slot.date));

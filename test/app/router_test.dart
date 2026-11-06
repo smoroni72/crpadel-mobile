@@ -260,9 +260,10 @@ void main() {
         adminMenuPermissions: ['matches'],
       );
       final repository = FakeAuthRepository(sessionUser: admin);
+      final backend = FakeBackend(auth: repository);
       await tester.pumpWidget(
         ProviderScope(
-          overrides: FakeBackend(auth: repository).overrides,
+          overrides: backend.overrides,
           retry: (_, _) => null,
           child: const CrPadelApp(),
         ),
@@ -301,19 +302,22 @@ void main() {
             find.byType(DropdownButtonFormField<int>),
           )
           .onChanged!
-          .call(18 * 60);
+          .call(8 * 60);
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Continua con giocatori e dettagli'));
       await tester.pumpAndSettle();
       expect(find.byType(CompleteBookingScreen), findsOneWidget);
-      expect(find.text('Mer 7 ott · 18:00–19:30'), findsOneWidget);
+      expect(find.text('Mer 7 ott · 08:00–09:30'), findsOneWidget);
+      expect(find.text('Prenotato per'), findsNothing);
+      expect(find.text('Registra partita'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Chiudi'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Indietro'));
+      await tester.tap(find.text('Registra partita'));
       await tester.pumpAndSettle();
       expect(find.byType(AdminMatchesScreen), findsOneWidget);
+      expect(backend.bookings.created, isEmpty);
+      expect(backend.matches.created, hasLength(1));
+      expect(backend.matches.created.single.timeSlot, '08:00-09:30');
     });
 
     testWidgets('parte con tema scuro e il sole attiva quello chiaro', (
