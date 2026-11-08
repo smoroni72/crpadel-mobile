@@ -255,7 +255,9 @@ void main() {
           'meta': {
             'period_start': '2026-10-21',
             'period_end': '2026-10-31',
-            'frozen_at': '2026-10-20',
+            'frozen_at': '2026-10-31',
+            'period_closed': true,
+            'snapshot_available': true,
             'minimum_matches': 7,
             'available_periods': [
               {'period_start': '2026-10-21', 'period_end': '2026-10-31'},
@@ -271,7 +273,9 @@ void main() {
       periodStart: '2026-10-21',
     );
 
-    expect(result.frozenAt, '2026-10-20');
+    expect(result.frozenAt, '2026-10-31');
+    expect(result.periodClosed, isTrue);
+    expect(result.snapshotAvailable, isTrue);
     expect(result.minimumMatches, 7);
     expect(result.availablePeriods, hasLength(2));
     expect(result.players.single.rankingBandName, 'Blu');

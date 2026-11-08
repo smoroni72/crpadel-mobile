@@ -109,3 +109,13 @@ Esempio:
 
 Notifiche automatiche suggerite: un giocatore entra o esce dalla tua partita; la tua partita è al completo; promemoria il giorno prima; risultato da inserire; pacchetto in esaurimento o in scadenza (`low_balance_thresholds`, `expiry_warning_days` dei piani).
 
+
+### Classifiche per decade — chiusura del periodo
+
+`GET /rankings/decades?period_start=YYYY-MM-DD` mantiene la decade selezionata
+in `period_start`/`period_end`. Se è conclusa (`period_closed: true`), restituisce
+la fotografia alla fine della stessa decade; finché è in corso restituisce la
+chiusura precedente. `frozen_at` indica la data effettiva della fotografia.
+`minimum_matches` descrive la soglia della fotografia restituita.
+Se manca la fotografia richiesta, `snapshot_available: false` e `data: []`:
+non mostrare come chiusura i valori dell'inizio del periodo.
