@@ -57,7 +57,8 @@ void main() {
       decadeRankings: const DecadeRankingResult(
         periodStart: '2026-10-21',
         periodEnd: '2026-10-31',
-        frozenAt: '2026-10-20',
+        frozenAt: '2026-10-31',
+        periodClosed: true,
         minimumMatches: 7,
         availablePeriods: [
           RankingDecadePeriod(start: '2026-10-21', end: '2026-10-31'),
@@ -130,14 +131,50 @@ void main() {
 
     expect(find.text('Classifiche delle decadi'), findsOneWidget);
     expect(
-      find.text('Fotografia ufficiale congelata al 20 ottobre 2026'),
+      find.text('Fotografia ufficiale congelata al 31 ottobre 2026'),
       findsOneWidget,
     );
     expect(find.text('Viola · coeff. 7,00'), findsOneWidget);
+    expect(find.text('Decade conclusa'), findsOneWidget);
+    expect(find.text('Decade in corso'), findsNothing);
 
     await tester.tap(find.text('21 ott – 31 ottobre 2026'));
     await tester.pumpAndSettle();
     expect(find.text('Seleziona la decade'), findsOneWidget);
     expect(find.text('11 ott – 20 ottobre 2026'), findsOneWidget);
+  });
+  testWidgets('la decade in corso mostra la chiusura precedente', (
+    tester,
+  ) async {
+    final repository = FakeProfileRepository(
+      decadeRankings: const DecadeRankingResult(
+        periodStart: '2026-11-01',
+        periodEnd: '2026-11-10',
+        frozenAt: '2026-10-31',
+        minimumMatches: 8,
+      ),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const RankingsScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Decadi'));
+    await tester.pumpAndSettle();
+    expect(find.text('Decade in corso'), findsOneWidget);
+    expect(find.text('Decade conclusa'), findsNothing);
+    expect(
+      find.text('Fotografia ufficiale congelata al 31 ottobre 2026'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('sono mostrati i risultati della decade precedente'),
+      findsOneWidget,
+    );
   });
 }

@@ -92,6 +92,8 @@ class ApiProfileRepository implements ProfileRepository {
       periodStart: meta['period_start'] as String? ?? '',
       periodEnd: meta['period_end'] as String? ?? '',
       frozenAt: meta['frozen_at'] as String? ?? '',
+      periodClosed: meta['period_closed'] == true,
+      snapshotAvailable: meta['snapshot_available'] != false,
       minimumMatches: (meta['minimum_matches'] as num?)?.toInt() ?? 0,
       availablePeriods:
           (meta['available_periods'] as List<dynamic>? ?? const [])

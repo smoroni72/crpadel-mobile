@@ -139,9 +139,6 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                     return ListTile(
                       leading: const Icon(Icons.history),
                       title: Text(_periodLabel(period.start, period.end)),
-                      subtitle: Text(
-                        'Fotografia congelata al ${_dateLabel(_dayBefore(period.start))}',
-                      ),
                       trailing: isSelected
                           ? Icon(
                               Icons.check_circle,
@@ -295,7 +292,7 @@ class _DecadeRankingSection extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Consulta posizione, colore e coefficiente congelati nel periodo',
+          'Classifica di chiusura per le decadi concluse; chiusura precedente per la decade in corso.',
           style: TextStyle(color: context.colors.textSecondary),
         ),
         const SizedBox(height: 12),
@@ -317,12 +314,19 @@ class _DecadeRankingSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+                  result.periodClosed ? 'Decade conclusa' : 'Decade in corso',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 3),
+                Text(
                   'Fotografia ufficiale congelata al ${_dateLabel(result.frozenAt)}',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  'Soglia di visibilità: ${result.minimumMatches} partite. Colori e coefficienti restano validi per tutta la decade.',
+                  result.periodClosed
+                      ? 'Risultati definitivi alla chiusura della decade. Soglia della fotografia: ${result.minimumMatches} partite.'
+                      : 'La decade non è ancora conclusa: sono mostrati i risultati della decade precedente. Soglia della fotografia: ${result.minimumMatches} partite.',
                   style: TextStyle(
                     fontSize: 12,
                     color: context.colors.textSecondary,
@@ -334,7 +338,13 @@ class _DecadeRankingSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         if (result.players.isEmpty)
-          const Center(child: Text('Nessun giocatore in questa classifica'))
+          Center(
+            child: Text(
+              result.snapshotAvailable
+                  ? 'Nessun giocatore in questa classifica'
+                  : 'Fotografia di chiusura non disponibile per questa decade.',
+            ),
+          )
         else
           for (var index = 0; index < result.players.length; index++) ...[
             _DecadeRankingRow(
@@ -783,16 +793,6 @@ String _periodLabel(String start, String end) {
 String _dateLabel(String value) {
   final date = DateTime.tryParse(value);
   return date == null ? value : DateFormat('d MMMM yyyy', 'it_IT').format(date);
-}
-
-String _dayBefore(String value) {
-  final date = DateTime.tryParse(value);
-  return date == null
-      ? value
-      : date
-            .subtract(const Duration(days: 1))
-            .toIso8601String()
-            .substring(0, 10);
 }
 
 String _points(double value) => NumberFormat('0.0', 'it_IT').format(value);

@@ -300,6 +300,8 @@ class DecadeRankingResult {
     this.periodStart = '',
     this.periodEnd = '',
     this.frozenAt = '',
+    this.periodClosed = false,
+    this.snapshotAvailable = true,
     this.minimumMatches = 0,
     this.availablePeriods = const [],
     this.players = const [],
@@ -308,6 +310,8 @@ class DecadeRankingResult {
   final String periodStart;
   final String periodEnd;
   final String frozenAt;
+  final bool periodClosed;
+  final bool snapshotAvailable;
   final int minimumMatches;
   final List<RankingDecadePeriod> availablePeriods;
   final List<DecadeRankingPlayer> players;
