@@ -26,7 +26,7 @@ abstract class PlayerRanking with _$PlayerRanking {
 
 double nullableRankingScoreFromJson(Object? value) => switch (value) {
   num number => number.toDouble(),
-  String text => double.tryParse(text) ?? 0,
+  String text => double.tryParse(text.trim().replaceAll(',', '.')) ?? 0,
   _ => 0,
 };
 
@@ -319,7 +319,7 @@ class DecadeRankingResult {
 
 double _number(Object? value) => switch (value) {
   num number => number.toDouble(),
-  String text => double.tryParse(text) ?? 0,
+  String text => double.tryParse(text.trim().replaceAll(',', '.')) ?? 0,
   _ => 0,
 };
 

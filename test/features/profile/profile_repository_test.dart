@@ -94,7 +94,7 @@ void main() {
                   'favorite_rule_enabled': true,
                   'favorite_streak': 3,
                   'favorite_threshold': 3,
-                  'favorite_points_after_threshold': 0,
+                  'favorite_points_after_threshold': '0,10',
                   'favorite_risk': true,
                   'inactivity_rule_enabled': true,
                   'matches_played_in_decade': 0,
@@ -190,6 +190,7 @@ void main() {
       expect(stats.trendLabel, 'Stabile');
       expect(stats.rankingAlerts.favoriteRisk, isTrue);
       expect(stats.rankingAlerts.favoriteStreak, 3);
+      expect(stats.rankingAlerts.favoritePointsAfterThreshold, 0.1);
       expect(stats.rankingAlerts.inactivityRisk, isTrue);
       expect(stats.rankingAlerts.matchesScheduledInDecade, 1);
     },
