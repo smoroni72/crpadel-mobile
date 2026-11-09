@@ -334,7 +334,7 @@ class _RankingRulesCard extends ConsumerWidget {
                   : 'Non attiva',
               warning: alerts.favoriteRisk,
               description: alerts.favoriteRisk
-                  ? 'Soglia raggiunta: una nuova partita ancora da favorito assegna ${NumberFormat('0.##', 'it_IT').format(alerts.favoritePointsAfterThreshold)} punti classifica.'
+                  ? 'Soglia raggiunta: una nuova partita ancora da favorito assegna ${NumberFormat('0.00', 'it_IT').format(alerts.favoritePointsAfterThreshold)} punti classifica.'
                   : alerts.favoriteRuleEnabled
                   ? 'Il contatore torna a zero giocando a coefficiente pari o inferiore agli avversari.'
                   : 'Questa regola non è attiva nel periodo corrente.',
