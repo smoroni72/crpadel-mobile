@@ -439,7 +439,7 @@ class _MonthlyHeader extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Media dei PR conquistati per partita × 10',
+              'Migliori giocatori del mese',
               style: TextStyle(color: context.colors.textSecondary),
             ),
           ],
@@ -571,7 +571,7 @@ class _MonthlyRankingSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Player del mese: almeno ${result.playerOfMonthMinimumMatches} partite e presenza nella classifica generale (${result.generalLeaderboardMinimumMatches} PG).',
+          'Servono almeno 3 partite nel mese per comparire',
           style: TextStyle(fontSize: 12, color: context.colors.primaryText),
         ),
         const SizedBox(height: 10),
