@@ -93,7 +93,7 @@ class _RankingAlertBanner extends ConsumerWidget {
     if (alerts == null || !alerts.hasRisk) return const SizedBox.shrink();
     final messages = <String>[
       if (alerts.favoriteRisk)
-        'Hai raggiunto ${alerts.favoriteStreak} partite consecutive da favorito: un’altra partita da favorito può annullare i punti classifica.',
+        'Hai raggiunto ${alerts.favoriteStreak} partite consecutive da favorito. Dalla prossima partita ancora da favorito otterrai solo ${NumberFormat('0.00', 'it_IT').format(alerts.favoritePointsAfterThreshold)} punti classifica, finché non giocherai una partita a coefficiente pari o inferiore a quello degli avversari.',
       if (alerts.inactivityRisk)
         'Non hai ancora giocato nella decade: senza una partita entro ${_shortDate(alerts.periodEnd)} subirai ${NumberFormat('0.##', 'it_IT').format(alerts.inactivityPenaltyPoints)} punto in classifica.',
     ];
@@ -107,7 +107,10 @@ class _RankingAlertBanner extends ConsumerWidget {
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
-          onTap: () => context.pushNamed(AppRoutes.profile),
+          // Il Profilo è una tab principale: deve essere selezionato, non
+          // sovrapposto allo stack della Home. In questo modo la barra resta
+          // coerente e il tocco su Home riporta sempre alla schermata iniziale.
+          onTap: () => context.goNamed(AppRoutes.profile),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(

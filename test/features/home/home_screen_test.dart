@@ -126,6 +126,7 @@ void main() {
               favoriteRuleEnabled: true,
               favoriteStreak: 3,
               favoriteThreshold: 3,
+              favoritePointsAfterThreshold: 0.1,
               favoriteRisk: true,
               inactivityRuleEnabled: true,
               inactivityMinimumMatches: 1,
@@ -139,6 +140,11 @@ void main() {
 
     expect(find.text('ATTENZIONE RANKING'), findsOneWidget);
     expect(find.textContaining('3 partite consecutive'), findsOneWidget);
+    expect(find.textContaining('solo 0,10 punti classifica'), findsOneWidget);
+    expect(
+      find.textContaining('coefficiente pari o inferiore'),
+      findsOneWidget,
+    );
     expect(find.textContaining('Non hai ancora giocato'), findsOneWidget);
   });
 
