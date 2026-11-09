@@ -17,6 +17,7 @@ import '../../app_menu/presentation/app_menu_provider.dart';
 import '../../bookings/presentation/upcoming_bookings_provider.dart';
 import '../../bookings/presentation/widgets/booking_card.dart';
 import '../../matches/presentation/day_matches_provider.dart';
+import '../../matches/presentation/match_providers.dart';
 import '../../matches/presentation/widgets/day_strip.dart';
 import '../../matches/presentation/widgets/connected_match_card.dart';
 import '../../subscriptions/presentation/subscription_summary_card.dart';
@@ -37,6 +38,7 @@ class HomeScreen extends ConsumerWidget {
       ref.refresh(usableSubscriptionsProvider.future),
       ref.refresh(upcomingBookingsProvider.future),
       ref.refresh(dayMatchesProvider(day).future),
+      ref.refresh(matchDatesProvider(day).future),
       ref.refresh(homeLeaderboardProvider.future),
       ref.refresh(homeNewsProvider.future),
       ref.refresh(profileStatsProvider.future),
@@ -806,6 +808,7 @@ class _DayMatchesSection extends ConsumerWidget {
         const _SectionHeader('Partite del giorno'),
         DayStrip(
           selected: day,
+          matchDates: ref.watch(matchDatesProvider(day)).value ?? const {},
           onSelected: dayController.select,
           onPrevious: dayController.previous,
           onNext: dayController.next,

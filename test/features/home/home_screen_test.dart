@@ -232,6 +232,8 @@ void main() {
     expect(find.text('CAMPO 3'), findsOneWidget);
     expect(find.text('Aperta'), findsOneWidget);
     expect(find.text('CAMPO 4'), findsNothing);
+    expect(find.byKey(const ValueKey('matches-2026-10-07')), findsOneWidget);
+    expect(find.byKey(const ValueKey('matches-2026-10-08')), findsOneWidget);
 
     await tester.tap(find.byTooltip('Giorno successivo'));
     await tester.pumpAndSettle();
