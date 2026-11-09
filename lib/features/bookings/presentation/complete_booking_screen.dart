@@ -16,9 +16,14 @@ import 'widgets/player_picker_sheet.dart';
 
 /// Pagina modale a schermo intero: tipo, istruttore, giocatori, conferma.
 class CompleteBookingScreen extends ConsumerWidget {
-  const CompleteBookingScreen({super.key, required this.slot});
+  const CompleteBookingScreen({
+    super.key,
+    required this.slot,
+    this.successRouteName = AppRoutes.home,
+  });
 
   final BookingSlot slot;
+  final String successRouteName;
 
   Future<void> _submit(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
@@ -28,12 +33,17 @@ class CompleteBookingScreen extends ConsumerWidget {
     if (!context.mounted || outcome == null) return;
     switch (outcome) {
       case BookingConfirmed():
-        context.goNamed(AppRoutes.home);
+        context.goNamed(successRouteName);
         messenger.showSnackBar(
           const SnackBar(content: Text('Prenotazione confermata')),
         );
+      case MatchRegistered():
+        context.goNamed(successRouteName);
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Partita registrata')),
+        );
       case MatchNotOpened(:final message):
-        context.goNamed(AppRoutes.home);
+        context.goNamed(successRouteName);
         messenger.showSnackBar(
           SnackBar(
             content: Text(
@@ -42,13 +52,15 @@ class CompleteBookingScreen extends ConsumerWidget {
             ),
           ),
         );
-      case BookingConflict():
+      case BookingConflict(:final message):
         context.pop();
         messenger.showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Lo spazio è stato appena occupato da un altro giocatore. '
-              'Scegli un altro orario.',
+              slot.directMatch
+                  ? message
+                  : 'Lo spazio è stato appena occupato da un altro giocatore. '
+                        'Scegli un altro orario.',
             ),
           ),
         );
@@ -64,6 +76,7 @@ class CompleteBookingScreen extends ConsumerWidget {
     final user = ref.watch(authControllerProvider).value;
     final end = slot.startMinutes + state.type.minutes;
     final dedicatedMatchFlow = slot.initialMatchType != null;
+    final directMatch = slot.directMatch;
     return Scaffold(
       backgroundColor: colors.surface,
       appBar: AppBar(
@@ -85,25 +98,27 @@ class CompleteBookingScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [
-          _Label('Tipo di impegno'),
-          SegmentedButton<BookingType>(
-            showSelectedIcon: false,
-            segments: [
-              for (final t in BookingType.values)
-                ButtonSegment(
-                  value: t,
-                  // Come nel mockup: la durata dell'allenamento non serve.
-                  label: Text(
-                    t == BookingType.training
-                        ? t.label
-                        : "${t.label} · ${t.minutes}'",
+          if (!directMatch) ...[
+            _Label('Tipo di impegno'),
+            SegmentedButton<BookingType>(
+              showSelectedIcon: false,
+              segments: [
+                for (final t in BookingType.values)
+                  ButtonSegment(
+                    value: t,
+                    // Come nel mockup: la durata dell'allenamento non serve.
+                    label: Text(
+                      t == BookingType.training
+                          ? t.label
+                          : "${t.label} · ${t.minutes}'",
+                    ),
                   ),
-                ),
-            ],
-            selected: {state.type},
-            onSelectionChanged: (s) => controller.setType(s.first),
-          ),
-          if (!controller.fits)
+              ],
+              selected: {state.type},
+              onSelectionChanged: (s) => controller.setType(s.first),
+            ),
+          ],
+          if (!directMatch && !controller.fits)
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
@@ -112,12 +127,13 @@ class CompleteBookingScreen extends ConsumerWidget {
                 style: TextStyle(color: colors.primaryText),
               ),
             ),
-          if (state.type.needsCoach) ...[
+          if (!directMatch && state.type.needsCoach) ...[
             const SizedBox(height: 18),
             _CoachField(value: state.coachId, onChanged: controller.setCoach),
           ],
           const SizedBox(height: 18),
-          if (user?.canAccessAdminMenu('bookings') ?? false) ...[
+          if (!directMatch &&
+              (user?.canAccessAdminMenu('bookings') ?? false)) ...[
             _Label('Prenotazione amministrativa'),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -152,10 +168,11 @@ class CompleteBookingScreen extends ConsumerWidget {
                 '${Dates.shortDay(slot.date)} · '
                     '${hhmm(slot.startMinutes)}–${hhmm(end)}',
               ),
-              (
-                'Prenotato per',
-                state.bookingFor?.fullName ?? '${user?.fullName ?? ''} (tu)',
-              ),
+              if (!directMatch)
+                (
+                  'Prenotato per',
+                  state.bookingFor?.fullName ?? '${user?.fullName ?? ''} (tu)',
+                ),
             ],
           ),
           if (state.type == BookingType.court) ...[
@@ -239,7 +256,9 @@ class CompleteBookingScreen extends ConsumerWidget {
                       )
                     : Text(
                         dedicatedMatchFlow
-                            ? 'Conferma e apri partita'
+                            ? directMatch
+                                  ? 'Registra partita'
+                                  : 'Conferma e apri partita'
                             : 'Conferma prenotazione',
                       ),
               ),

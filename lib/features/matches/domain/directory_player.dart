@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'padel_match.dart';
+
 part 'directory_player.freezed.dart';
 part 'directory_player.g.dart';
 
@@ -36,7 +38,9 @@ class NewMatch {
     this.teamsByPlayerId = const {},
   });
 
-  final String bookingId;
+  /// Prenotazione collegata, assente per le partite registrate direttamente
+  /// dall'amministrazione dopo che sono state disputate.
+  final String? bookingId;
 
   /// `YYYY-MM-DD`
   final String date;
@@ -56,7 +60,7 @@ class NewMatch {
   final Map<String, String> teamsByPlayerId;
 
   Map<String, dynamic> toJson() => {
-    'booking_id': bookingId,
+    if (bookingId != null) 'booking_id': bookingId,
     'date': date,
     'court_id': courtId,
     'time_slot': timeSlot,
@@ -71,5 +75,37 @@ class NewMatch {
           if (teamsByPlayerId[p.id] != null) 'team': teamsByPlayerId[p.id],
         },
     ],
+  };
+}
+
+class UpdateMatch {
+  const UpdateMatch({
+    required this.date,
+    required this.courtId,
+    required this.timeSlot,
+    this.players,
+  });
+
+  final String date;
+  final String courtId;
+  final String timeSlot;
+  final List<MatchPlayer>? players;
+
+  Map<String, dynamic> toJson() => {
+    'date': date,
+    'court_id': courtId,
+    'time_slot': timeSlot,
+    if (players != null)
+      'players': [
+        for (var index = 0; index < players!.length; index++)
+          {
+            if (players![index].clubPlayerId != null)
+              'club_player_id': players![index].clubPlayerId,
+            'name': players![index].name,
+            'team': index < 2 ? 'A' : 'B',
+            if (players![index].playingSide != null)
+              'playing_side': players![index].playingSide,
+          },
+      ],
   };
 }
