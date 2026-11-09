@@ -116,3 +116,9 @@ Voci presenti solo nell'app, fuori dal Profilo per tenerlo uguale al sito: **Cir
 ## 0. Scegli il circolo (`00-scegli-circolo.html`)
 
 Primo avvio, solo se il backend espone più circoli (Fase 0b). Ricerca per nome o città, elenco dei circoli aderenti con logo e città. La scelta si cambia dal Profilo.
+
+### Classifica mensile utenti
+
+La graduatoria mensile è ordinata esclusivamente per delta classifica decrescente.
+Non è presente il selettore «Ordina per». Restano la selezione del mese e il filtro
+«Solo idonei»; il valore evidenziato nelle righe e nel giocatore del mese è il delta.

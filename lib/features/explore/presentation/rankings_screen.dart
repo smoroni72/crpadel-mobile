@@ -16,12 +16,9 @@ class RankingsScreen extends ConsumerStatefulWidget {
 
 enum _RankingView { general, monthly, decades }
 
-enum _MonthlySort { classificationDelta, pointsEarned }
-
 class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   late DateTime _month;
   _RankingView _view = _RankingView.general;
-  _MonthlySort _monthlySort = _MonthlySort.classificationDelta;
   bool _onlyEligible = false;
   String? _decadeStart;
 
@@ -232,9 +229,7 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
             _MonthlyHeader(month: _month, onSelectMonth: _selectMonth),
             const SizedBox(height: 12),
             _MonthlyFilters(
-              sort: _monthlySort,
               onlyEligible: _onlyEligible,
-              onSortChanged: (value) => setState(() => _monthlySort = value),
               onOnlyEligibleChanged: (value) =>
                   setState(() => _onlyEligible = value),
             ),
@@ -245,7 +240,6 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
               onRetry: () => ref.invalidate(monthlyRankingsProvider(_monthKey)),
               data: (result) => _MonthlyRankingSection(
                 result: result,
-                sort: _monthlySort,
                 onlyEligible: _onlyEligible,
               ),
             ),
@@ -457,15 +451,11 @@ class _MonthlyHeader extends StatelessWidget {
 
 class _MonthlyFilters extends StatelessWidget {
   const _MonthlyFilters({
-    required this.sort,
     required this.onlyEligible,
-    required this.onSortChanged,
     required this.onOnlyEligibleChanged,
   });
 
-  final _MonthlySort sort;
   final bool onlyEligible;
-  final ValueChanged<_MonthlySort> onSortChanged;
   final ValueChanged<bool> onOnlyEligibleChanged;
 
   @override
@@ -473,30 +463,6 @@ class _MonthlyFilters extends StatelessWidget {
     spacing: 10,
     runSpacing: 10,
     children: [
-      SizedBox(
-        width: 220,
-        child: DropdownButtonFormField<_MonthlySort>(
-          initialValue: sort,
-          isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'Ordina per',
-            prefixIcon: Icon(Icons.swap_vert),
-          ),
-          items: const [
-            DropdownMenuItem(
-              value: _MonthlySort.classificationDelta,
-              child: Text('Delta classifica'),
-            ),
-            DropdownMenuItem(
-              value: _MonthlySort.pointsEarned,
-              child: Text('PR totali'),
-            ),
-          ],
-          onChanged: (value) {
-            if (value != null) onSortChanged(value);
-          },
-        ),
-      ),
       FilterChip(
         selected: onlyEligible,
         avatar: Icon(
@@ -513,12 +479,10 @@ class _MonthlyFilters extends StatelessWidget {
 class _MonthlyRankingSection extends StatelessWidget {
   const _MonthlyRankingSection({
     required this.result,
-    required this.sort,
     required this.onlyEligible,
   });
 
   final MonthlyRankingResult result;
-  final _MonthlySort sort;
   final bool onlyEligible;
 
   @override
@@ -528,14 +492,10 @@ class _MonthlyRankingSection extends StatelessWidget {
             .where((player) => !onlyEligible || player.playerOfMonthEligible)
             .toList()
           ..sort((left, right) {
-            final leftValue = sort == _MonthlySort.classificationDelta
-                ? left.classificationDelta
-                : left.pointsEarned;
-            final rightValue = sort == _MonthlySort.classificationDelta
-                ? right.classificationDelta
-                : right.pointsEarned;
-            final byValue = rightValue.compareTo(leftValue);
-            if (byValue != 0) return byValue;
+            final byDelta = right.classificationDelta.compareTo(
+              left.classificationDelta,
+            );
+            if (byDelta != 0) return byDelta;
             final byPoints = right.pointsEarned.compareTo(left.pointsEarned);
             if (byPoints != 0) return byPoints;
             return left.playerName.compareTo(right.playerName);
@@ -614,7 +574,7 @@ class _MonthlyRankingSection extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    _monthlyValue(winner, sort),
+                    _signedPoints(winner.classificationDelta),
                     style: context.fonts
                         .monoStyle(fontSize: 18, fontWeight: FontWeight.w700)
                         .copyWith(color: const Color(0xFFFFB300)),
@@ -692,7 +652,7 @@ class _MonthlyRankingSection extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        _monthlyValue(player, sort),
+                        _signedPoints(player.classificationDelta),
                         style: context.fonts
                             .monoStyle(fontWeight: FontWeight.w700)
                             .copyWith(color: context.colors.primaryText),
@@ -709,11 +669,6 @@ class _MonthlyRankingSection extends StatelessWidget {
     );
   }
 }
-
-String _monthlyValue(MonthlyRanking player, _MonthlySort sort) =>
-    sort == _MonthlySort.classificationDelta
-    ? _signedPoints(player.classificationDelta)
-    : _points(player.pointsEarned);
 
 String _signedPoints(double value) =>
     '${value > 0 ? '+' : ''}${_points(value)}';
