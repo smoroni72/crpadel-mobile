@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../app/routes.dart';
+import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../auth/presentation/auth_controller.dart';
-import '../../matches/data/matches_repository.dart';
 import '../../matches/domain/padel_match.dart';
+import '../../matches/presentation/day_matches_provider.dart';
+import '../../matches/presentation/match_providers.dart';
 import '../../matches/presentation/widgets/connected_match_card.dart';
 import '../../matches/presentation/widgets/day_strip.dart';
 import '../data/admin_repository.dart';
@@ -218,10 +220,6 @@ class _AdminEntry {
   final String route;
 }
 
-final _adminMatchesProvider = FutureProvider.family<List<PadelMatch>, DateTime>(
-  (ref, day) => ref.read(matchesRepositoryProvider).byDate(day),
-);
-
 class AdminMatchesScreen extends ConsumerStatefulWidget {
   const AdminMatchesScreen({super.key});
 
@@ -230,11 +228,19 @@ class AdminMatchesScreen extends ConsumerStatefulWidget {
 }
 
 class _AdminMatchesScreenState extends ConsumerState<AdminMatchesScreen> {
-  var day = DateTime.now();
+  late DateTime day;
+  var onlyPendingResults = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = ref.read(clockProvider)();
+    day = DateTime(now.year, now.month, now.day);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final matches = ref.watch(_adminMatchesProvider(day));
+    final matches = ref.watch(dayMatchesProvider(day));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendario partite'),
@@ -248,22 +254,33 @@ class _AdminMatchesScreenState extends ConsumerState<AdminMatchesScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('${AppPaths.book}?mode=match'),
+        onPressed: () => context.pushNamed(AppRoutes.adminCreateMatch),
         icon: const Icon(Icons.add),
         label: const Text('Nuova partita'),
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(_adminMatchesProvider(day).future),
+        onRefresh: () async {
+          await Future.wait([
+            ref.refresh(dayMatchesProvider(day).future),
+            ref.refresh(matchDatesProvider(day).future),
+          ]);
+        },
         child: AsyncValueView(
           value: matches,
           errorText: 'Non riesco a caricare le partite',
-          onRetry: () => ref.invalidate(_adminMatchesProvider(day)),
+          onRetry: () => ref.invalidate(dayMatchesProvider(day)),
           data: (items) {
+            final pendingResults = items
+                .where((match) => match.status == MatchStatus.pendingResult)
+                .toList();
+            final visibleItems = onlyPendingResults ? pendingResults : items;
             return ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
               children: [
                 DayStrip(
                   selected: day,
+                  matchDates:
+                      ref.watch(matchDatesProvider(day)).value ?? const {},
                   onSelected: (value) => setState(() => day = value),
                   onPrevious: () => setState(
                     () => day = day.subtract(const Duration(days: 5)),
@@ -272,20 +289,41 @@ class _AdminMatchesScreenState extends ConsumerState<AdminMatchesScreen> {
                       setState(() => day = day.add(const Duration(days: 5))),
                 ),
                 const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: FilterChip(
+                    avatar: const Icon(
+                      Icons.pending_actions_outlined,
+                      size: 18,
+                    ),
+                    label: Text(
+                      'Risultato da inserire (${pendingResults.length})',
+                    ),
+                    selected: onlyPendingResults,
+                    onSelected: (value) =>
+                        setState(() => onlyPendingResults = value),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Text(
-                  '${Dates.longDay(day)} · ${items.length} ${items.length == 1 ? 'partita' : 'partite'}',
+                  '${Dates.longDay(day)} · ${visibleItems.length} '
+                  '${visibleItems.length == 1 ? 'partita' : 'partite'}',
                   style: TextStyle(color: context.colors.textSecondary),
                 ),
                 const SizedBox(height: 12),
-                if (items.isEmpty)
-                  const Card(
+                if (visibleItems.isEmpty)
+                  Card(
                     child: Padding(
-                      padding: EdgeInsets.all(22),
-                      child: Text('Nessuna partita in questa giornata.'),
+                      padding: const EdgeInsets.all(22),
+                      child: Text(
+                        onlyPendingResults
+                            ? 'Nessuna partita richiede l’inserimento del risultato in questa giornata.'
+                            : 'Nessuna partita in questa giornata.',
+                      ),
                     ),
                   )
                 else
-                  for (final match in items) ...[
+                  for (final match in visibleItems) ...[
                     ConnectedMatchCard(match: match, adminMode: true),
                     const SizedBox(height: 12),
                   ],
@@ -423,7 +461,12 @@ class _AdminPlayersScreenState extends ConsumerState<AdminPlayersScreen> {
                           '${item.email}\n${item.matches} PG · ${item.wins} V · ${item.points.toStringAsFixed(2)} PR',
                         ),
                         isThreeLine: true,
-                        trailing: Text(item.status),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.pushNamed(
+                          AppRoutes.adminPlayerDetail,
+                          pathParameters: {'id': item.id},
+                          extra: item,
+                        ),
                       ),
                     );
                   },

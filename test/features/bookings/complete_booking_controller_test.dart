@@ -20,6 +20,7 @@ void main() {
     BookingType? initialType,
     String? matchType,
     String? matchLevel,
+    bool directMatch = false,
   }) => BookingSlot(
     court: court,
     date: day,
@@ -28,6 +29,7 @@ void main() {
     initialType: initialType,
     initialMatchType: matchType,
     initialMatchLevel: matchLevel,
+    directMatch: directMatch,
   );
   const self = DirectoryPlayer(id: 'p0', fullName: 'Mario Rossi', isSelf: true);
   const anna = DirectoryPlayer(id: 'p1', fullName: 'Anna Verdi');
@@ -125,6 +127,24 @@ void main() {
     expect(match.players, [anna]);
     expect(match.teamsByPlayerId, {'p1': 'B'});
     expect((match.toJson()['players'] as List).single['team'], 'B');
+  });
+
+  test('registrazione diretta: crea la partita senza prenotazione', () async {
+    final s = slot(
+      start: 8 * 60,
+      initialType: BookingType.court,
+      matchType: 'ranking',
+      directMatch: true,
+    );
+
+    final outcome = await controller(s).submit();
+
+    expect(outcome, isA<MatchRegistered>());
+    expect(backend.bookings.created, isEmpty);
+    final match = backend.matches.created.single;
+    expect(match.bookingId, isNull);
+    expect(match.timeSlot, '08:00-09:30');
+    expect(match.toJson(), isNot(contains('booking_id')));
   });
 
   test('una lezione non apre una partita', () async {

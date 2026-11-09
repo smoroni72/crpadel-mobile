@@ -23,6 +23,12 @@ abstract interface class MatchesRepository {
   /// Apre una partita su una propria prenotazione confermata.
   Future<PadelMatch> create(NewMatch request);
 
+  /// Modifica amministrativa di data, campo, orario ed eventualmente giocatori.
+  Future<PadelMatch> update(String matchId, UpdateMatch request);
+
+  /// Elimina definitivamente una partita (solo amministratori).
+  Future<void> delete(String matchId);
+
   /// Rubrica dei giocatori del circolo, per aggiungerli a una partita.
   Future<List<DirectoryPlayer>> playersDirectory();
 
@@ -96,6 +102,16 @@ class ApiMatchesRepository implements MatchesRepository {
     return PadelMatch.fromJson(
       (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>,
     );
+  }
+
+  @override
+  Future<PadelMatch> update(String matchId, UpdateMatch request) async => _one(
+    (await _api.patch('/matches/$matchId', data: request.toJson())).data,
+  );
+
+  @override
+  Future<void> delete(String matchId) async {
+    await _api.delete('/matches/$matchId');
   }
 
   @override

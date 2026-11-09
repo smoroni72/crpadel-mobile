@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/widgets/async_value_view.dart';
+import '../../admin/presentation/admin_edit_match_screen.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../bookings/presentation/cancel_booking.dart';
 import '../../bookings/presentation/widgets/player_picker_sheet.dart';
@@ -77,6 +78,7 @@ class _Body extends ConsumerWidget {
     final organizer = match.isOrganizer(me);
     final canManage =
         organizer || (user?.canAccessAdminMenu('matches') ?? false);
+    final adminCanManage = user?.canAccessAdminMenu('matches') ?? false;
     final participant = match.isParticipant(me);
     final open = match.status == MatchStatus.open;
     final colors = context.colors;
@@ -152,6 +154,23 @@ class _Body extends ConsumerWidget {
 
     // Azioni.
     final buttons = <Widget>[];
+    if (adminCanManage) {
+      buttons.add(
+        ElevatedButton.icon(
+          onPressed: () async {
+            final deleted = await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AdminEditMatchScreen(match: match),
+              ),
+            );
+            if (deleted == true && context.mounted) context.pop();
+          },
+          icon: const Icon(Icons.edit_calendar_outlined),
+          label: const Text('Modifica partita'),
+        ),
+      );
+    }
     if (canManage && open && match.teamWithFreeSpot != null) {
       buttons.add(
         OutlinedButton.icon(

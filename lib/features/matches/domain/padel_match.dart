@@ -55,6 +55,7 @@ abstract class PadelMatch with _$PadelMatch {
     required String id,
     String? bookingId,
     required DateTime date,
+    String? courtId,
     @Default('') String courtName,
     required String timeSlot,
     @JsonKey(unknownEnumValue: MatchStatus.unknown)

@@ -93,6 +93,13 @@ class AdminRepository {
     );
   }
 
+  Future<AdminPlayerStatistics> playerStatistics(String playerId) async {
+    final response = await _api.get('/players/$playerId/statistics');
+    final data =
+        (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    return AdminPlayerStatistics.fromJson(data);
+  }
+
   Future<List<AdminUser>> users({String search = ''}) async {
     final response = await _api.get(
       '/users',
@@ -213,7 +220,11 @@ class AdminPlayer {
     required this.wins,
     required this.points,
     required this.status,
+    this.phone = '',
+    this.birthDate = '',
   });
+  final String phone;
+  final String birthDate;
   final String id;
   final String name;
   final String email;
@@ -230,7 +241,130 @@ class AdminPlayer {
     wins: _intValue(json['ranking_matches_won']),
     points: _doubleValue(json['ranking_real_points']),
     status: (json['registration_status'] ?? '').toString(),
+    phone: (json['phone'] ?? '').toString(),
+    birthDate: (json['birth_date'] ?? '').toString(),
   );
+}
+
+class AdminPlayerStatistics {
+  const AdminPlayerStatistics({
+    required this.matchesPlayed,
+    required this.wins,
+    required this.losses,
+    required this.rankingMatches,
+    required this.friendlyMatches,
+    required this.tournamentMatches,
+    required this.setsWon,
+    required this.setsLost,
+    required this.gamesWon,
+    required this.gamesLost,
+    required this.underdogMatches,
+    required this.underdogWins,
+    required this.favoriteMatches,
+    required this.favoriteWins,
+    required this.rankingPoints,
+    required this.averageRankingPoints,
+    required this.favoriteStreak,
+    required this.decadeAdjustmentPoints,
+    required this.matches,
+  });
+
+  final int matchesPlayed;
+  final int wins;
+  final int losses;
+  final int rankingMatches;
+  final int friendlyMatches;
+  final int tournamentMatches;
+  final int setsWon;
+  final int setsLost;
+  final int gamesWon;
+  final int gamesLost;
+  final int underdogMatches;
+  final int underdogWins;
+  final int favoriteMatches;
+  final int favoriteWins;
+  final double rankingPoints;
+  final double averageRankingPoints;
+  final int favoriteStreak;
+  final double decadeAdjustmentPoints;
+  final List<AdminPlayerMatchStatistic> matches;
+
+  int get winRate =>
+      matchesPlayed == 0 ? 0 : (wins * 100 / matchesPlayed).round();
+  int get matchesCount => matchesPlayed;
+  List<AdminPlayerMatchStatistic> get history => matches;
+
+  factory AdminPlayerStatistics.fromJson(Map<String, dynamic> json) {
+    final totals = json['totals'] as Map<String, dynamic>? ?? const {};
+    return AdminPlayerStatistics(
+      matchesPlayed: _intValue(totals['matches_played']),
+      wins: _intValue(totals['wins']),
+      losses: _intValue(totals['losses']),
+      rankingMatches: _intValue(totals['ranking_matches']),
+      friendlyMatches: _intValue(totals['friendly_matches']),
+      tournamentMatches: _intValue(totals['tournament_matches']),
+      setsWon: _intValue(totals['sets_won']),
+      setsLost: _intValue(totals['sets_lost']),
+      gamesWon: _intValue(totals['games_won']),
+      gamesLost: _intValue(totals['games_lost']),
+      underdogMatches: _intValue(totals['underdog_matches']),
+      underdogWins: _intValue(totals['underdog_wins']),
+      favoriteMatches: _intValue(totals['favorite_matches']),
+      favoriteWins: _intValue(totals['favorite_wins']),
+      rankingPoints: _doubleValue(totals['ranking_points_earned']),
+      averageRankingPoints: _doubleValue(totals['ranking_points_average']),
+      favoriteStreak: _intValue(json['current_favorite_streak']),
+      decadeAdjustmentPoints: _doubleValue(json['decade_adjustment_points']),
+      matches: (json['matches'] as List<dynamic>? ?? const [])
+          .cast<Map<String, dynamic>>()
+          .map(AdminPlayerMatchStatistic.fromJson)
+          .toList(),
+    );
+  }
+}
+
+class AdminPlayerMatchStatistic {
+  const AdminPlayerMatchStatistic({
+    required this.id,
+    required this.date,
+    required this.time,
+    required this.court,
+    required this.score,
+    required this.status,
+    required this.players,
+    this.rankingPoints,
+    this.rankingScoreDelta,
+  });
+
+  final String id;
+  final String date;
+  final String time;
+  final String court;
+  final String score;
+  final String status;
+  final List<String> players;
+  final double? rankingPoints;
+  final double? rankingScoreDelta;
+  bool get pending => status == 'pending_result' || status == 'in_progress';
+
+  factory AdminPlayerMatchStatistic.fromJson(Map<String, dynamic> json) =>
+      AdminPlayerMatchStatistic(
+        id: (json['id'] ?? '').toString(),
+        date: (json['date'] ?? '').toString(),
+        time: (json['time_slot'] ?? '').toString(),
+        court: (json['court_name'] ?? 'Campo').toString(),
+        score: (json['score_team1'] ?? '').toString(),
+        status: (json['status'] ?? '').toString(),
+        players: (json['players'] as List<dynamic>? ?? const [])
+            .map(
+              (player) =>
+                  ((player as Map<String, dynamic>)['name'] ?? '').toString(),
+            )
+            .where((name) => name.isNotEmpty)
+            .toList(),
+        rankingPoints: _nullableDouble(json['ranking_points_delta']),
+        rankingScoreDelta: _nullableDouble(json['ranking_score_delta']),
+      );
 }
 
 class AdminCommunication {
@@ -294,6 +428,12 @@ double _doubleValue(Object? value) => switch (value) {
   num number => number.toDouble(),
   String text => double.tryParse(text.replaceAll(',', '.')) ?? 0,
   _ => 0,
+};
+
+double? _nullableDouble(Object? value) => switch (value) {
+  num number => number.toDouble(),
+  String text => double.tryParse(text.replaceAll(',', '.')),
+  _ => null,
 };
 
 bool _boolValue(Object? value, {bool fallback = false}) => switch (value) {

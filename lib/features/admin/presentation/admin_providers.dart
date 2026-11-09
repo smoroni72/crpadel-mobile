@@ -25,3 +25,8 @@ final adminCommunicationsProvider = FutureProvider<List<AdminCommunication>>(
 final adminUsersProvider = FutureProvider.family<List<AdminUser>, String>(
   (ref, search) => ref.read(adminRepositoryProvider).users(search: search),
 );
+
+final adminPlayerStatisticsProvider = FutureProvider.autoDispose
+    .family<AdminPlayerStatistics, String>(
+      (ref, id) => ref.read(adminRepositoryProvider).playerStatistics(id),
+    );

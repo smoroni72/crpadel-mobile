@@ -26,8 +26,11 @@ abstract final class AppRoutes {
   static const clubInfo = 'informazioni-circolo';
   static const admin = 'amministrazione';
   static const adminMatches = 'amministrazione-partite';
+  static const adminCreateMatch = 'amministrazione-crea-partita';
+  static const adminCompleteMatch = 'amministrazione-completa-partita';
   static const adminBookings = 'amministrazione-prenotazioni';
   static const adminPlayers = 'amministrazione-giocatori';
+  static const adminPlayerDetail = 'amministrazione-giocatore';
   static const adminCommunications = 'amministrazione-comunicazioni';
   static const adminMatchHistory = 'amministrazione-storico-partite';
   static const adminUsers = 'amministrazione-utenti';
@@ -60,6 +63,8 @@ abstract final class AppPaths {
   static const clubInfo = '/informazioni-circolo';
   static const admin = '/amministrazione';
   static const adminMatches = '/amministrazione/partite';
+  static const adminCreateMatch = '/amministrazione/partite/nuova';
+  static const adminCompleteMatch = 'completa';
   static const adminBookings = '/amministrazione/prenotazioni';
   static const adminPlayers = '/amministrazione/giocatori';
   static const adminCommunications = '/amministrazione/comunicazioni';

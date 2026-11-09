@@ -1,20 +1,28 @@
 import 'package:crpadel_mobile/app/app.dart';
 import 'package:crpadel_mobile/app/bottom_bar.dart';
+import 'package:crpadel_mobile/app/app_shell.dart';
 import 'package:crpadel_mobile/app/router.dart';
 import 'package:crpadel_mobile/app/routes.dart';
 import 'package:crpadel_mobile/features/auth/data/fake_auth_repository.dart';
 import 'package:crpadel_mobile/features/auth/domain/app_user.dart';
 import 'package:crpadel_mobile/features/auth/presentation/login_screen.dart';
 import 'package:crpadel_mobile/features/auth/presentation/register_screen.dart';
+import 'package:crpadel_mobile/features/admin/presentation/admin_screens.dart';
+import 'package:crpadel_mobile/features/admin/presentation/admin_create_match_screen.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/book_screen.dart';
+import 'package:crpadel_mobile/features/bookings/presentation/complete_booking_screen.dart';
 import 'package:crpadel_mobile/features/home/presentation/home_screen.dart';
 import 'package:crpadel_mobile/features/matches/presentation/matches_screen.dart';
+import 'package:crpadel_mobile/features/matches/data/fake_matches_repository.dart';
+import 'package:crpadel_mobile/features/matches/domain/padel_match.dart';
 import 'package:crpadel_mobile/features/profile/presentation/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../helpers/app_overrides.dart';
+import '../helpers/fixtures.dart';
 
 void main() {
   group('appRedirect', () {
@@ -243,6 +251,135 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(ProfileScreen), findsOneWidget);
     });
+
+    testWidgets('un admin crea la partita scegliendo campo e orario', (
+      tester,
+    ) async {
+      const admin = AppUser(
+        id: 'admin-1',
+        email: 'admin@crpadel.it',
+        fullName: 'Admin',
+        role: 'admin',
+        adminMenuPermissions: ['matches'],
+      );
+      final repository = FakeAuthRepository(sessionUser: admin);
+      final backend = FakeBackend(auth: repository);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: backend.overrides,
+          retry: (_, _) => null,
+          child: const CrPadelApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      GoRouter.of(
+        tester.element(find.byType(HomeScreen)),
+      ).goNamed(AppRoutes.adminMatches);
+      await tester.pumpAndSettle();
+      expect(find.byType(AdminMatchesScreen), findsOneWidget);
+
+      await tester.tap(find.text('Nuova partita'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(AdminCreateMatchScreen), findsOneWidget);
+      expect(find.byType(BookScreen), findsNothing);
+      expect(find.text('Crea partita'), findsOneWidget);
+      expect(find.text('Data della partita'), findsOneWidget);
+      expect(find.text('Campo'), findsOneWidget);
+      expect(find.text('Orario'), findsOneWidget);
+      expect(find.text('Continua con giocatori e dettagli'), findsOneWidget);
+      expect(find.byType(AppShell), findsNothing);
+
+      tester
+          .widget<DropdownButtonFormField<String>>(
+            find.byType(DropdownButtonFormField<String>),
+          )
+          .onChanged!
+          .call('c1');
+      await tester.pumpAndSettle();
+
+      tester
+          .widget<DropdownButtonFormField<int>>(
+            find.byType(DropdownButtonFormField<int>),
+          )
+          .onChanged!
+          .call(8 * 60);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Continua con giocatori e dettagli'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CompleteBookingScreen), findsOneWidget);
+      expect(find.text('Mer 7 ott · 08:00–09:30'), findsOneWidget);
+      expect(find.text('Prenotato per'), findsNothing);
+      expect(find.text('Registra partita'), findsOneWidget);
+
+      await tester.tap(find.text('Registra partita'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AdminMatchesScreen), findsOneWidget);
+      expect(backend.bookings.created, isEmpty);
+      expect(backend.matches.created, hasLength(1));
+      expect(backend.matches.created.single.timeSlot, '08:00-09:30');
+    });
+
+    testWidgets(
+      'il calendario admin evidenzia i giorni e filtra i risultati mancanti',
+      (tester) async {
+        const admin = AppUser(
+          id: 'admin-1',
+          email: 'admin@crpadel.it',
+          fullName: 'Admin',
+          role: 'admin',
+          adminMenuPermissions: ['matches'],
+        );
+        final backend = FakeBackend(
+          auth: FakeAuthRepository(sessionUser: admin),
+          matches: FakeMatchesRepository(
+            matches: [
+              match(
+                id: 'pending',
+                court: 'Campo da completare',
+                status: MatchStatus.pendingResult,
+              ),
+              match(
+                id: 'completed',
+                court: 'Campo completato',
+                status: MatchStatus.completed,
+                score: '6-2 6-3',
+              ),
+            ],
+          ),
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: backend.overrides,
+            retry: (_, _) => null,
+            child: const CrPadelApp(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        GoRouter.of(
+          tester.element(find.byType(HomeScreen)),
+        ).goNamed(AppRoutes.adminMatches);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const ValueKey('matches-2026-10-07')),
+          findsOneWidget,
+        );
+        expect(find.text('CAMPO DA COMPLETARE'), findsOneWidget);
+        expect(find.text('CAMPO COMPLETATO'), findsOneWidget);
+        expect(find.text('Risultato da inserire (1)'), findsOneWidget);
+
+        await tester.tap(find.text('Risultato da inserire (1)'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('CAMPO DA COMPLETARE'), findsOneWidget);
+        expect(find.text('CAMPO COMPLETATO'), findsNothing);
+      },
+    );
 
     testWidgets('parte con tema scuro e il sole attiva quello chiaro', (
       tester,

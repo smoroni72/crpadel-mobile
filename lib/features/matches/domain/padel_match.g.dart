@@ -37,6 +37,7 @@ _PadelMatch _$PadelMatchFromJson(Map<String, dynamic> json) => _PadelMatch(
   id: json['id'] as String,
   bookingId: json['booking_id'] as String?,
   date: DateTime.parse(json['date'] as String),
+  courtId: json['court_id'] as String?,
   courtName: json['court_name'] as String? ?? '',
   timeSlot: json['time_slot'] as String,
   status:
@@ -83,6 +84,7 @@ Map<String, dynamic> _$PadelMatchToJson(_PadelMatch instance) =>
       'id': instance.id,
       'booking_id': instance.bookingId,
       'date': instance.date.toIso8601String(),
+      'court_id': instance.courtId,
       'court_name': instance.courtName,
       'time_slot': instance.timeSlot,
       'status': _$MatchStatusEnumMap[instance.status]!,
