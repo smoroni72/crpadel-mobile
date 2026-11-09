@@ -116,3 +116,7 @@ Voci presenti solo nell'app, fuori dal Profilo per tenerlo uguale al sito: **Cir
 ## 0. Scegli il circolo (`00-scegli-circolo.html`)
 
 Primo avvio, solo se il backend espone più circoli (Fase 0b). Ricerca per nome o città, elenco dei circoli aderenti con logo e città. La scelta si cambia dal Profilo.
+
+## Admin — dettaglio giocatore
+
+Nell’elenco Giocatori il tocco apre il dettaglio con nome, contatti, dati ranking e statistiche. Lo storico personale usa `GET /players/:id/statistics`, senza il limite dell’elenco generale delle partite. Ogni partita apre il relativo dettaglio; tornando indietro resta la ricerca dei giocatori. Sono presenti aggiornamento, errore con Riprova e storico vuoto.

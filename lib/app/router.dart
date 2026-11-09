@@ -8,6 +8,8 @@ import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
 import '../features/auth/domain/app_user.dart';
+import '../features/admin/data/admin_repository.dart';
+import '../features/admin/presentation/admin_player_detail_screen.dart';
 import '../features/admin/presentation/admin_screens.dart';
 import '../features/admin/presentation/admin_additional_screens.dart';
 import '../features/bookings/presentation/book_screen.dart';
@@ -147,6 +149,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppPaths.adminPlayers,
         name: AppRoutes.adminPlayers,
         builder: (_, _) => const AdminPlayersScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            name: AppRoutes.adminPlayerDetail,
+            builder: (_, state) => AdminPlayerDetailScreen(
+              playerId: state.pathParameters['id']!,
+              player: state.extra is AdminPlayer
+                  ? state.extra as AdminPlayer
+                  : null,
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: AppPaths.adminCommunications,

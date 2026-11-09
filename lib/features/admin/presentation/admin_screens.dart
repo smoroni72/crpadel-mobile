@@ -423,7 +423,12 @@ class _AdminPlayersScreenState extends ConsumerState<AdminPlayersScreen> {
                           '${item.email}\n${item.matches} PG · ${item.wins} V · ${item.points.toStringAsFixed(2)} PR',
                         ),
                         isThreeLine: true,
-                        trailing: Text(item.status),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.pushNamed(
+                          AppRoutes.adminPlayerDetail,
+                          pathParameters: {'id': item.id},
+                          extra: item,
+                        ),
                       ),
                     );
                   },

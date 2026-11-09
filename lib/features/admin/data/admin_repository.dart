@@ -68,6 +68,13 @@ class AdminRepository {
     ).cast<Map<String, dynamic>>().map(AdminPlayer.fromJson).toList();
   }
 
+  Future<AdminPlayerStatistics> playerStatistics(String id) async {
+    final response = await _api.get('/players/$id/statistics');
+    return AdminPlayerStatistics.fromJson(
+      (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>,
+    );
+  }
+
   Future<AdminPlayer> createPlayer({
     required String fullName,
     required String birthDate,
@@ -213,7 +220,11 @@ class AdminPlayer {
     required this.wins,
     required this.points,
     required this.status,
+    this.phone = '',
+    this.birthDate = '',
   });
+  final String phone;
+  final String birthDate;
   final String id;
   final String name;
   final String email;
@@ -230,6 +241,8 @@ class AdminPlayer {
     wins: _intValue(json['ranking_matches_won']),
     points: _doubleValue(json['ranking_real_points']),
     status: (json['registration_status'] ?? '').toString(),
+    phone: (json['phone'] ?? '').toString(),
+    birthDate: (json['birth_date'] ?? '').toString(),
   );
 }
 
@@ -303,3 +316,63 @@ bool _boolValue(Object? value, {bool fallback = false}) => switch (value) {
   String text when text.toLowerCase() == 'false' || text == '0' => false,
   _ => fallback,
 };
+
+class AdminPlayerStatistics {
+  const AdminPlayerStatistics({
+    required this.matches,
+    required this.wins,
+    required this.losses,
+    required this.history,
+  });
+  final int matches;
+  final int wins;
+  final int losses;
+  final List<AdminPlayerMatch> history;
+
+  factory AdminPlayerStatistics.fromJson(Map<String, dynamic> json) {
+    final totals = json['totals'] as Map<String, dynamic>? ?? const {};
+    return AdminPlayerStatistics(
+      matches: _intValue(totals['matches_played']),
+      wins: _intValue(totals['wins']),
+      losses: _intValue(totals['losses']),
+      history: (json['matches'] as List<dynamic>? ?? const [])
+          .cast<Map<String, dynamic>>()
+          .map(AdminPlayerMatch.fromJson)
+          .toList(),
+    );
+  }
+}
+
+class AdminPlayerMatch {
+  const AdminPlayerMatch({
+    required this.id,
+    required this.date,
+    required this.time,
+    required this.court,
+    required this.score,
+    required this.pending,
+    required this.players,
+  });
+  final String id;
+  final String date;
+  final String time;
+  final String court;
+  final String score;
+  final bool pending;
+  final List<String> players;
+
+  factory AdminPlayerMatch.fromJson(Map<String, dynamic> json) =>
+      AdminPlayerMatch(
+        id: json['id'].toString(),
+        date: (json['date'] ?? '').toString(),
+        time: (json['time_slot'] ?? '').toString(),
+        court: (json['court_name'] ?? '').toString(),
+        score: (json['score_team1'] ?? '').toString(),
+        pending: json['status'] == 'pending_result',
+        players: (json['players'] as List<dynamic>? ?? const [])
+            .map(
+              (player) => (player as Map<String, dynamic>)['name'].toString(),
+            )
+            .toList(),
+      );
+}

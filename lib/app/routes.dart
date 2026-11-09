@@ -28,6 +28,7 @@ abstract final class AppRoutes {
   static const adminMatches = 'amministrazione-partite';
   static const adminBookings = 'amministrazione-prenotazioni';
   static const adminPlayers = 'amministrazione-giocatori';
+  static const adminPlayerDetail = 'amministrazione-giocatore';
   static const adminCommunications = 'amministrazione-comunicazioni';
   static const adminMatchHistory = 'amministrazione-storico-partite';
   static const adminUsers = 'amministrazione-utenti';
