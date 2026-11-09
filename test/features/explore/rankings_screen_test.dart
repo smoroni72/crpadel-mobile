@@ -34,8 +34,8 @@ void main() {
             position: 1,
             playerRef: 'p1',
             playerName: 'Mario Rossi',
-            pointsEarned: 39.5,
-            monthlyScore: 131.7,
+            pointsEarned: 48,
+            monthlyScore: 160,
             matchesPlayed: 3,
             matchesWon: 2,
             classificationDelta: 4.2,
@@ -46,8 +46,8 @@ void main() {
             position: 2,
             playerRef: 'p2',
             playerName: 'Luigi Bianchi',
-            pointsEarned: 48,
-            monthlyScore: 160,
+            pointsEarned: 39.5,
+            monthlyScore: 131.7,
             matchesPlayed: 3,
             matchesWon: 3,
             classificationDelta: 8,
@@ -101,7 +101,15 @@ void main() {
 
     expect(find.text('Classifica mensile'), findsOneWidget);
     expect(find.text('GIOCATORE DEL MESE'), findsOneWidget);
-    expect(find.text('Ordina per'), findsOneWidget);
+    expect(find.text('Ordina per'), findsNothing);
+    expect(find.text('PR totali'), findsNothing);
+    expect(find.text('+8,0'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Luigi Bianchi')).dy,
+      lessThan(tester.getTopLeft(find.text('Mario Rossi').last).dy),
+      reason:
+          'La graduatoria deve seguire il delta anche quando i PR sono più bassi',
+    );
     expect(find.text('Solo idonei'), findsOneWidget);
     expect(find.text('Mario Rossi'), findsWidgets);
     expect(find.text('Luigi Bianchi'), findsOneWidget);
