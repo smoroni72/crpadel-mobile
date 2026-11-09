@@ -220,7 +220,11 @@ class AdminPlayer {
     required this.wins,
     required this.points,
     required this.status,
+    this.phone = '',
+    this.birthDate = '',
   });
+  final String phone;
+  final String birthDate;
   final String id;
   final String name;
   final String email;
@@ -237,6 +241,8 @@ class AdminPlayer {
     wins: _intValue(json['ranking_matches_won']),
     points: _doubleValue(json['ranking_real_points']),
     status: (json['registration_status'] ?? '').toString(),
+    phone: (json['phone'] ?? '').toString(),
+    birthDate: (json['birth_date'] ?? '').toString(),
   );
 }
 
@@ -285,6 +291,8 @@ class AdminPlayerStatistics {
 
   int get winRate =>
       matchesPlayed == 0 ? 0 : (wins * 100 / matchesPlayed).round();
+  int get matchesCount => matchesPlayed;
+  List<AdminPlayerMatchStatistic> get history => matches;
 
   factory AdminPlayerStatistics.fromJson(Map<String, dynamic> json) {
     final totals = json['totals'] as Map<String, dynamic>? ?? const {};
@@ -317,30 +325,43 @@ class AdminPlayerStatistics {
 
 class AdminPlayerMatchStatistic {
   const AdminPlayerMatchStatistic({
+    required this.id,
     required this.date,
     required this.time,
     required this.court,
     required this.score,
     required this.status,
+    required this.players,
     this.rankingPoints,
     this.rankingScoreDelta,
   });
 
+  final String id;
   final String date;
   final String time;
   final String court;
   final String score;
   final String status;
+  final List<String> players;
   final double? rankingPoints;
   final double? rankingScoreDelta;
+  bool get pending => status == 'pending_result' || status == 'in_progress';
 
   factory AdminPlayerMatchStatistic.fromJson(Map<String, dynamic> json) =>
       AdminPlayerMatchStatistic(
+        id: (json['id'] ?? '').toString(),
         date: (json['date'] ?? '').toString(),
         time: (json['time_slot'] ?? '').toString(),
         court: (json['court_name'] ?? 'Campo').toString(),
         score: (json['score_team1'] ?? '').toString(),
         status: (json['status'] ?? '').toString(),
+        players: (json['players'] as List<dynamic>? ?? const [])
+            .map(
+              (player) =>
+                  ((player as Map<String, dynamic>)['name'] ?? '').toString(),
+            )
+            .where((name) => name.isNotEmpty)
+            .toList(),
         rankingPoints: _nullableDouble(json['ranking_points_delta']),
         rankingScoreDelta: _nullableDouble(json['ranking_score_delta']),
       );
