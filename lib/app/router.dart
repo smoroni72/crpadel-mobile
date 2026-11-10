@@ -19,6 +19,7 @@ import '../features/bookings/presentation/complete_booking_screen.dart';
 import '../features/bookings/presentation/free_courts_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/explore/presentation/club_info_screen.dart';
+import '../features/explore/presentation/crpadel_tv_screen.dart';
 import '../features/explore/presentation/explore_menu_screen.dart';
 import '../features/explore/presentation/gallery_screen.dart';
 import '../features/explore/presentation/lessons_screen.dart';
@@ -125,6 +126,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppPaths.gallery,
         name: AppRoutes.gallery,
         builder: (_, _) => const GalleryScreen(),
+      ),
+      GoRoute(
+        path: AppPaths.crpadelTv,
+        name: AppRoutes.crpadelTv,
+        builder: (_, _) => const CrpadelTvScreen(),
       ),
       GoRoute(
         path: AppPaths.clubInfo,

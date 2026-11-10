@@ -38,6 +38,7 @@ void main() {
       'Classifiche',
       'Lezioni',
       'Gallery',
+      'CRPadel TV',
       'Centro notifiche',
       'Informazioni sul circolo',
     ]) {
@@ -54,6 +55,7 @@ void main() {
               tournaments: false,
               lessons: false,
               gallery: false,
+              crpadelTv: false,
               notifications: false,
             ),
           ),
@@ -72,6 +74,7 @@ void main() {
     expect(find.text('Tornei'), findsNothing);
     expect(find.text('Lezioni'), findsNothing);
     expect(find.text('Gallery'), findsNothing);
+    expect(find.text('CRPadel TV'), findsNothing);
     expect(find.text('Centro notifiche'), findsNothing);
   });
 }

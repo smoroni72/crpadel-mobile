@@ -8,6 +8,7 @@ class AppMenuConfiguration {
     this.rankings = true,
     this.lessons = true,
     this.gallery = true,
+    this.crpadelTv = true,
     this.notifications = true,
     this.clubInfo = true,
     this.createMatches = true,
@@ -23,6 +24,7 @@ class AppMenuConfiguration {
         rankings: json['rankings'] as bool? ?? true,
         lessons: json['lessons'] as bool? ?? true,
         gallery: json['gallery'] as bool? ?? true,
+        crpadelTv: json['crpadel_tv'] as bool? ?? true,
         notifications: json['notifications'] as bool? ?? true,
         clubInfo: json['club_info'] as bool? ?? true,
         createMatches: json['create_matches'] as bool? ?? true,
@@ -36,6 +38,7 @@ class AppMenuConfiguration {
   final bool rankings;
   final bool lessons;
   final bool gallery;
+  final bool crpadelTv;
   final bool notifications;
   final bool clubInfo;
 
@@ -54,6 +57,7 @@ class AppMenuConfiguration {
     AppMenuFeature.rankings => rankings,
     AppMenuFeature.lessons => lessons,
     AppMenuFeature.gallery => gallery,
+    AppMenuFeature.crpadelTv => crpadelTv,
     AppMenuFeature.notifications => notifications,
     AppMenuFeature.clubInfo => clubInfo,
   };
@@ -63,6 +67,7 @@ class AppMenuConfiguration {
       rankings ||
       lessons ||
       gallery ||
+      crpadelTv ||
       notifications ||
       clubInfo;
 }
@@ -76,6 +81,7 @@ enum AppMenuFeature {
   rankings,
   lessons,
   gallery,
+  crpadelTv,
   notifications,
   clubInfo,
 }
