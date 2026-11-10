@@ -30,6 +30,7 @@ extension MatchStatusLabel on PadelMatch {
     MatchStatus.open => 'Al completo · $playersLabel',
     MatchStatus.inProgress => 'In corso',
     MatchStatus.pendingResult => 'In attesa del risultato',
+    MatchStatus.completed when endedByTimeLimit => 'Tempo scaduto',
     MatchStatus.completed => 'Completata',
     MatchStatus.notPlayed => 'Non disputata',
     MatchStatus.cancelled => 'Annullata',

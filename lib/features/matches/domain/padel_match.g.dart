@@ -66,6 +66,7 @@ _PadelMatch _$PadelMatchFromJson(Map<String, dynamic> json) => _PadelMatch(
   maxPlayers: (json['max_players'] as num?)?.toInt() ?? 4,
   scoreTeam1: json['score_team1'] as String?,
   winnerTeam: json['winner_team'] as String?,
+  resultOutcome: json['result_outcome'] as String? ?? 'normal',
   rankingTeamACoefficientAtResult: nullableDoubleFromJson(
     json['ranking_team_a_coefficient_at_result'],
   ),
@@ -95,6 +96,7 @@ Map<String, dynamic> _$PadelMatchToJson(_PadelMatch instance) =>
       'max_players': instance.maxPlayers,
       'score_team1': instance.scoreTeam1,
       'winner_team': instance.winnerTeam,
+      'result_outcome': instance.resultOutcome,
       'ranking_team_a_coefficient_at_result':
           instance.rankingTeamACoefficientAtResult,
       'ranking_team_b_coefficient_at_result':

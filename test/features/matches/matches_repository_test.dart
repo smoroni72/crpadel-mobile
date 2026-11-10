@@ -23,6 +23,7 @@ void main() {
     'score_team1': null,
     'score_team2': null,
     'winner_team': null,
+    'result_outcome': 'normal',
     'players': [
       {
         'club_player_id': 'cp1',
@@ -85,6 +86,29 @@ void main() {
 
     expect(match.status, MatchStatus.unknown);
     expect(match.matchType, MatchType.unknown);
+  });
+
+  test('riconosce una partita terminata per mancanza di tempo', () async {
+    final adapter = FakeAdapter(
+      (_) => (
+        200,
+        {
+          'data': [
+            {
+              ...matchJson,
+              'status': 'completed',
+              'result_outcome': 'time_expired',
+            },
+          ],
+        },
+      ),
+    );
+    final repository = ApiMatchesRepository(fakeApiClient(adapter));
+
+    final match = (await repository.byDate(DateTime(2026, 10, 7))).single;
+
+    expect(match.endedByTimeLimit, isTrue);
+    expect(match.winnerTeam, isNull);
   });
 
   test('le mie partite usano il filtro organizzatore', () async {
