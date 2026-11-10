@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../profile/domain/profile_models.dart';
+import '../../profile/presentation/widgets/player_avatar.dart';
 import 'explore_providers.dart';
 
 class RankingsScreen extends ConsumerStatefulWidget {
@@ -383,6 +384,12 @@ class _DecadeRankingRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
+          PlayerAvatar(
+            name: player.playerName,
+            photoUrl: player.playerPhotoUrl,
+            size: 32,
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -542,9 +549,10 @@ class _MonthlyRankingSection extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    backgroundColor: Color(0x33FFC107),
-                    child: Icon(Icons.emoji_events, color: Color(0xFFFFB300)),
+                  PlayerAvatar(
+                    name: winner.playerName,
+                    photoUrl: winner.playerPhotoUrl,
+                    size: 44,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -615,6 +623,12 @@ class _MonthlyRankingSection extends StatelessWidget {
                           ),
                         ),
                       ),
+                      PlayerAvatar(
+                        name: player.playerName,
+                        photoUrl: player.playerPhotoUrl,
+                        size: 34,
+                      ),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -699,6 +713,12 @@ class _RankingRow extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: context.colors.border),
             ),
+          ),
+          const SizedBox(width: 10),
+          PlayerAvatar(
+            name: player.playerName,
+            photoUrl: player.playerPhotoUrl,
+            size: 34,
           ),
           const SizedBox(width: 10),
           Expanded(

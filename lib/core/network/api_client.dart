@@ -80,6 +80,23 @@ class ApiClient {
   Future<Response<dynamic>> delete(String path, {Object? data}) =>
       _guard(() => _dio.delete(path, data: data));
 
+  Future<Map<String, dynamic>> uploadJpeg(Uint8List bytes) async {
+    final response = await _guard(
+      () => _dio.post(
+        '/storage/images',
+        data: Stream.fromIterable([bytes]),
+        options: Options(
+          headers: {
+            Headers.contentTypeHeader: 'image/jpeg',
+            Headers.contentLengthHeader: bytes.length,
+            'X-File-Name': 'foto-giocatore.jpg',
+          },
+        ),
+      ),
+    );
+    return (response.data as Map).cast<String, dynamic>();
+  }
+
   Future<void> setAccessToken(String? token) async {
     _accessToken = token;
     if (token == null) {

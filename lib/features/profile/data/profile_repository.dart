@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:typed_data';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/providers.dart';
@@ -28,6 +29,11 @@ abstract interface class ProfileRepository {
 
   /// Annulla una propria lezione confermata.
   Future<void> cancelLesson(String lessonId);
+
+  Future<ProfileStats> updatePhoto({
+    Uint8List? jpeg,
+    required bool publicConsent,
+  });
 }
 
 class ApiProfileRepository implements ProfileRepository {
@@ -185,6 +191,37 @@ class ApiProfileRepository implements ProfileRepository {
       bandName: own?.rankingBandName,
       bandColor: own?.rankingBandColor,
       rankingAlerts: RankingAlerts.fromJson(rankingAlertsJson),
+      photoUrl: self?['photo_url'] as String?,
+      photoStorageId: self?['photo_storage_id'] as String?,
+      photoPublicConsent: self?['photo_public_consent'] == true,
+    );
+  }
+
+  @override
+  Future<ProfileStats> updatePhoto({
+    Uint8List? jpeg,
+    required bool publicConsent,
+  }) async {
+    Map<String, dynamic>? upload;
+    if (jpeg != null) upload = await _api.uploadJpeg(jpeg);
+    final current = await _api.get('/players/me');
+    final player =
+        (current.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    final response = await _api.patch(
+      '/players/me/photo',
+      data: {
+        'photo_url': upload?['file_url'] ?? player['photo_url'],
+        'photo_storage_id':
+            upload?['storage_object_id'] ?? player['photo_storage_id'],
+        'photo_public_consent': publicConsent,
+      },
+    );
+    final updated =
+        (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    return ProfileStats(
+      photoUrl: updated['photo_url'] as String?,
+      photoStorageId: updated['photo_storage_id'] as String?,
+      photoPublicConsent: updated['photo_public_consent'] == true,
     );
   }
 

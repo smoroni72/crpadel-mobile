@@ -13,6 +13,7 @@ abstract class PlayerRanking with _$PlayerRanking {
     @Default(0) int position,
     String? rankingBandName,
     String? rankingBandColor,
+    String? playerPhotoUrl,
     @JsonKey(fromJson: nullableRankingScoreFromJson)
     @Default(0)
     double eloScore,
@@ -123,6 +124,9 @@ class ProfileStats {
     this.recentMatches = 0,
     this.recentWins = 0,
     this.rankingAlerts = const RankingAlerts(),
+    this.photoUrl,
+    this.photoStorageId,
+    this.photoPublicConsent = false,
   });
 
   /// Posizione in classifica; `null` se l'utente non è in classifica.
@@ -149,6 +153,9 @@ class ProfileStats {
   final int recentMatches;
   final int recentWins;
   final RankingAlerts rankingAlerts;
+  final String? photoUrl;
+  final String? photoStorageId;
+  final bool photoPublicConsent;
 
   /// Percentuale di vittorie arrotondata, come sul sito.
   int get winRate =>
@@ -201,6 +208,7 @@ class MonthlyRanking {
     this.classificationDelta = 0,
     this.generalLeaderboardQualified = false,
     this.playerOfMonthEligible = false,
+    this.playerPhotoUrl,
   });
 
   final int position;
@@ -213,6 +221,7 @@ class MonthlyRanking {
   final double classificationDelta;
   final bool generalLeaderboardQualified;
   final bool playerOfMonthEligible;
+  final String? playerPhotoUrl;
 
   int get matchesLost => matchesPlayed - matchesWon;
 
@@ -227,6 +236,7 @@ class MonthlyRanking {
     classificationDelta: _number(json['classification_delta']),
     generalLeaderboardQualified: json['general_leaderboard_qualified'] == true,
     playerOfMonthEligible: json['player_of_month_eligible'] == true,
+    playerPhotoUrl: json['player_photo_url'] as String?,
   );
 }
 
@@ -273,6 +283,7 @@ class DecadeRankingPlayer {
     required this.coefficient,
     this.rankingBandName,
     this.rankingBandColor,
+    this.playerPhotoUrl,
   });
 
   final String playerRef;
@@ -282,6 +293,7 @@ class DecadeRankingPlayer {
   final double coefficient;
   final String? rankingBandName;
   final String? rankingBandColor;
+  final String? playerPhotoUrl;
 
   factory DecadeRankingPlayer.fromJson(Map<String, dynamic> json) =>
       DecadeRankingPlayer(
@@ -292,6 +304,7 @@ class DecadeRankingPlayer {
         coefficient: _number(json['coefficient']),
         rankingBandName: json['ranking_band_name'] as String?,
         rankingBandColor: json['ranking_band_color'] as String?,
+        playerPhotoUrl: json['player_photo_url'] as String?,
       );
 }
 

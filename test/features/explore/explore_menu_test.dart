@@ -22,7 +22,12 @@ void main() {
     final backend = FakeBackend();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: backend.overrides,
+        overrides: [
+          ...backend.overrides,
+          appMenuConfigurationProvider.overrideWith(
+            (_) async => AppMenuConfiguration.allEnabled,
+          ),
+        ],
         retry: (_, _) => null,
         child: const CrPadelApp(),
       ),
@@ -38,11 +43,11 @@ void main() {
       'Classifiche',
       'Lezioni',
       'Gallery',
-      'CRPadel TV',
+      'CR Padel TV',
       'Centro notifiche',
       'Informazioni sul circolo',
     ]) {
-      expect(find.text(label), findsOneWidget);
+      expect(find.text(label, skipOffstage: false), findsOneWidget);
     }
   });
 
@@ -74,7 +79,7 @@ void main() {
     expect(find.text('Tornei'), findsNothing);
     expect(find.text('Lezioni'), findsNothing);
     expect(find.text('Gallery'), findsNothing);
-    expect(find.text('CRPadel TV'), findsNothing);
+    expect(find.text('CR Padel TV'), findsNothing);
     expect(find.text('Centro notifiche'), findsNothing);
   });
 }

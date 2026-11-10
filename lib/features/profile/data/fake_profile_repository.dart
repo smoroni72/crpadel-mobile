@@ -1,4 +1,5 @@
 import '../../bookings/domain/booking.dart';
+import 'dart:typed_data';
 import '../domain/profile_models.dart';
 import 'profile_repository.dart';
 
@@ -90,5 +91,26 @@ class FakeProfileRepository implements ProfileRepository {
       for (final l in lessonList)
         l.id == lessonId ? l.copyWith(status: LessonStatus.cancelled) : l,
     ];
+  }
+
+  @override
+  Future<ProfileStats> updatePhoto({
+    Uint8List? jpeg,
+    required bool publicConsent,
+  }) async {
+    _check();
+    profileStats = ProfileStats(
+      position: profileStats.position,
+      matchesPlayed: profileStats.matchesPlayed,
+      matchesWon: profileStats.matchesWon,
+      bandName: profileStats.bandName,
+      bandColor: profileStats.bandColor,
+      photoUrl: jpeg == null ? profileStats.photoUrl : '/fake/player.jpg',
+      photoStorageId: jpeg == null
+          ? profileStats.photoStorageId
+          : 'fake-storage',
+      photoPublicConsent: publicConsent,
+    );
+    return profileStats;
   }
 }

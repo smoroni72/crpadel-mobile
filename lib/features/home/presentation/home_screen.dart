@@ -24,6 +24,7 @@ import '../../subscriptions/presentation/subscription_summary_card.dart';
 import '../../subscriptions/presentation/subscriptions_provider.dart';
 import '../../notifications/presentation/notifications_provider.dart';
 import '../../profile/domain/profile_models.dart';
+import '../../profile/presentation/widgets/player_avatar.dart';
 import '../../profile/presentation/profile_providers.dart';
 import '../domain/home_news.dart';
 import 'home_providers.dart';
@@ -362,6 +363,12 @@ class _PodiumDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        PlayerAvatar(
+          name: player.playerName,
+          photoUrl: player.playerPhotoUrl,
+          size: 44,
+        ),
+        const SizedBox(height: 8),
         Row(
           children: [
             Container(
@@ -440,6 +447,12 @@ class _RankingRow extends StatelessWidget {
               color: parseHexColor(player.rankingBandColor) ?? colors.divider,
               border: Border.all(color: colors.border),
             ),
+          ),
+          const SizedBox(width: 9),
+          PlayerAvatar(
+            name: player.playerName,
+            photoUrl: player.playerPhotoUrl,
+            size: 32,
           ),
           const SizedBox(width: 9),
           Expanded(

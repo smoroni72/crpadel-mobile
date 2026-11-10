@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/providers.dart';
@@ -25,6 +29,7 @@ import 'delete_account.dart';
 import 'profile_labels.dart';
 import 'profile_providers.dart';
 import 'widgets/player_mood_avatar.dart';
+import 'widgets/player_avatar.dart';
 
 /// Profilo uguale a quello del sito: card, 4 riquadri, schede, Esci ed
 /// Elimina account. Le voci solo dell'app sono in Impostazioni.
@@ -192,7 +197,21 @@ class _ProfileCard extends ConsumerWidget {
                     ),
                   )
                 else
-                  PlayerMoodAvatar(stats: s, size: 64, showLabel: true),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      PlayerAvatar(
+                        name: user?.fullName ?? '',
+                        photoUrl: s.photoUrl,
+                        size: 64,
+                      ),
+                      Positioned(
+                        right: -5,
+                        bottom: -5,
+                        child: PlayerMoodAvatar(stats: s, size: 28),
+                      ),
+                    ],
+                  ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -212,6 +231,47 @@ class _ProfileCard extends ConsumerWidget {
                       if (s != null) ...[
                         const SizedBox(height: 4),
                         _BandBadge(name: s.bandName, color: s.bandColor),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: () =>
+                                  _choosePlayerPhoto(context, ref, s),
+                              icon: const Icon(
+                                Icons.add_a_photo_outlined,
+                                size: 17,
+                              ),
+                              label: const Text('Foto profilo'),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Checkbox(
+                                  value: s.photoPublicConsent,
+                                  onChanged: s.photoUrl == null
+                                      ? null
+                                      : (value) async {
+                                          await ref
+                                              .read(profileRepositoryProvider)
+                                              .updatePhoto(
+                                                publicConsent: value == true,
+                                              );
+                                          ref.invalidate(profileStatsProvider);
+                                        },
+                                ),
+                                const Flexible(
+                                  child: Text(
+                                    'Visibile in classifiche e podi',
+                                    style: TextStyle(fontSize: 11),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ],
                     ],
                   ),
@@ -262,6 +322,80 @@ class _ProfileCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+Future<void> _choosePlayerPhoto(
+  BuildContext context,
+  WidgetRef ref,
+  ProfileStats stats,
+) async {
+  final source = await showModalBottomSheet<ImageSource>(
+    context: context,
+    builder: (context) => SafeArea(
+      child: Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.camera_alt_outlined),
+            title: const Text('Scatta un selfie'),
+            onTap: () => Navigator.pop(context, ImageSource.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library_outlined),
+            title: const Text('Scegli dalla galleria'),
+            onTap: () => Navigator.pop(context, ImageSource.gallery),
+          ),
+        ],
+      ),
+    ),
+  );
+  if (source == null) return;
+  final picked = await ImagePicker().pickImage(
+    source: source,
+    imageQuality: 92,
+    maxWidth: 1600,
+    maxHeight: 1600,
+  );
+  if (picked == null) return;
+
+  // Su iOS il picker può restituire il file mentre la fotocamera è ancora in
+  // chiusura. Presentare subito il cropper viene ignorato silenziosamente dal
+  // sistema; attendiamo la fine della transizione prima di aprirlo.
+  if (Platform.isIOS && source == ImageSource.camera) {
+    await Future<void>.delayed(const Duration(milliseconds: 800));
+    if (!context.mounted) return;
+  }
+
+  final cropped = await ImageCropper().cropImage(
+    sourcePath: picked.path,
+    maxWidth: 640,
+    maxHeight: 640,
+    aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+    compressFormat: ImageCompressFormat.jpg,
+    compressQuality: 82,
+    uiSettings: [
+      AndroidUiSettings(
+        toolbarTitle: 'Ritaglia la foto',
+        toolbarColor: const Color(0xFFEF382C),
+        toolbarWidgetColor: Colors.white,
+        activeControlsWidgetColor: const Color(0xFFEF382C),
+        lockAspectRatio: true,
+        hideBottomControls: false,
+      ),
+      IOSUiSettings(
+        title: 'Ritaglia la foto',
+        doneButtonTitle: 'Usa foto',
+        cancelButtonTitle: 'Annulla',
+        aspectRatioLockEnabled: true,
+        resetAspectRatioEnabled: false,
+      ),
+    ],
+  );
+  if (cropped == null) return;
+  final jpeg = await cropped.readAsBytes();
+  await ref
+      .read(profileRepositoryProvider)
+      .updatePhoto(jpeg: jpeg, publicConsent: stats.photoPublicConsent);
+  ref.invalidate(profileStatsProvider);
 }
 
 class _RankingRulesCard extends ConsumerWidget {
