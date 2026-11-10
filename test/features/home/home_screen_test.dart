@@ -140,7 +140,10 @@ void main() {
 
     expect(find.text('ATTENZIONE RANKING'), findsOneWidget);
     expect(find.textContaining('3 partite consecutive'), findsOneWidget);
-    expect(find.textContaining('al massimo 0,10 punti classifica'), findsOneWidget);
+    expect(
+      find.textContaining('al massimo 0,10 punti classifica'),
+      findsOneWidget,
+    );
     expect(
       find.textContaining('coefficiente pari o inferiore'),
       findsOneWidget,
