@@ -52,8 +52,8 @@ class FakeAuthRepository implements AuthRepository {
     required String email,
     required String password,
     required String fullName,
-    required DateTime birthDate,
-    required String gender,
+    DateTime? birthDate,
+    String? gender,
   }) async => 'Registrazione completata. Controlla la tua email.';
 
   @override

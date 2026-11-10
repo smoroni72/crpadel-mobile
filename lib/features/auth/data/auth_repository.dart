@@ -20,8 +20,8 @@ abstract interface class AuthRepository {
     required String email,
     required String password,
     required String fullName,
-    required DateTime birthDate,
-    required String gender,
+    DateTime? birthDate,
+    String? gender,
   });
 
   /// Restituisce il messaggio del server da mostrare all'utente.
@@ -76,17 +76,18 @@ class ApiAuthRepository implements AuthRepository {
     required String email,
     required String password,
     required String fullName,
-    required DateTime birthDate,
-    required String gender,
+    DateTime? birthDate,
+    String? gender,
   }) async {
     final response = await _api.post(
       '/auth/register',
-      data: {
+      data: <String, dynamic>{
         'email': email.trim().toLowerCase(),
         'password': password,
         'full_name': fullName.trim(),
-        'birth_date': birthDate.toIso8601String().substring(0, 10),
-        'gender': gender,
+        if (birthDate != null)
+          'birth_date': birthDate.toIso8601String().substring(0, 10),
+        if (gender != null) 'gender': gender,
       },
     );
     return (response.data as Map<String, dynamic>)['message'] as String;

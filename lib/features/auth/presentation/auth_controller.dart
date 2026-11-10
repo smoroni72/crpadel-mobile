@@ -33,8 +33,8 @@ class AuthController extends AsyncNotifier<AppUser?> {
     required String email,
     required String password,
     required String fullName,
-    required DateTime birthDate,
-    required String gender,
+    DateTime? birthDate,
+    String? gender,
   }) => _repository.register(
     email: email,
     password: password,
