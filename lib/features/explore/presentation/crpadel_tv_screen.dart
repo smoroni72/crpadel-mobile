@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -13,6 +14,9 @@ class CrpadelTvScreen extends StatefulWidget {
 class _CrpadelTvScreenState extends State<CrpadelTvScreen> {
   static final Uri _channelUri = Uri.parse(
     'https://www.youtube.com/@CastelliRomaniPadel',
+  );
+  static final Uri _telegramBotUri = Uri.parse(
+    'https://t.me/padel_castelliromani_bot',
   );
 
   late final WebViewController _controller;
@@ -48,11 +52,25 @@ class _CrpadelTvScreenState extends State<CrpadelTvScreen> {
     await _controller.reload();
   }
 
+  Future<void> _openLiveBot() async {
+    final opened = await launchUrl(
+      _telegramBotUri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Non riesco ad aprire Telegram o il browser.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CRPadel TV'),
+        title: const Text('CR Padel TV'),
         actions: [
           IconButton(
             tooltip: 'Aggiorna video',
@@ -67,17 +85,34 @@ class _CrpadelTvScreenState extends State<CrpadelTvScreen> {
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
             color: context.colors.surface,
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Rivedi le partite del circolo',
                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                 ),
-                SizedBox(height: 4),
-                Text(
+                const SizedBox(height: 4),
+                const Text(
                   'Video e dirette dal canale ufficiale Castelli Romani Padel.',
                   style: TextStyle(fontSize: 13),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _openLiveBot,
+                    icon: const Icon(Icons.videocam_outlined),
+                    label: const Text('Avvia diretta'),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Si apre il bot Castelli Romani Padel in Telegram o nel browser.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -115,7 +150,7 @@ class _VideoLoadError extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             const Text(
-              'Non riesco a caricare CRPadel TV',
+              'Non riesco a caricare CR Padel TV',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),

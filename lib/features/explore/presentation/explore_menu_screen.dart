@@ -40,7 +40,7 @@ class ExploreMenuScreen extends ConsumerWidget {
         ),
       if (configuration.crpadelTv)
         const _MenuItem(
-          'CRPadel TV',
+          'CR Padel TV',
           Icons.ondemand_video_outlined,
           AppRoutes.crpadelTv,
         ),
