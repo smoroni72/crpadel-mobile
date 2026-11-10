@@ -19,6 +19,7 @@ void main() {
             'rankings': true,
             'lessons': false,
             'gallery': false,
+            'crpadel_tv': false,
             'notifications': true,
             'club_info': true,
             'create_matches': false,
@@ -35,6 +36,7 @@ void main() {
     expect(configuration.home, isTrue);
     expect(configuration.matches, isFalse);
     expect(configuration.rankings, isTrue);
+    expect(configuration.crpadelTv, isFalse);
     expect(configuration.clubInfo, isTrue);
     expect(configuration.createMatches, isFalse);
   });
@@ -43,6 +45,7 @@ void main() {
     final configuration = AppMenuConfiguration.fromJson(const {});
     expect(configuration.hasExploreItems, isTrue);
     expect(configuration.bookings, isTrue);
+    expect(configuration.crpadelTv, isTrue);
     expect(configuration.createMatches, isTrue);
   });
 }

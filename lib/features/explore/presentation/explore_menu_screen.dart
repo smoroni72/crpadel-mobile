@@ -38,6 +38,12 @@ class ExploreMenuScreen extends ConsumerWidget {
           Icons.photo_library_outlined,
           AppRoutes.gallery,
         ),
+      if (configuration.crpadelTv)
+        const _MenuItem(
+          'CR Padel TV',
+          Icons.ondemand_video_outlined,
+          AppRoutes.crpadelTv,
+        ),
       if (configuration.notifications)
         _MenuItem(
           'Centro notifiche',

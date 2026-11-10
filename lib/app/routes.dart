@@ -23,6 +23,7 @@ abstract final class AppRoutes {
   static const rankings = 'classifiche';
   static const lessons = 'lezioni';
   static const gallery = 'gallery';
+  static const crpadelTv = 'crpadel-tv';
   static const clubInfo = 'informazioni-circolo';
   static const admin = 'amministrazione';
   static const adminMatches = 'amministrazione-partite';
@@ -60,6 +61,7 @@ abstract final class AppPaths {
   static const rankings = '/classifiche';
   static const lessons = '/lezioni';
   static const gallery = '/gallery';
+  static const crpadelTv = '/crpadel-tv';
   static const clubInfo = '/informazioni-circolo';
   static const admin = '/amministrazione';
   static const adminMatches = '/amministrazione/partite';

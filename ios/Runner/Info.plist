@@ -26,6 +26,17 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>CRPadel usa la fotocamera per scattare la foto del profilo giocatore.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>CRPadel si collega al server locale del circolo durante le prove di sviluppo.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>CRPadel accede alle foto per scegliere l’immagine del profilo giocatore.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
