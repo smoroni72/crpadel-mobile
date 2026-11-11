@@ -49,6 +49,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subscriptions = ref.watch(usableSubscriptionsProvider);
+    final menuConfiguration = ref.watch(appMenuConfigurationProvider).value;
+    final bookingsEnabled = menuConfiguration?.bookings ?? false;
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -74,8 +76,10 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               const _NewsSection(),
               const SizedBox(height: 24),
-              const _BookingsSection(),
-              const SizedBox(height: 20),
+              if (bookingsEnabled) ...[
+                const _BookingsSection(),
+                const SizedBox(height: 20),
+              ],
               const _DayMatchesSection(),
             ],
           ),

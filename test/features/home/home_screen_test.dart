@@ -4,6 +4,8 @@ import 'package:crpadel_mobile/core/utils/dates.dart';
 import 'package:crpadel_mobile/features/bookings/data/fake_bookings_repository.dart';
 import 'package:crpadel_mobile/features/bookings/domain/booking.dart';
 import 'package:crpadel_mobile/features/bookings/presentation/widgets/booking_card.dart';
+import 'package:crpadel_mobile/features/app_menu/domain/app_menu_configuration.dart';
+import 'package:crpadel_mobile/features/app_menu/presentation/app_menu_provider.dart';
 import 'package:crpadel_mobile/features/home/presentation/home_screen.dart';
 import 'package:crpadel_mobile/features/home/data/fake_home_repository.dart';
 import 'package:crpadel_mobile/features/home/domain/home_news.dart';
@@ -23,13 +25,22 @@ import '../../helpers/fixtures.dart';
 void main() {
   setUpAll(() => initializeDateFormatting(Dates.locale));
 
-  Future<void> pumpHome(WidgetTester tester, FakeBackend backend) async {
+  Future<void> pumpHome(
+    WidgetTester tester,
+    FakeBackend backend, {
+    AppMenuConfiguration menuConfiguration = AppMenuConfiguration.allEnabled,
+  }) async {
     tester.view.physicalSize = const Size(1170, 3600);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: backend.overrides,
+        overrides: [
+          ...backend.overrides,
+          appMenuConfigurationProvider.overrideWith(
+            (ref) async => menuConfiguration,
+          ),
+        ],
         retry: (_, _) => null,
         child: MaterialApp(theme: AppTheme.light(), home: const HomeScreen()),
       ),
@@ -200,6 +211,20 @@ void main() {
 
     expect(find.text('Nessuna prenotazione in programma'), findsOneWidget);
     expect(find.text('Prenota un campo'), findsOneWidget);
+  });
+
+  testWidgets('nasconde la sezione prenotazioni quando disattivata', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      FakeBackend(),
+      menuConfiguration: const AppMenuConfiguration(bookings: false),
+    );
+
+    expect(find.text('Le tue prenotazioni'), findsNothing);
+    expect(find.text('Prenota un campo'), findsNothing);
+    expect(find.text('Partite del giorno'), findsOneWidget);
   });
 
   testWidgets('partite del giorno per stato e cambio giorno', (tester) async {
