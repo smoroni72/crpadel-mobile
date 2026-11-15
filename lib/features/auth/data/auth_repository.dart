@@ -27,6 +27,13 @@ abstract interface class AuthRepository {
   /// Restituisce il messaggio del server da mostrare all'utente.
   Future<String> forgotPassword(String email);
 
+  /// Invia al nuovo indirizzo il collegamento di verifica. L'indirizzo
+  /// corrente resta attivo finché il collegamento non viene confermato.
+  Future<String> requestEmailChange({
+    required String newEmail,
+    required String currentPassword,
+  });
+
   Future<void> logout();
 
   /// Cambia la password. Il server chiude tutte le sessioni: dopo bisogna
@@ -98,6 +105,21 @@ class ApiAuthRepository implements AuthRepository {
     final response = await _api.post(
       '/auth/forgot-password',
       data: {'email': email.trim().toLowerCase()},
+    );
+    return (response.data as Map<String, dynamic>)['message'] as String;
+  }
+
+  @override
+  Future<String> requestEmailChange({
+    required String newEmail,
+    required String currentPassword,
+  }) async {
+    final response = await _api.post(
+      '/auth/change-email/request',
+      data: {
+        'new_email': newEmail.trim().toLowerCase(),
+        'current_password': currentPassword,
+      },
     );
     return (response.data as Map<String, dynamic>)['message'] as String;
   }

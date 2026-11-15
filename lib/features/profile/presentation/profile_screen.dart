@@ -1,9 +1,10 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -174,7 +175,46 @@ class _ProfileCard extends ConsumerWidget {
     final stats = ref.watch(profileStatsProvider);
     final colors = context.colors;
     final s = stats.value;
-    return Card(
+    final bandColor = parseHexColor(s?.bandColor) ?? colors.primary;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = bandColor.computeLuminance() > .72
+        ? (dark ? Colors.white : colors.navy)
+        : bandColor;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: accentColor.withValues(alpha: dark ? .55 : .38),
+          width: dark ? 1 : 1.25,
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: dark
+              ? [
+                  bandColor.withValues(alpha: .27),
+                  colors.surface,
+                  colors.surface,
+                ]
+              : [
+                  Color.alphaBlend(
+                    accentColor.withValues(alpha: .13),
+                    colors.surface,
+                  ),
+                  const Color(0xFFF5F8FC),
+                  colors.surface,
+                ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (dark ? bandColor : colors.navy).withValues(
+              alpha: dark ? .12 : .10,
+            ),
+            blurRadius: dark ? 24 : 28,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -197,20 +237,27 @@ class _ProfileCard extends ConsumerWidget {
                     ),
                   )
                 else
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      PlayerAvatar(
-                        name: user?.fullName ?? '',
-                        photoUrl: s.photoUrl,
-                        size: 64,
-                      ),
-                      Positioned(
-                        right: -5,
-                        bottom: -5,
-                        child: PlayerMoodAvatar(stats: s, size: 28),
-                      ),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: accentColor, width: 3),
+                    ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        PlayerAvatar(
+                          name: user?.fullName ?? '',
+                          photoUrl: s.photoUrl,
+                          size: 70,
+                        ),
+                        Positioned(
+                          right: -5,
+                          bottom: -5,
+                          child: PlayerMoodAvatar(stats: s, size: 28),
+                        ),
+                      ],
+                    ),
                   ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -219,7 +266,9 @@ class _ProfileCard extends ConsumerWidget {
                     children: [
                       Text(
                         user?.fullName ?? '',
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                       Text(
                         user?.email ?? '',
@@ -285,39 +334,134 @@ class _ProfileCard extends ConsumerWidget {
                 onRetry: () => ref.invalidate(profileStatsProvider),
               )
             else
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 1.9,
+              Column(
                 children: [
-                  _Stat(
-                    icon: Icons.bar_chart,
-                    value: s?.position == null ? '—' : '${s!.position}°',
-                    label: 'Posizione',
-                    highlight: true,
+                  Row(
+                    children: [
+                      _ProfileHeroMetric(
+                        label: 'POSIZIONE',
+                        value: s?.position == null ? '—' : '${s!.position}°',
+                      ),
+                      _ProfileHeroDivider(color: bandColor),
+                      _ProfileHeroMetric(
+                        label: 'PUNTI',
+                        value: s == null
+                            ? '—'
+                            : s.currentRankingScore.toStringAsFixed(2),
+                      ),
+                      _ProfileHeroDivider(color: bandColor),
+                      _ProfileHeroMetric(
+                        label: 'WIN RATE',
+                        value: '${s?.winRate ?? 0}%',
+                      ),
+                    ],
                   ),
-                  _Stat(
-                    icon: Icons.sports_tennis,
-                    value: '${s?.matchesPlayed ?? 0}',
-                    label: 'Partite',
+                  if (s != null && s.recentHistory.isNotEmpty) ...[
+                    const SizedBox(height: 17),
+                    Row(
+                      children: [
+                        Text(
+                          'FORMA RECENTE · ULTIME ${s.recentHistory.length}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                        const Spacer(),
+                        for (final match in s.recentHistory) ...[
+                          _ProfileFormDot(won: match.won),
+                          const SizedBox(width: 6),
+                        ],
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  Text(
+                    'STORICO DISPONIBILE · ${s?.matchesPlayed ?? 0} TOTALI',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textSecondary,
+                    ),
                   ),
-                  _Stat(
-                    icon: Icons.emoji_events_outlined,
-                    value: '${s?.matchesWon ?? 0}',
-                    label: 'Vittorie',
-                    highlight: true,
-                  ),
-                  _Stat(
-                    icon: Icons.trending_up,
-                    value: '${s?.winRate ?? 0}%',
-                    label: 'Win rate',
+                  const SizedBox(height: 3),
+                  Text(
+                    '${s?.matchesWon ?? 0} vittorie · ${s?.matchesLost ?? 0} sconfitte',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: colors.textSecondary),
                   ),
                 ],
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileHeroMetric extends StatelessWidget {
+  const _ProfileHeroMetric({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: Column(
+      children: [
+        Text(
+          value,
+          style: context.fonts.monoStyle(
+            fontSize: 19,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: context.colors.textSecondary,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _ProfileHeroDivider extends StatelessWidget {
+  const _ProfileHeroDivider({required this.color});
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) =>
+      Container(width: 1, height: 38, color: color.withValues(alpha: .35));
+}
+
+class _ProfileFormDot extends StatelessWidget {
+  const _ProfileFormDot({required this.won});
+  final bool won;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = won ? const Color(0xff16a34a) : const Color(0xffef4444);
+    return Container(
+      width: 27,
+      height: 27,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: .15),
+        border: Border.all(color: color.withValues(alpha: .7)),
+      ),
+      child: Text(
+        won ? 'V' : 'S',
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
         ),
       ),
     );
@@ -349,53 +493,65 @@ Future<void> _choosePlayerPhoto(
     ),
   );
   if (source == null) return;
-  final picked = await ImagePicker().pickImage(
-    source: source,
-    imageQuality: 92,
-    maxWidth: 1600,
-    maxHeight: 1600,
-  );
-  if (picked == null) return;
+  try {
+    final picked = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 92,
+      maxWidth: 1600,
+      maxHeight: 1600,
+    );
+    if (picked == null || !context.mounted) return;
 
-  // Su iOS il picker può restituire il file mentre la fotocamera è ancora in
-  // chiusura. Presentare subito il cropper viene ignorato silenziosamente dal
-  // sistema; attendiamo la fine della transizione prima di aprirlo.
-  if (Platform.isIOS && source == ImageSource.camera) {
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    // Su iOS il picker può restituire il file mentre la fotocamera è ancora in
+    // chiusura. Presentare subito il cropper viene ignorato silenziosamente dal
+    // sistema; attendiamo la fine della transizione prima di aprirlo.
+    if (Platform.isIOS && source == ImageSource.camera) {
+      await Future<void>.delayed(const Duration(milliseconds: 800));
+      if (!context.mounted) return;
+    }
+
+    final cropped = await ImageCropper().cropImage(
+      sourcePath: picked.path,
+      maxWidth: 640,
+      maxHeight: 640,
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 82,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Ritaglia la foto',
+          toolbarColor: const Color(0xFFEF382C),
+          toolbarWidgetColor: Colors.white,
+          activeControlsWidgetColor: const Color(0xFFEF382C),
+          lockAspectRatio: true,
+          hideBottomControls: false,
+        ),
+        IOSUiSettings(
+          title: 'Ritaglia la foto',
+          doneButtonTitle: 'Usa foto',
+          cancelButtonTitle: 'Annulla',
+          aspectRatioLockEnabled: true,
+          resetAspectRatioEnabled: false,
+        ),
+      ],
+    );
+    if (cropped == null || !context.mounted) return;
+    final jpeg = await cropped.readAsBytes();
+    await ref
+        .read(profileRepositoryProvider)
+        .updatePhoto(jpeg: jpeg, publicConsent: stats.photoPublicConsent);
+    ref.invalidate(profileStatsProvider);
+  } catch (_) {
     if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Non è stato possibile salvare la foto. Riprova oppure scegli '
+          'un’immagine dalla galleria.',
+        ),
+      ),
+    );
   }
-
-  final cropped = await ImageCropper().cropImage(
-    sourcePath: picked.path,
-    maxWidth: 640,
-    maxHeight: 640,
-    aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-    compressFormat: ImageCompressFormat.jpg,
-    compressQuality: 82,
-    uiSettings: [
-      AndroidUiSettings(
-        toolbarTitle: 'Ritaglia la foto',
-        toolbarColor: const Color(0xFFEF382C),
-        toolbarWidgetColor: Colors.white,
-        activeControlsWidgetColor: const Color(0xFFEF382C),
-        lockAspectRatio: true,
-        hideBottomControls: false,
-      ),
-      IOSUiSettings(
-        title: 'Ritaglia la foto',
-        doneButtonTitle: 'Usa foto',
-        cancelButtonTitle: 'Annulla',
-        aspectRatioLockEnabled: true,
-        resetAspectRatioEnabled: false,
-      ),
-    ],
-  );
-  if (cropped == null) return;
-  final jpeg = await cropped.readAsBytes();
-  await ref
-      .read(profileRepositoryProvider)
-      .updatePhoto(jpeg: jpeg, publicConsent: stats.photoPublicConsent);
-  ref.invalidate(profileStatsProvider);
 }
 
 class _RankingRulesCard extends ConsumerWidget {
@@ -409,8 +565,20 @@ class _RankingRulesCard extends ConsumerWidget {
     final deadline = DateTime.tryParse(alerts.periodEnd);
     final deadlineLabel = deadline == null
         ? alerts.periodEnd
-        : DateFormat('d MMMM', 'it_IT').format(deadline);
+        : intl.DateFormat('d MMMM', 'it_IT').format(deadline);
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Card(
+      elevation: dark ? 0 : 3,
+      shadowColor: context.colors.navy.withValues(alpha: .16),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: dark
+              ? context.colors.border
+              : context.colors.navy.withValues(alpha: .20),
+          width: dark ? 1 : 1.15,
+        ),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -468,7 +636,7 @@ class _RankingRulesCard extends ConsumerWidget {
                   : 'Non attiva',
               warning: alerts.favoriteRisk,
               description: alerts.favoriteRisk
-                  ? 'Soglia raggiunta: una nuova partita ancora da favorito assegna al massimo ${NumberFormat('0.00', 'it_IT').format(alerts.favoritePointsAfterThreshold)} punti classifica; se il calcolo restituisce meno, resta valido il valore inferiore.'
+                  ? 'Soglia raggiunta: una nuova partita ancora da favorito assegna al massimo ${intl.NumberFormat('0.00', 'it_IT').format(alerts.favoritePointsAfterThreshold)} punti classifica; se il calcolo restituisce meno, resta valido il valore inferiore.'
                   : alerts.favoriteRuleEnabled
                   ? 'Il contatore torna a zero giocando a coefficiente pari o inferiore agli avversari.'
                   : 'Questa regola non è attiva nel periodo corrente.',
@@ -486,7 +654,7 @@ class _RankingRulesCard extends ConsumerWidget {
               description: alerts.injuryExempt
                   ? 'Esenzione per infortunio attiva: nessuna penalizzazione per assenza.'
                   : alerts.inactivityRisk
-                  ? 'Entro il $deadlineLabel serve una partita ranking: altrimenti ${NumberFormat('0.##', 'it_IT').format(alerts.inactivityPenaltyPoints)} punto in classifica.${alerts.matchesScheduledInDecade > 0 ? ' Hai ${alerts.matchesScheduledInDecade} partita/e già in calendario.' : ''}'
+                  ? 'Entro il $deadlineLabel serve una partita ranking: altrimenti ${intl.NumberFormat('0.##', 'it_IT').format(alerts.inactivityPenaltyPoints)} punto in classifica.${alerts.matchesScheduledInDecade > 0 ? ' Hai ${alerts.matchesScheduledInDecade} partita/e già in calendario.' : ''}'
                   : alerts.inactivityRuleEnabled
                   ? 'Requisito della decade raggiunto. Nessuna penalizzazione per assenza.'
                   : 'Questa regola non è attiva nel periodo corrente.',
@@ -573,7 +741,21 @@ class _PlayerPerformance extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(profileStatsProvider).value;
     if (stats == null) return const SizedBox.shrink();
+    final showRankingDetails =
+        ref.watch(authControllerProvider).value?.isAdmin ?? false;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Card(
+      elevation: dark ? 0 : 3,
+      shadowColor: context.colors.navy.withValues(alpha: .16),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: dark
+              ? context.colors.border
+              : context.colors.navy.withValues(alpha: .20),
+          width: dark ? 1 : 1.15,
+        ),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -603,7 +785,7 @@ class _PlayerPerformance extends ConsumerWidget {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       Text(
-                        'Forma, risultati e rendimento',
+                        'Dati sulle ${stats.matchesPlayed} partite registrate',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.colors.textSecondary,
@@ -633,6 +815,14 @@ class _PlayerPerformance extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 18),
+            if (stats.recentHistory.isNotEmpty) ...[
+              _PersonalTrendChart(matches: stats.recentHistory),
+              const SizedBox(height: 18),
+            ],
+            if (_hasPersonalHighlights(stats)) ...[
+              _PersonalHighlights(stats: stats),
+              const SizedBox(height: 18),
+            ],
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
@@ -712,25 +902,489 @@ class _PlayerPerformance extends ConsumerWidget {
                 ),
                 (
                   'PR conquistati',
-                  NumberFormat(
+                  intl.NumberFormat(
                     '0.0#',
                     'it_IT',
                   ).format(stats.rankingPointsEarned),
                 ),
                 (
                   'Media PR',
-                  NumberFormat(
+                  intl.NumberFormat(
                     '0.0#',
                     'it_IT',
                   ).format(stats.rankingPointsAverage),
                 ),
               ],
             ),
+            if (showRankingDetails) ...[
+              const SizedBox(height: 14),
+              _MetricGroup(
+                title: stats.recentHistory.isEmpty
+                    ? 'Classifica recente'
+                    : 'Classifica ultime ${stats.recentHistory.length}',
+                icon: Icons.add_chart_rounded,
+                color: Colors.purple,
+                metrics: [
+                  (
+                    'Punti classifica',
+                    _signedProfileScore(stats.rankingScoreEarned),
+                  ),
+                  (
+                    'Media per partita',
+                    _signedProfileScore(stats.rankingScoreAverage),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 18),
+            const Divider(),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Icon(Icons.history_rounded, color: context.colors.primaryText),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    stats.recentHistory.isEmpty
+                        ? 'Partite recenti'
+                        : 'Ultime ${stats.recentHistory.length} partite',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              showRankingDetails
+                  ? 'Avversari, risultato e punti classifica'
+                  : 'Avversari e risultato',
+              style: TextStyle(
+                fontSize: 11,
+                color: context.colors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (stats.recentHistory.isEmpty)
+              Text(
+                'Nessuna partita disponibile',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: context.colors.textSecondary),
+              )
+            else
+              for (
+                var index = 0;
+                index < stats.recentHistory.length;
+                index++
+              ) ...[
+                _PersonalRecentMatch(
+                  match: stats.recentHistory[index],
+                  showRankingDetails: showRankingDetails,
+                ),
+                if (index < stats.recentHistory.length - 1)
+                  const SizedBox(height: 10),
+              ],
           ],
         ),
       ),
     );
   }
+}
+
+String _signedProfileScore(double value) =>
+    '${value > 0 ? '+' : ''}${value.toStringAsFixed(2).replaceAll('.', ',')}';
+
+bool _hasPersonalHighlights(ProfileStats stats) =>
+    stats.currentStreakCount > 0 ||
+    stats.bestPartner != null ||
+    stats.mostFacedOpponent != null ||
+    stats.badges.isNotEmpty;
+
+class _PersonalHighlights extends StatelessWidget {
+  const _PersonalHighlights({required this.stats});
+  final ProfileStats stats;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: context.colors.background,
+      borderRadius: BorderRadius.circular(17),
+      border: Border.all(color: context.colors.border),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.auto_awesome_rounded, color: context.colors.primaryText),
+            const SizedBox(width: 8),
+            const Text(
+              'Identità sportiva',
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+            ),
+          ],
+        ),
+        if (stats.badges.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: [
+              for (final badge in stats.badges)
+                Chip(
+                  avatar: const Icon(
+                    Icons.workspace_premium_outlined,
+                    size: 16,
+                    color: Color(0xffd97706),
+                  ),
+                  label: Text(badge),
+                  visualDensity: VisualDensity.compact,
+                ),
+            ],
+          ),
+        ],
+        if (stats.currentStreakCount > 0) ...[
+          const SizedBox(height: 10),
+          _PersonalHighlightTile(
+            icon: Icons.local_fire_department_rounded,
+            title: 'Serie attuale',
+            value:
+                '${stats.currentStreakCount} ${stats.currentStreakType == 'win' ? 'vittorie' : 'sconfitte'}',
+          ),
+        ],
+        if (stats.bestPartner != null) ...[
+          const SizedBox(height: 8),
+          _PersonalHighlightTile(
+            icon: Icons.handshake_outlined,
+            title: 'Miglior compagno',
+            value:
+                '${stats.bestPartner!.name} · ${stats.bestPartner!.matches} partite · ${stats.bestPartner!.winRate.toStringAsFixed(0)}%',
+          ),
+        ],
+        if (stats.mostFacedOpponent != null) ...[
+          const SizedBox(height: 8),
+          _PersonalHighlightTile(
+            icon: Icons.sports_martial_arts_outlined,
+            title: 'Avversario più affrontato',
+            value:
+                '${stats.mostFacedOpponent!.name} · ${stats.mostFacedOpponent!.matches} sfide',
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+class _PersonalHighlightTile extends StatelessWidget {
+  const _PersonalHighlightTile({
+    required this.icon,
+    required this.title,
+    required this.value,
+  });
+  final IconData icon;
+  final String title;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(icon, size: 19, color: context.colors.primaryText),
+      const SizedBox(width: 9),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: context.colors.textSecondary,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(value, style: const TextStyle(fontWeight: FontWeight.w800)),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+class _PersonalTrendChart extends StatelessWidget {
+  const _PersonalTrendChart({required this.matches});
+  final List<RecentPlayerMatch> matches;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(12, 14, 12, 10),
+    decoration: BoxDecoration(
+      color: context.colors.background,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: context.colors.border),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Andamento ultime ${matches.length}',
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        Text(
+          'Progressivo di vittorie e sconfitte',
+          style: TextStyle(fontSize: 11, color: context.colors.textSecondary),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 170,
+          width: double.infinity,
+          child: CustomPaint(
+            painter: _PersonalTrendPainter(
+              matches: matches.reversed.toList(),
+              gridColor: context.colors.divider,
+              textColor: context.colors.textSecondary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _ProfileLegend(color: Color(0xff16a34a), label: 'Vittorie'),
+            SizedBox(width: 18),
+            _ProfileLegend(color: Color(0xffef4444), label: 'Sconfitte'),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+class _ProfileLegend extends StatelessWidget {
+  const _ProfileLegend({required this.color, required this.label});
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 9,
+        height: 9,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
+      const SizedBox(width: 6),
+      Text(label, style: const TextStyle(fontSize: 11)),
+    ],
+  );
+}
+
+class _PersonalTrendPainter extends CustomPainter {
+  _PersonalTrendPainter({
+    required this.matches,
+    required this.gridColor,
+    required this.textColor,
+  });
+
+  final List<RecentPlayerMatch> matches;
+  final Color gridColor;
+  final Color textColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final chart = Rect.fromLTRB(25, 10, size.width - 8, size.height - 27);
+    final maxValue = math.max(matches.length, 1).toDouble();
+    final grid = Paint()
+      ..color = gridColor
+      ..strokeWidth = 1;
+    for (var row = 0; row <= matches.length; row++) {
+      final y = chart.bottom - chart.height * row / maxValue;
+      canvas.drawLine(Offset(chart.left, y), Offset(chart.right, y), grid);
+    }
+    final wins = <Offset>[];
+    final losses = <Offset>[];
+    var win = 0;
+    var loss = 0;
+    for (var index = 0; index < matches.length; index++) {
+      matches[index].won ? win++ : loss++;
+      final x = matches.length == 1
+          ? chart.center.dx
+          : chart.left + chart.width * index / (matches.length - 1);
+      wins.add(Offset(x, chart.bottom - chart.height * win / maxValue));
+      losses.add(Offset(x, chart.bottom - chart.height * loss / maxValue));
+      final date = DateTime.tryParse(matches[index].date);
+      final label = date == null
+          ? matches[index].date
+          : intl.DateFormat('dd/MM').format(date);
+      final text = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: TextStyle(fontSize: 9, color: textColor),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      text.paint(canvas, Offset(x - text.width / 2, chart.bottom + 7));
+    }
+    _drawLine(canvas, wins, const Color(0xff16a34a));
+    _drawLine(canvas, losses, const Color(0xffef4444));
+  }
+
+  void _drawLine(Canvas canvas, List<Offset> points, Color color) {
+    if (points.isEmpty) return;
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (final point in points.skip(1)) {
+      path.lineTo(point.dx, point.dy);
+    }
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = color
+        ..strokeWidth = 3
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+    for (final point in points) {
+      canvas.drawCircle(point, 4, Paint()..color = color);
+      canvas.drawCircle(point, 2, Paint()..color = Colors.white);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PersonalTrendPainter oldDelegate) =>
+      oldDelegate.matches != matches ||
+      oldDelegate.gridColor != gridColor ||
+      oldDelegate.textColor != textColor;
+}
+
+class _PersonalRecentMatch extends StatelessWidget {
+  const _PersonalRecentMatch({
+    required this.match,
+    required this.showRankingDetails,
+  });
+  final RecentPlayerMatch match;
+  final bool showRankingDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = match.won ? const Color(0xff16a34a) : const Color(0xffef4444);
+    final date = DateTime.tryParse(match.date);
+    final dateLabel = date == null
+        ? match.date
+        : intl.DateFormat('dd MMM', 'it_IT').format(date);
+    final opponents = match.opponents.isEmpty
+        ? 'Avversari non indicati'
+        : match.opponents.join(' / ');
+    final mate = match.teamMates.isEmpty ? null : match.teamMates.join(' / ');
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: context.colors.background,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: context.colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: color.withValues(alpha: .14),
+                ),
+                child: Text(
+                  match.won ? 'V' : 'S',
+                  style: TextStyle(color: color, fontWeight: FontWeight.w900),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$dateLabel${match.timeSlot.isEmpty ? '' : ' · ${match.timeSlot}'}',
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    Text(
+                      match.courtName.isEmpty
+                          ? 'Campo non indicato'
+                          : match.courtName,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                match.score.isEmpty ? '—' : match.score,
+                style: context.fonts.monoStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          if (mate != null) _ProfileMatchLine(label: 'In coppia con $mate'),
+          _ProfileMatchLine(label: 'vs $opponents'),
+          if (showRankingDetails && match.rankingScoreDelta != null) ...[
+            const SizedBox(height: 7),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${_signedProfileScore(match.rankingScoreDelta!)} punti classifica',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: match.rankingScoreDelta! >= 0
+                      ? const Color(0xff16a34a)
+                      : const Color(0xffef4444),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileMatchLine extends StatelessWidget {
+  const _ProfileMatchLine({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 3),
+    child: Row(
+      children: [
+        Icon(
+          Icons.sports_tennis_rounded,
+          size: 13,
+          color: context.colors.textSecondary,
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 11, color: context.colors.textSecondary),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _Gauge extends StatelessWidget {
@@ -826,9 +1480,11 @@ class _MetricGroup extends StatelessWidget {
             child: Icon(icon, size: 17, color: color),
           ),
           const SizedBox(width: 9),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
@@ -940,10 +1596,12 @@ class _BandBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final dot = parseHexColor(color);
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: colors.primaryTint,
+        color: dark ? colors.primaryTint : const Color(0xFFF2F5F9),
+        border: Border.all(color: dark ? Colors.transparent : colors.border),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -953,7 +1611,13 @@ class _BandBadge extends StatelessWidget {
             Container(
               width: 8,
               height: 8,
-              decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: dot,
+                shape: BoxShape.circle,
+                border: dot.computeLuminance() > .72
+                    ? Border.all(color: colors.textSecondary, width: .8)
+                    : null,
+              ),
             ),
             const SizedBox(width: 6),
           ],
@@ -961,49 +1625,7 @@ class _BandBadge extends StatelessWidget {
             name == null ? 'Fuori fascia' : 'Fascia $name',
             style: context.fonts
                 .monoStyle(fontSize: 11, fontWeight: FontWeight.w600)
-                .copyWith(color: colors.primaryText),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Stat extends StatelessWidget {
-  const _Stat({
-    required this.icon,
-    required this.value,
-    required this.label,
-    this.highlight = false,
-  });
-
-  final IconData icon;
-  final String value;
-  final String label;
-  final bool highlight;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final color = highlight ? colors.primaryText : colors.text;
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.divider,
-        borderRadius: BorderRadius.circular(AppTheme.controlRadius),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 20, color: color),
-          Text(
-            value,
-            style: context.fonts
-                .monoStyle(fontSize: 18, fontWeight: FontWeight.w600)
-                .copyWith(color: color),
-          ),
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: colors.textSecondary),
+                .copyWith(color: dark ? colors.primaryText : colors.navy),
           ),
         ],
       ),
@@ -1197,7 +1819,7 @@ class _Empty extends StatelessWidget {
 }
 
 String _dayAndSlot(DateTime date, String slot) =>
-    '${DateFormat('d MMM yyyy', Dates.locale).format(date)} • $slot';
+    '${intl.DateFormat('d MMM yyyy', Dates.locale).format(date)} • $slot';
 
 class _BookingsTab extends ConsumerWidget {
   const _BookingsTab();
@@ -1258,7 +1880,7 @@ class _MatchesTab extends ConsumerWidget {
                 _HistoryRow(
                   title:
                       'Partita del '
-                      '${DateFormat('d MMM yyyy', Dates.locale).format(m.date)}',
+                      '${intl.DateFormat('d MMM yyyy', Dates.locale).format(m.date)}',
                   subtitle:
                       '${m.slot?.label ?? m.timeSlot} • '
                       '${m.players.length} giocatori',

@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$PlayerRanking {
 
 /// Id utente, se registrato; altrimenti un altro riferimento stabile.
- String? get playerRef; String get playerName; int get position; String? get rankingBandName; String? get rankingBandColor; String? get playerPhotoUrl;@JsonKey(fromJson: nullableRankingScoreFromJson) double get eloScore; int get matchesPlayed; int get matchesWon;
+ String? get playerRef; String get playerName; int get position; String? get rankingBandName; String? get rankingBandColor; String? get playerPhotoUrl;@JsonKey(fromJson: nullableRankingScoreFromJson) double get eloScore; int get matchesPlayed; int get matchesWon; List<String> get recentForm;
 /// Create a copy of PlayerRanking
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $PlayerRankingCopyWith<PlayerRanking> get copyWith => _$PlayerRankingCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayerRanking&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.playerName, playerName) || other.playerName == playerName)&&(identical(other.position, position) || other.position == position)&&(identical(other.rankingBandName, rankingBandName) || other.rankingBandName == rankingBandName)&&(identical(other.rankingBandColor, rankingBandColor) || other.rankingBandColor == rankingBandColor)&&(identical(other.playerPhotoUrl, playerPhotoUrl) || other.playerPhotoUrl == playerPhotoUrl)&&(identical(other.eloScore, eloScore) || other.eloScore == eloScore)&&(identical(other.matchesPlayed, matchesPlayed) || other.matchesPlayed == matchesPlayed)&&(identical(other.matchesWon, matchesWon) || other.matchesWon == matchesWon));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayerRanking&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.playerName, playerName) || other.playerName == playerName)&&(identical(other.position, position) || other.position == position)&&(identical(other.rankingBandName, rankingBandName) || other.rankingBandName == rankingBandName)&&(identical(other.rankingBandColor, rankingBandColor) || other.rankingBandColor == rankingBandColor)&&(identical(other.playerPhotoUrl, playerPhotoUrl) || other.playerPhotoUrl == playerPhotoUrl)&&(identical(other.eloScore, eloScore) || other.eloScore == eloScore)&&(identical(other.matchesPlayed, matchesPlayed) || other.matchesPlayed == matchesPlayed)&&(identical(other.matchesWon, matchesWon) || other.matchesWon == matchesWon)&&const DeepCollectionEquality().equals(other.recentForm, recentForm));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,playerRef,playerName,position,rankingBandName,rankingBandColor,playerPhotoUrl,eloScore,matchesPlayed,matchesWon);
+int get hashCode => Object.hash(runtimeType,playerRef,playerName,position,rankingBandName,rankingBandColor,playerPhotoUrl,eloScore,matchesPlayed,matchesWon,const DeepCollectionEquality().hash(recentForm));
 
 @override
 String toString() {
-  return 'PlayerRanking(playerRef: $playerRef, playerName: $playerName, position: $position, rankingBandName: $rankingBandName, rankingBandColor: $rankingBandColor, playerPhotoUrl: $playerPhotoUrl, eloScore: $eloScore, matchesPlayed: $matchesPlayed, matchesWon: $matchesWon)';
+  return 'PlayerRanking(playerRef: $playerRef, playerName: $playerName, position: $position, rankingBandName: $rankingBandName, rankingBandColor: $rankingBandColor, playerPhotoUrl: $playerPhotoUrl, eloScore: $eloScore, matchesPlayed: $matchesPlayed, matchesWon: $matchesWon, recentForm: $recentForm)';
 }
 
 
@@ -49,7 +49,7 @@ abstract mixin class $PlayerRankingCopyWith<$Res>  {
   factory $PlayerRankingCopyWith(PlayerRanking value, $Res Function(PlayerRanking) _then) = _$PlayerRankingCopyWithImpl;
 @useResult
 $Res call({
- String? playerRef, String playerName, int position, String? rankingBandName, String? rankingBandColor, String? playerPhotoUrl,@JsonKey(fromJson: nullableRankingScoreFromJson) double eloScore, int matchesPlayed, int matchesWon
+ String? playerRef, String playerName, int position, String? rankingBandName, String? rankingBandColor, String? playerPhotoUrl,@JsonKey(fromJson: nullableRankingScoreFromJson) double eloScore, int matchesPlayed, int matchesWon, List<String> recentForm
 });
 
 
@@ -66,7 +66,7 @@ class _$PlayerRankingCopyWithImpl<$Res>
 
 /// Create a copy of PlayerRanking
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? playerRef = freezed,Object? playerName = null,Object? position = null,Object? rankingBandName = freezed,Object? rankingBandColor = freezed,Object? playerPhotoUrl = freezed,Object? eloScore = null,Object? matchesPlayed = null,Object? matchesWon = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? playerRef = freezed,Object? playerName = null,Object? position = null,Object? rankingBandName = freezed,Object? rankingBandColor = freezed,Object? playerPhotoUrl = freezed,Object? eloScore = null,Object? matchesPlayed = null,Object? matchesWon = null,Object? recentForm = null,}) {
   return _then(_self.copyWith(
 playerRef: freezed == playerRef ? _self.playerRef : playerRef // ignore: cast_nullable_to_non_nullable
 as String?,playerName: null == playerName ? _self.playerName : playerName // ignore: cast_nullable_to_non_nullable
@@ -77,7 +77,8 @@ as String?,playerPhotoUrl: freezed == playerPhotoUrl ? _self.playerPhotoUrl : pl
 as String?,eloScore: null == eloScore ? _self.eloScore : eloScore // ignore: cast_nullable_to_non_nullable
 as double,matchesPlayed: null == matchesPlayed ? _self.matchesPlayed : matchesPlayed // ignore: cast_nullable_to_non_nullable
 as int,matchesWon: null == matchesWon ? _self.matchesWon : matchesWon // ignore: cast_nullable_to_non_nullable
-as int,
+as int,recentForm: null == recentForm ? _self.recentForm : recentForm // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 
@@ -162,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? playerRef,  String playerName,  int position,  String? rankingBandName,  String? rankingBandColor,  String? playerPhotoUrl, @JsonKey(fromJson: nullableRankingScoreFromJson)  double eloScore,  int matchesPlayed,  int matchesWon)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? playerRef,  String playerName,  int position,  String? rankingBandName,  String? rankingBandColor,  String? playerPhotoUrl, @JsonKey(fromJson: nullableRankingScoreFromJson)  double eloScore,  int matchesPlayed,  int matchesWon,  List<String> recentForm)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PlayerRanking() when $default != null:
-return $default(_that.playerRef,_that.playerName,_that.position,_that.rankingBandName,_that.rankingBandColor,_that.playerPhotoUrl,_that.eloScore,_that.matchesPlayed,_that.matchesWon);case _:
+return $default(_that.playerRef,_that.playerName,_that.position,_that.rankingBandName,_that.rankingBandColor,_that.playerPhotoUrl,_that.eloScore,_that.matchesPlayed,_that.matchesWon,_that.recentForm);case _:
   return orElse();
 
 }
@@ -183,10 +184,10 @@ return $default(_that.playerRef,_that.playerName,_that.position,_that.rankingBan
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? playerRef,  String playerName,  int position,  String? rankingBandName,  String? rankingBandColor,  String? playerPhotoUrl, @JsonKey(fromJson: nullableRankingScoreFromJson)  double eloScore,  int matchesPlayed,  int matchesWon)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? playerRef,  String playerName,  int position,  String? rankingBandName,  String? rankingBandColor,  String? playerPhotoUrl, @JsonKey(fromJson: nullableRankingScoreFromJson)  double eloScore,  int matchesPlayed,  int matchesWon,  List<String> recentForm)  $default,) {final _that = this;
 switch (_that) {
 case _PlayerRanking():
-return $default(_that.playerRef,_that.playerName,_that.position,_that.rankingBandName,_that.rankingBandColor,_that.playerPhotoUrl,_that.eloScore,_that.matchesPlayed,_that.matchesWon);case _:
+return $default(_that.playerRef,_that.playerName,_that.position,_that.rankingBandName,_that.rankingBandColor,_that.playerPhotoUrl,_that.eloScore,_that.matchesPlayed,_that.matchesWon,_that.recentForm);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +204,10 @@ return $default(_that.playerRef,_that.playerName,_that.position,_that.rankingBan
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? playerRef,  String playerName,  int position,  String? rankingBandName,  String? rankingBandColor,  String? playerPhotoUrl, @JsonKey(fromJson: nullableRankingScoreFromJson)  double eloScore,  int matchesPlayed,  int matchesWon)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? playerRef,  String playerName,  int position,  String? rankingBandName,  String? rankingBandColor,  String? playerPhotoUrl, @JsonKey(fromJson: nullableRankingScoreFromJson)  double eloScore,  int matchesPlayed,  int matchesWon,  List<String> recentForm)?  $default,) {final _that = this;
 switch (_that) {
 case _PlayerRanking() when $default != null:
-return $default(_that.playerRef,_that.playerName,_that.position,_that.rankingBandName,_that.rankingBandColor,_that.playerPhotoUrl,_that.eloScore,_that.matchesPlayed,_that.matchesWon);case _:
+return $default(_that.playerRef,_that.playerName,_that.position,_that.rankingBandName,_that.rankingBandColor,_that.playerPhotoUrl,_that.eloScore,_that.matchesPlayed,_that.matchesWon,_that.recentForm);case _:
   return null;
 
 }
@@ -218,7 +219,7 @@ return $default(_that.playerRef,_that.playerName,_that.position,_that.rankingBan
 @JsonSerializable()
 
 class _PlayerRanking implements PlayerRanking {
-  const _PlayerRanking({this.playerRef, required this.playerName, this.position = 0, this.rankingBandName, this.rankingBandColor, this.playerPhotoUrl, @JsonKey(fromJson: nullableRankingScoreFromJson) this.eloScore = 0, this.matchesPlayed = 0, this.matchesWon = 0});
+  const _PlayerRanking({this.playerRef, required this.playerName, this.position = 0, this.rankingBandName, this.rankingBandColor, this.playerPhotoUrl, @JsonKey(fromJson: nullableRankingScoreFromJson) this.eloScore = 0, this.matchesPlayed = 0, this.matchesWon = 0, final  List<String> recentForm = const <String>[]}): _recentForm = recentForm;
   factory _PlayerRanking.fromJson(Map<String, dynamic> json) => _$PlayerRankingFromJson(json);
 
 /// Id utente, se registrato; altrimenti un altro riferimento stabile.
@@ -231,6 +232,13 @@ class _PlayerRanking implements PlayerRanking {
 @override@JsonKey(fromJson: nullableRankingScoreFromJson) final  double eloScore;
 @override@JsonKey() final  int matchesPlayed;
 @override@JsonKey() final  int matchesWon;
+ final  List<String> _recentForm;
+@override@JsonKey() List<String> get recentForm {
+  if (_recentForm is EqualUnmodifiableListView) return _recentForm;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_recentForm);
+}
+
 
 /// Create a copy of PlayerRanking
 /// with the given fields replaced by the non-null parameter values.
@@ -245,16 +253,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayerRanking&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.playerName, playerName) || other.playerName == playerName)&&(identical(other.position, position) || other.position == position)&&(identical(other.rankingBandName, rankingBandName) || other.rankingBandName == rankingBandName)&&(identical(other.rankingBandColor, rankingBandColor) || other.rankingBandColor == rankingBandColor)&&(identical(other.playerPhotoUrl, playerPhotoUrl) || other.playerPhotoUrl == playerPhotoUrl)&&(identical(other.eloScore, eloScore) || other.eloScore == eloScore)&&(identical(other.matchesPlayed, matchesPlayed) || other.matchesPlayed == matchesPlayed)&&(identical(other.matchesWon, matchesWon) || other.matchesWon == matchesWon));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayerRanking&&(identical(other.playerRef, playerRef) || other.playerRef == playerRef)&&(identical(other.playerName, playerName) || other.playerName == playerName)&&(identical(other.position, position) || other.position == position)&&(identical(other.rankingBandName, rankingBandName) || other.rankingBandName == rankingBandName)&&(identical(other.rankingBandColor, rankingBandColor) || other.rankingBandColor == rankingBandColor)&&(identical(other.playerPhotoUrl, playerPhotoUrl) || other.playerPhotoUrl == playerPhotoUrl)&&(identical(other.eloScore, eloScore) || other.eloScore == eloScore)&&(identical(other.matchesPlayed, matchesPlayed) || other.matchesPlayed == matchesPlayed)&&(identical(other.matchesWon, matchesWon) || other.matchesWon == matchesWon)&&const DeepCollectionEquality().equals(other._recentForm, _recentForm));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,playerRef,playerName,position,rankingBandName,rankingBandColor,playerPhotoUrl,eloScore,matchesPlayed,matchesWon);
+int get hashCode => Object.hash(runtimeType,playerRef,playerName,position,rankingBandName,rankingBandColor,playerPhotoUrl,eloScore,matchesPlayed,matchesWon,const DeepCollectionEquality().hash(_recentForm));
 
 @override
 String toString() {
-  return 'PlayerRanking(playerRef: $playerRef, playerName: $playerName, position: $position, rankingBandName: $rankingBandName, rankingBandColor: $rankingBandColor, playerPhotoUrl: $playerPhotoUrl, eloScore: $eloScore, matchesPlayed: $matchesPlayed, matchesWon: $matchesWon)';
+  return 'PlayerRanking(playerRef: $playerRef, playerName: $playerName, position: $position, rankingBandName: $rankingBandName, rankingBandColor: $rankingBandColor, playerPhotoUrl: $playerPhotoUrl, eloScore: $eloScore, matchesPlayed: $matchesPlayed, matchesWon: $matchesWon, recentForm: $recentForm)';
 }
 
 
@@ -265,7 +273,7 @@ abstract mixin class _$PlayerRankingCopyWith<$Res> implements $PlayerRankingCopy
   factory _$PlayerRankingCopyWith(_PlayerRanking value, $Res Function(_PlayerRanking) _then) = __$PlayerRankingCopyWithImpl;
 @override @useResult
 $Res call({
- String? playerRef, String playerName, int position, String? rankingBandName, String? rankingBandColor, String? playerPhotoUrl,@JsonKey(fromJson: nullableRankingScoreFromJson) double eloScore, int matchesPlayed, int matchesWon
+ String? playerRef, String playerName, int position, String? rankingBandName, String? rankingBandColor, String? playerPhotoUrl,@JsonKey(fromJson: nullableRankingScoreFromJson) double eloScore, int matchesPlayed, int matchesWon, List<String> recentForm
 });
 
 
@@ -282,7 +290,7 @@ class __$PlayerRankingCopyWithImpl<$Res>
 
 /// Create a copy of PlayerRanking
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? playerRef = freezed,Object? playerName = null,Object? position = null,Object? rankingBandName = freezed,Object? rankingBandColor = freezed,Object? playerPhotoUrl = freezed,Object? eloScore = null,Object? matchesPlayed = null,Object? matchesWon = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? playerRef = freezed,Object? playerName = null,Object? position = null,Object? rankingBandName = freezed,Object? rankingBandColor = freezed,Object? playerPhotoUrl = freezed,Object? eloScore = null,Object? matchesPlayed = null,Object? matchesWon = null,Object? recentForm = null,}) {
   return _then(_PlayerRanking(
 playerRef: freezed == playerRef ? _self.playerRef : playerRef // ignore: cast_nullable_to_non_nullable
 as String?,playerName: null == playerName ? _self.playerName : playerName // ignore: cast_nullable_to_non_nullable
@@ -293,7 +301,8 @@ as String?,playerPhotoUrl: freezed == playerPhotoUrl ? _self.playerPhotoUrl : pl
 as String?,eloScore: null == eloScore ? _self.eloScore : eloScore // ignore: cast_nullable_to_non_nullable
 as double,matchesPlayed: null == matchesPlayed ? _self.matchesPlayed : matchesPlayed // ignore: cast_nullable_to_non_nullable
 as int,matchesWon: null == matchesWon ? _self.matchesWon : matchesWon // ignore: cast_nullable_to_non_nullable
-as int,
+as int,recentForm: null == recentForm ? _self._recentForm : recentForm // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

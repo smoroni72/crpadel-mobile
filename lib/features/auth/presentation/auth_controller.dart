@@ -46,6 +46,14 @@ class AuthController extends AsyncNotifier<AppUser?> {
   Future<String> forgotPassword(String email) =>
       _repository.forgotPassword(email);
 
+  Future<String> requestEmailChange({
+    required String newEmail,
+    required String currentPassword,
+  }) => _repository.requestEmailChange(
+    newEmail: newEmail,
+    currentPassword: currentPassword,
+  );
+
   /// Cambia la password e chiude la sessione (il server le revoca tutte).
   Future<void> changePassword({
     required String currentPassword,

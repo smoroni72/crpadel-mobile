@@ -19,6 +19,7 @@ abstract class PlayerRanking with _$PlayerRanking {
     double eloScore,
     @Default(0) int matchesPlayed,
     @Default(0) int matchesWon,
+    @Default(<String>[]) List<String> recentForm,
   }) = _PlayerRanking;
 
   factory PlayerRanking.fromJson(Map<String, dynamic> json) =>
@@ -98,6 +99,57 @@ class RankingAlerts {
   );
 }
 
+class RecentPlayerMatch {
+  const RecentPlayerMatch({
+    required this.id,
+    required this.date,
+    required this.timeSlot,
+    required this.courtName,
+    required this.score,
+    required this.resultLabel,
+    required this.won,
+    required this.teamMates,
+    required this.opponents,
+    required this.rankingScoreDelta,
+  });
+
+  final String id;
+  final String date;
+  final String timeSlot;
+  final String courtName;
+  final String score;
+  final String resultLabel;
+  final bool won;
+  final List<String> teamMates;
+  final List<String> opponents;
+  final double? rankingScoreDelta;
+}
+
+class PlayerHighlightPerson {
+  const PlayerHighlightPerson({
+    required this.name,
+    this.matches = 0,
+    this.wins = 0,
+    this.losses = 0,
+    this.winRate = 0,
+  });
+
+  final String name;
+  final int matches;
+  final int wins;
+  final int losses;
+  final double winRate;
+
+  factory PlayerHighlightPerson.fromJson(Map<String, dynamic> json) =>
+      PlayerHighlightPerson(
+        name: json['name'] as String? ?? '',
+        matches: (json['matches'] as num?)?.toInt() ?? 0,
+        wins: (json['wins'] as num?)?.toInt() ?? 0,
+        losses: (json['losses'] as num?)?.toInt() ?? 0,
+        winRate: _number(json['win_rate']),
+      );
+}
+
 /// Statistiche del Profilo, come i 4 riquadri del sito.
 class ProfileStats {
   const ProfileStats({
@@ -121,8 +173,17 @@ class ProfileStats {
     this.favoriteWins = 0,
     this.rankingPointsEarned = 0,
     this.rankingPointsAverage = 0,
+    this.rankingScoreEarned = 0,
+    this.rankingScoreAverage = 0,
+    this.currentRankingScore = 0,
     this.recentMatches = 0,
     this.recentWins = 0,
+    this.recentHistory = const [],
+    this.currentStreakType,
+    this.currentStreakCount = 0,
+    this.bestPartner,
+    this.mostFacedOpponent,
+    this.badges = const [],
     this.rankingAlerts = const RankingAlerts(),
     this.photoUrl,
     this.photoStorageId,
@@ -150,8 +211,17 @@ class ProfileStats {
   final int favoriteWins;
   final double rankingPointsEarned;
   final double rankingPointsAverage;
+  final double rankingScoreEarned;
+  final double rankingScoreAverage;
+  final double currentRankingScore;
   final int recentMatches;
   final int recentWins;
+  final List<RecentPlayerMatch> recentHistory;
+  final String? currentStreakType;
+  final int currentStreakCount;
+  final PlayerHighlightPerson? bestPartner;
+  final PlayerHighlightPerson? mostFacedOpponent;
+  final List<String> badges;
   final RankingAlerts rankingAlerts;
   final String? photoUrl;
   final String? photoStorageId;

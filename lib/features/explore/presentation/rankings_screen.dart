@@ -7,6 +7,7 @@ import '../../../core/widgets/async_value_view.dart';
 import '../../profile/domain/profile_models.dart';
 import '../../profile/presentation/widgets/player_avatar.dart';
 import 'explore_providers.dart';
+import 'public_player_stats_screen.dart';
 
 class RankingsScreen extends ConsumerStatefulWidget {
   const RankingsScreen({super.key});
@@ -16,6 +17,15 @@ class RankingsScreen extends ConsumerStatefulWidget {
 }
 
 enum _RankingView { general, monthly, decades }
+
+void _openPlayerStats(BuildContext context, PlayerRanking player) {
+  if (player.playerRef == null || player.playerRef!.isEmpty) return;
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => PublicPlayerStatsScreen(player: player),
+    ),
+  );
+}
 
 class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   late DateTime _month;
@@ -363,58 +373,73 @@ class _DecadeRankingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 38,
-            child: Text(
-              '#$position',
-              style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () => _openPlayerStats(
+        context,
+        PlayerRanking(
+          playerRef: player.playerRef,
+          playerName: player.playerName,
+          position: position,
+          rankingBandName: player.rankingBandName,
+          rankingBandColor: player.rankingBandColor,
+          playerPhotoUrl: player.playerPhotoUrl,
+          eloScore: player.eloScore,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 38,
+              child: Text(
+                '#$position',
+                style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+              ),
             ),
-          ),
-          Container(
-            width: 13,
-            height: 13,
-            decoration: BoxDecoration(
-              color: _color(player.rankingBandColor),
-              shape: BoxShape.circle,
-              border: Border.all(color: context.colors.border),
+            Container(
+              width: 13,
+              height: 13,
+              decoration: BoxDecoration(
+                color: _color(player.rankingBandColor),
+                shape: BoxShape.circle,
+                border: Border.all(color: context.colors.border),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          PlayerAvatar(
-            name: player.playerName,
-            photoUrl: player.playerPhotoUrl,
-            size: 32,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  player.playerName,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                Text(
-                  '${player.rankingBandName ?? 'Senza fascia'} · coeff. ${player.coefficient.toStringAsFixed(2).replaceAll('.', ',')}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.colors.textSecondary,
+            const SizedBox(width: 10),
+            PlayerAvatar(
+              name: player.playerName,
+              photoUrl: player.playerPhotoUrl,
+              size: 32,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    player.playerName,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                ),
-              ],
+                  Text(
+                    '${player.rankingBandName ?? 'Senza fascia'} · coeff. ${player.coefficient.toStringAsFixed(2).replaceAll('.', ',')}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Text(
-            player.eloScore.toStringAsFixed(1),
-            style: context.fonts
-                .monoStyle(fontWeight: FontWeight.w700)
-                .copyWith(color: context.colors.primaryText),
-          ),
-        ],
+            Text(
+              player.eloScore.toStringAsFixed(1),
+              style: context.fonts
+                  .monoStyle(fontWeight: FontWeight.w700)
+                  .copyWith(color: context.colors.primaryText),
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -694,61 +719,123 @@ class _RankingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 38,
-            child: Text(
-              '#$position',
-              style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () => _openPlayerStats(context, player),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 38,
+              child: Text(
+                '#$position',
+                style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+              ),
             ),
-          ),
-          Container(
-            width: 13,
-            height: 13,
-            decoration: BoxDecoration(
-              color: _color(player.rankingBandColor),
-              shape: BoxShape.circle,
-              border: Border.all(color: context.colors.border),
+            Container(
+              width: 13,
+              height: 13,
+              decoration: BoxDecoration(
+                color: _color(player.rankingBandColor),
+                shape: BoxShape.circle,
+                border: Border.all(color: context.colors.border),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          PlayerAvatar(
-            name: player.playerName,
-            photoUrl: player.playerPhotoUrl,
-            size: 34,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  player.playerName,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                Text(
-                  '${player.matchesPlayed} PG · ${player.matchesWon} V',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.colors.textSecondary,
+            const SizedBox(width: 10),
+            PlayerAvatar(
+              name: player.playerName,
+              photoUrl: player.playerPhotoUrl,
+              size: 34,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    player.playerName,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                ),
-              ],
+                  Text(
+                    '${player.matchesPlayed} PG · ${player.matchesWon} V',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+                  if (player.recentForm.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    _RecentForm(results: player.recentForm),
+                  ],
+                ],
+              ),
             ),
-          ),
-          Text(
-            player.eloScore.toStringAsFixed(1),
-            style: context.fonts
-                .monoStyle(fontWeight: FontWeight.w700)
-                .copyWith(color: context.colors.primaryText),
-          ),
-        ],
+            Text(
+              player.eloScore.toStringAsFixed(1),
+              style: context.fonts
+                  .monoStyle(fontWeight: FontWeight.w700)
+                  .copyWith(color: context.colors.primaryText),
+            ),
+          ],
+        ),
       ),
     ),
   );
+}
+
+class _RecentForm extends StatelessWidget {
+  const _RecentForm({required this.results});
+
+  final List<String> results;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = results
+        .where((result) => result == 'V' || result == 'S')
+        .take(5)
+        .toList();
+    return Semantics(
+      label: 'Forma ultime partite: ${visible.join(', ')}',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Ultime ${visible.length}',
+            style: TextStyle(fontSize: 10, color: context.colors.textSecondary),
+          ),
+          const SizedBox(width: 5),
+          for (final result in visible) ...[
+            Container(
+              width: 20,
+              height: 20,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: result == 'V'
+                    ? Colors.green.withValues(alpha: .14)
+                    : Colors.red.withValues(alpha: .12),
+                border: Border.all(
+                  color: result == 'V'
+                      ? Colors.green.withValues(alpha: .45)
+                      : Colors.red.withValues(alpha: .4),
+                ),
+              ),
+              child: Text(
+                result,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: result == 'V' ? Colors.green : Colors.red,
+                ),
+              ),
+            ),
+            const SizedBox(width: 3),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 String _monthLabel(DateTime value) {

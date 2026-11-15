@@ -67,6 +67,7 @@ void main() {
         profile: FakeProfileRepository(
           rankings: const [
             PlayerRanking(
+              playerRef: 'p1',
               playerName: 'Diego Gallucci',
               position: 1,
               eloScore: 612,
@@ -74,8 +75,10 @@ void main() {
               rankingBandColor: '#F50505',
               matchesPlayed: 18,
               matchesWon: 12,
+              recentForm: ['V', 'V', 'S', 'S', 'V'],
             ),
             PlayerRanking(
+              playerRef: 'p2',
               playerName: 'Fabio Di Costantini',
               position: 2,
               eloScore: 590,
@@ -85,6 +88,7 @@ void main() {
               matchesWon: 10,
             ),
             PlayerRanking(
+              playerRef: 'p3',
               playerName: 'Mario Sanzone',
               position: 3,
               eloScore: 570,
@@ -111,8 +115,14 @@ void main() {
     expect(find.text('Vedi classifica'), findsOneWidget);
     expect(find.text('Diego Gallucci'), findsNWidgets(2));
     expect(find.text('TOP 10 DEL CLUB'), findsOneWidget);
+    expect(find.text('Forma'), findsWidgets);
     expect(find.text('News & aggiornamenti'), findsOneWidget);
     expect(find.text('Open Day CRPadel'), findsOneWidget);
+
+    await tester.tap(find.text('Diego Gallucci').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Statistiche giocatore'), findsOneWidget);
+    expect(find.text('Rendimento'), findsOneWidget);
   });
 
   testWidgets('con un pacchetto compare il riferimento', (tester) async {

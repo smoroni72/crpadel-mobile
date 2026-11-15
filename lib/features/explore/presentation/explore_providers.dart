@@ -23,6 +23,12 @@ final fullRankingsProvider = FutureProvider<List<PlayerRanking>>(
   (ref) => ref.read(profileRepositoryProvider).leaderboard(limit: 200),
 );
 
+final publicPlayerStatsProvider =
+    FutureProvider.family<ProfileStats, PlayerRanking>(
+      (ref, player) =>
+          ref.read(profileRepositoryProvider).publicStats(player: player),
+    );
+
 final monthlyRankingsProvider =
     FutureProvider.family<MonthlyRankingResult, String>(
       (ref, month) =>

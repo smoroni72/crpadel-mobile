@@ -24,6 +24,7 @@ void main() {
           eloScore: 1180,
           matchesPlayed: 12,
           matchesWon: 8,
+          recentForm: ['V', 'S', 'V', 'V', 'S'],
         ),
       ],
       monthlyRankings: const MonthlyRankingResult(
@@ -88,6 +89,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    expect(find.text('Ultime 5'), findsOneWidget);
+    expect(find.text('V'), findsNWidgets(3));
+    expect(find.text('S'), findsNWidgets(2));
 
     expect(find.text('Generale'), findsOneWidget);
     expect(find.text('Mensile'), findsOneWidget);
@@ -95,6 +99,21 @@ void main() {
     expect(find.text('Classifica generale'), findsOneWidget);
     expect(find.text('1180.0'), findsOneWidget);
     expect(find.text('Classifica mensile'), findsNothing);
+
+    await tester.tap(find.text('Mario Rossi'));
+    await tester.pumpAndSettle();
+    expect(find.text('Statistiche giocatore'), findsOneWidget);
+    expect(find.text('Rendimento'), findsOneWidget);
+    await tester.drag(find.byType(ListView).last, const Offset(0, -1300));
+    await tester.pumpAndSettle();
+    expect(find.text('Analisi ranking'), findsOneWidget);
+    expect(find.textContaining('Punti classifica'), findsNothing);
+    expect(find.textContaining('Media classifica'), findsNothing);
+    await tester.drag(find.byType(ListView).last, const Offset(0, -1300));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('pagamenti'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Mensile'));
     await tester.pumpAndSettle();

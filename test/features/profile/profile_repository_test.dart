@@ -69,6 +69,64 @@ void main() {
   });
 
   test(
+    'statistiche pubbliche usano le partite registrate e non i contatori importati',
+    () async {
+      final adapter = FakeAdapter(
+        (_) => (
+          200,
+          {
+            'data': {
+              'totals': {'matches_played': 26, 'wins': 19, 'losses': 7},
+              'period': {
+                'matches_played': 2,
+                'wins': 2,
+                'losses': 0,
+                'ranking_matches': 2,
+              },
+              'matches': [
+                {
+                  'id': 'm2',
+                  'date': '2026-11-10',
+                  'status': 'completed',
+                  'winner_team': 'team1',
+                  'position': 0,
+                  'players': <Object>[],
+                },
+                {
+                  'id': 'm1',
+                  'date': '2026-11-01',
+                  'status': 'completed',
+                  'winner_team': 'team2',
+                  'position': 2,
+                  'players': <Object>[],
+                },
+              ],
+            },
+          },
+        ),
+      );
+      final repository = ApiProfileRepository(fakeApiClient(adapter));
+
+      final stats = await repository.publicStats(
+        player: const PlayerRanking(
+          playerRef: 'player-1',
+          playerName: 'Fabio Di Costantini',
+          position: 3,
+          eloScore: 1178.04,
+          matchesPlayed: 26,
+          matchesWon: 19,
+        ),
+      );
+
+      expect(stats.matchesPlayed, 2);
+      expect(stats.matchesWon, 2);
+      expect(stats.matchesLost, 0);
+      expect(stats.recentMatches, 2);
+      expect(stats.recentHistory, hasLength(2));
+    },
+  );
+
+  test(
     'carica tutte le statistiche personali e calcola la forma recente',
     () async {
       final adapter = FakeAdapter((options) {
@@ -87,6 +145,24 @@ void main() {
             200,
             {
               'data': {
+                'highlights': {
+                  'current_streak': {'type': 'win', 'count': 3},
+                  'best_partner': {
+                    'name': 'Luca Bianchi',
+                    'matches': 6,
+                    'wins': 5,
+                    'losses': 1,
+                    'win_rate': 83.3,
+                  },
+                  'most_faced_opponent': {
+                    'name': 'Paolo Verdi',
+                    'matches': 4,
+                    'wins': 2,
+                    'losses': 2,
+                    'win_rate': 50,
+                  },
+                  'badges': ['In forma', 'Serie vincente'],
+                },
                 'ranking_alerts': {
                   'period_start': '2026-11-01',
                   'period_end': '2026-11-10',
@@ -193,6 +269,12 @@ void main() {
       expect(stats.rankingAlerts.favoritePointsAfterThreshold, 0.1);
       expect(stats.rankingAlerts.inactivityRisk, isTrue);
       expect(stats.rankingAlerts.matchesScheduledInDecade, 1);
+      expect(stats.currentStreakType, 'win');
+      expect(stats.currentStreakCount, 3);
+      expect(stats.bestPartner?.name, 'Luca Bianchi');
+      expect(stats.bestPartner?.winRate, 83.3);
+      expect(stats.mostFacedOpponent?.name, 'Paolo Verdi');
+      expect(stats.badges, ['In forma', 'Serie vincente']);
     },
   );
 

@@ -10,6 +10,7 @@ class FakeProfileRepository implements ProfileRepository {
       position: 12,
       matchesPlayed: 24,
       matchesWon: 15,
+      matchesLost: 9,
       bandName: 'Oro',
       bandColor: '#E8C468',
     ),
@@ -72,6 +73,12 @@ class FakeProfileRepository implements ProfileRepository {
   }
 
   @override
+  Future<ProfileStats> publicStats({required PlayerRanking player}) async {
+    _check();
+    return profileStats;
+  }
+
+  @override
   Future<List<Booking>> bookingHistory({required String email}) async {
     _check();
     return history;
@@ -105,6 +112,8 @@ class FakeProfileRepository implements ProfileRepository {
       matchesWon: profileStats.matchesWon,
       bandName: profileStats.bandName,
       bandColor: profileStats.bandColor,
+      currentRankingScore: profileStats.currentRankingScore,
+      recentHistory: profileStats.recentHistory,
       photoUrl: jpeg == null ? profileStats.photoUrl : '/fake/player.jpg',
       photoStorageId: jpeg == null
           ? profileStats.photoStorageId

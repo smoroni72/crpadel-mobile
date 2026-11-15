@@ -61,6 +61,17 @@ class FakeAuthRepository implements AuthRepository {
       "Se l'indirizzo è registrato riceverai un'email.";
 
   @override
+  Future<String> requestEmailChange({
+    required String newEmail,
+    required String currentPassword,
+  }) async {
+    if (currentPassword != password) {
+      throw const ApiException('Password attuale non valida', statusCode: 400);
+    }
+    return 'Controlla il nuovo indirizzo email per confermare la modifica.';
+  }
+
+  @override
   Future<void> logout() async => sessionUser = null;
 
   @override
