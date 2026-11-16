@@ -11,6 +11,9 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 );
 
 abstract interface class ProfileRepository {
+  Future<RankingMatchSummary> rankingMatchSummary();
+  Future<MostPlayedRankingResult> mostPlayedLeaderboard();
+
   /// Prime posizioni della classifica ufficiale del circolo.
   Future<List<PlayerRanking>> leaderboard({int limit = 10});
 
@@ -42,6 +45,27 @@ abstract interface class ProfileRepository {
 class ApiProfileRepository implements ProfileRepository {
   ApiProfileRepository(this._api);
   final ApiClient _api;
+
+  @override
+  Future<MostPlayedRankingResult> mostPlayedLeaderboard() async {
+    final response = await _api.get('/rankings/most-played');
+    final body = response.data as Map<String, dynamic>;
+    return MostPlayedRankingResult(
+      since: (body['meta'] as Map<String, dynamic>)['since'] as String,
+      players: (body['data'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map(MostPlayedPlayer.fromJson)
+          .toList(),
+    );
+  }
+
+  @override
+  Future<RankingMatchSummary> rankingMatchSummary() async {
+    final response = await _api.get('/rankings/match-summary');
+    return RankingMatchSummary.fromJson(
+      (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>,
+    );
+  }
 
   /// Il server restituisce al massimo 200 righe di classifica.
   static const _leaderboardLimit = 200;
@@ -422,7 +446,13 @@ List<RecentPlayerMatch> _recentHistory(
     date: match['date'] as String? ?? '',
     timeSlot: match['time_slot'] as String? ?? '',
     courtName: match['court_name'] as String? ?? '',
-    score: match['score_team1'] as String? ?? '',
+    // The API score is always team A first; history shows the player's team first.
+    score: position < 2
+        ? match['score_team1'] as String? ?? ''
+        : (match['score_team1'] as String? ?? '').replaceAllMapped(
+            RegExp(r'(\d+)\s*-\s*(\d+)'),
+            (set) => '${set[2]}-${set[1]}',
+          ),
     resultLabel: timeExpired
         ? 'Tempo scaduto'
         : won

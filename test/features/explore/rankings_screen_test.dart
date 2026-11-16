@@ -12,10 +12,73 @@ import 'package:intl/intl.dart';
 void main() {
   setUpAll(() => initializeDateFormatting('it_IT'));
 
+  testWidgets(
+    'classifica presenze mostra storico ed esiti su schermo telefono',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repository = FakeProfileRepository(
+        matchSummary: const RankingMatchSummary(
+          totalPlayed: 470,
+          since: '2026-06-01',
+        ),
+        mostPlayed: const MostPlayedRankingResult(
+          since: '2026-06-01',
+          players: [
+            MostPlayedPlayer(
+              position: 1,
+              name: 'Giocatore Storico',
+              matchesPlayed: 97,
+              wins: 79,
+              losses: 18,
+              setsWon: 29,
+              setsLost: 4,
+              gamesWon: 177,
+              gamesLost: 105,
+              matchesWithScore: 15,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            locale: const Locale('it', 'IT'),
+            home: const RankingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('470'), findsOneWidget);
+      expect(find.textContaining('Dal 1 giugno 2026'), findsOneWidget);
+      await tester.tap(find.text('Chi ha giocato di più'));
+      await tester.pumpAndSettle();
+      expect(find.text('Classifica presenze Ranking'), findsOneWidget);
+      expect(find.text('Giocatore Storico'), findsOneWidget);
+      expect(find.text('97'), findsOneWidget);
+      expect(find.text('Vittorie  79'), findsOneWidget);
+      expect(find.text('Sconfitte  18'), findsOneWidget);
+      expect(find.text('Set vinti  29'), findsOneWidget);
+      expect(find.text('Set persi  4'), findsOneWidget);
+      expect(find.text('Game vinti  177'), findsOneWidget);
+      expect(find.text('Game persi  105'), findsOneWidget);
+      expect(find.text('Set e game: 15 partite con dettaglio'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('permette di scegliere classifica generale, mensile e decadi', (
     tester,
   ) async {
     final repository = FakeProfileRepository(
+      matchSummary: const RankingMatchSummary(
+        totalPlayed: 132,
+        since: '2026-10-01',
+      ),
       rankings: const [
         PlayerRanking(
           playerRef: 'p1',
@@ -89,6 +152,16 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    expect(find.text('PARTITE GIOCATE'), findsOneWidget);
+    expect(find.text('132'), findsOneWidget);
+    expect(find.textContaining('Dal 1 ottobre 2026'), findsOneWidget);
+    repository.matchSummary = const RankingMatchSummary(
+      totalPlayed: 133,
+      since: '2026-10-01',
+    );
+    await tester.drag(find.byType(ListView).first, const Offset(0, 400));
+    await tester.pumpAndSettle();
+    expect(find.text('133'), findsOneWidget);
     expect(find.text('Ultime 5'), findsOneWidget);
     expect(find.text('V'), findsNWidgets(3));
     expect(find.text('S'), findsNWidgets(2));

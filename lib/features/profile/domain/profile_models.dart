@@ -99,6 +99,67 @@ class RankingAlerts {
   );
 }
 
+class MostPlayedRankingResult {
+  const MostPlayedRankingResult({this.since = '', this.players = const []});
+  final String since;
+  final List<MostPlayedPlayer> players;
+}
+
+class MostPlayedPlayer {
+  const MostPlayedPlayer({
+    required this.position,
+    required this.name,
+    required this.matchesPlayed,
+    required this.wins,
+    required this.losses,
+    required this.setsWon,
+    required this.setsLost,
+    required this.gamesWon,
+    required this.gamesLost,
+    required this.matchesWithScore,
+    this.photoUrl,
+  });
+  final int position,
+      matchesPlayed,
+      wins,
+      losses,
+      setsWon,
+      setsLost,
+      gamesWon,
+      gamesLost,
+      matchesWithScore;
+  final String name;
+  final String? photoUrl;
+
+  factory MostPlayedPlayer.fromJson(Map<String, dynamic> json) =>
+      MostPlayedPlayer(
+        position: (json['position'] as num).toInt(),
+        name: json['player_name'] as String,
+        photoUrl: json['player_photo_url'] as String?,
+        matchesPlayed: (json['matches_played'] as num).toInt(),
+        wins: (json['wins'] as num).toInt(),
+        losses: (json['losses'] as num).toInt(),
+        setsWon: (json['sets_won'] as num).toInt(),
+        setsLost: (json['sets_lost'] as num).toInt(),
+        gamesWon: (json['games_won'] as num).toInt(),
+        gamesLost: (json['games_lost'] as num).toInt(),
+        matchesWithScore: (json['matches_with_score'] as num).toInt(),
+      );
+}
+
+class RankingMatchSummary {
+  const RankingMatchSummary({required this.totalPlayed, required this.since});
+
+  final int totalPlayed;
+  final String since;
+
+  factory RankingMatchSummary.fromJson(Map<String, dynamic> json) =>
+      RankingMatchSummary(
+        totalPlayed: (json['total_played'] as num).toInt(),
+        since: json['since'] as String,
+      );
+}
+
 class RecentPlayerMatch {
   const RecentPlayerMatch({
     required this.id,
@@ -117,6 +178,8 @@ class RecentPlayerMatch {
   final String date;
   final String timeSlot;
   final String courtName;
+
+  /// Set scores with the player's team first, including the match tie-break.
   final String score;
   final String resultLabel;
   final bool won;

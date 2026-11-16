@@ -6,6 +6,11 @@ import 'profile_repository.dart';
 /// Repository in memoria per test e sviluppo senza backend.
 class FakeProfileRepository implements ProfileRepository {
   FakeProfileRepository({
+    this.mostPlayed = const MostPlayedRankingResult(),
+    this.matchSummary = const RankingMatchSummary(
+      totalPlayed: 0,
+      since: '2026-10-01',
+    ),
     this.profileStats = const ProfileStats(
       position: 12,
       matchesPlayed: 24,
@@ -25,6 +30,21 @@ class FakeProfileRepository implements ProfileRepository {
   }) : lessonList = [...lessons];
 
   ProfileStats profileStats;
+  RankingMatchSummary matchSummary;
+  MostPlayedRankingResult mostPlayed;
+
+  @override
+  Future<MostPlayedRankingResult> mostPlayedLeaderboard() async {
+    _check();
+    return mostPlayed;
+  }
+
+  @override
+  Future<RankingMatchSummary> rankingMatchSummary() async {
+    _check();
+    return matchSummary;
+  }
+
   List<Booking> history;
   List<Lesson> lessonList;
   List<PlayerRanking> rankings;

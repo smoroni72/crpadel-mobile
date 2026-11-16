@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -16,7 +18,7 @@ class RankingsScreen extends ConsumerStatefulWidget {
   ConsumerState<RankingsScreen> createState() => _RankingsScreenState();
 }
 
-enum _RankingView { general, monthly, decades }
+enum _RankingView { general, monthly, decades, mostPlayed }
 
 void _openPlayerStats(BuildContext context, PlayerRanking player) {
   if (player.playerRef == null || player.playerRef!.isEmpty) return;
@@ -32,6 +34,7 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   _RankingView _view = _RankingView.general;
   bool _onlyEligible = false;
   String? _decadeStart;
+  Timer? _summaryRefresh;
 
   @override
   void initState() {
@@ -40,11 +43,24 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
     // Il giocatore del mese si apre sull'ultimo mese concluso. In questo modo
     // nei primi giorni del mese non viene mostrata una classifica ancora vuota.
     _month = DateTime(now.year, now.month - 1);
+    _summaryRefresh = Timer.periodic(const Duration(minutes: 1), (_) {
+      ref.invalidate(rankingMatchSummaryProvider);
+      if (_view == _RankingView.mostPlayed) {
+        ref.invalidate(mostPlayedRankingsProvider);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _summaryRefresh?.cancel();
+    super.dispose();
   }
 
   String get _monthKey => DateFormat('yyyy-MM').format(_month);
 
   Future<void> _refresh() async {
+    ref.invalidate(rankingMatchSummaryProvider);
     switch (_view) {
       case _RankingView.general:
         final _ = await ref.refresh(fullRankingsProvider.future);
@@ -54,6 +70,8 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
         final _ = await ref.refresh(
           decadeRankingsProvider(_decadeStart).future,
         );
+      case _RankingView.mostPlayed:
+        final _ = await ref.refresh(mostPlayedRankingsProvider.future);
     }
   }
 
@@ -176,7 +194,10 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         children: [
+          const _PlayedMatchesTotal(),
+          const SizedBox(height: 16),
           SegmentedButton<_RankingView>(
+            emptySelectionAllowed: true,
             showSelectedIcon: false,
             segments: const [
               ButtonSegment(
@@ -195,9 +216,25 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                 label: Text('Decadi'),
               ),
             ],
-            selected: {_view},
-            onSelectionChanged: (selection) =>
-                setState(() => _view = selection.single),
+            selected: _view == _RankingView.mostPlayed ? {} : {_view},
+            onSelectionChanged: (selection) => selection.isEmpty
+                ? null
+                : setState(() => _view = selection.single),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => setState(() => _view = _RankingView.mostPlayed),
+            icon: const Icon(Icons.emoji_events_outlined),
+            label: const Text('Chi ha giocato di più'),
+            style: _view == _RankingView.mostPlayed
+                ? OutlinedButton.styleFrom(
+                    backgroundColor: context.colors.primary.withValues(
+                      alpha: .1,
+                    ),
+                    foregroundColor: context.colors.primaryText,
+                    side: BorderSide(color: context.colors.primary),
+                  )
+                : null,
           ),
           const SizedBox(height: 20),
           if (_view == _RankingView.general) ...[
@@ -254,6 +291,13 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                 onlyEligible: _onlyEligible,
               ),
             ),
+          ] else if (_view == _RankingView.mostPlayed) ...[
+            AsyncValueView(
+              value: ref.watch(mostPlayedRankingsProvider),
+              errorText: 'Non riesco a caricare le presenze Ranking',
+              onRetry: () => ref.invalidate(mostPlayedRankingsProvider),
+              data: (result) => _MostPlayedSection(result: result),
+            ),
           ] else ...[
             AsyncValueView(
               value: ref.watch(decadeRankingsProvider(_decadeStart)),
@@ -270,6 +314,206 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
       ),
     ),
   );
+}
+
+class _MostPlayedSection extends StatelessWidget {
+  const _MostPlayedSection({required this.result});
+  final MostPlayedRankingResult result;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Classifica presenze Ranking',
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+      const SizedBox(height: 6),
+      Text(
+        'Partite, vittorie e sconfitte comprendono lo storico. Set e game si riferiscono ai risultati dettagliati disponibili. Il tie-break decisivo vale un set, senza aggiungere game.',
+        style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
+      ),
+      const SizedBox(height: 14),
+      if (result.players.isEmpty)
+        const Text('Nessuna partita Ranking giocata.'),
+      for (final player in result.players) ...[
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: player.position == 1
+                  ? context.colors.primary.withValues(alpha: .5)
+                  : context.colors.border,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    '${player.position}°',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: context.colors.primaryText,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  PlayerAvatar(
+                    name: player.name,
+                    photoUrl: player.photoUrl,
+                    size: 34,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      player.name,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    children: [
+                      Text(
+                        '${player.matchesPlayed}',
+                        style: context.fonts
+                            .monoStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                            )
+                            .copyWith(color: context.colors.primaryText),
+                      ),
+                      const Text(
+                        'PARTITE',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              for (final pair in [
+                ('Vittorie', player.wins, 'Sconfitte', player.losses),
+                ('Set vinti', player.setsWon, 'Set persi', player.setsLost),
+                ('Game vinti', player.gamesWon, 'Game persi', player.gamesLost),
+              ])
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${pair.$1}  ${pair.$2}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          '${pair.$3}  ${pair.$4}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 6),
+              Text(
+                'Set e game: ${player.matchesWithScore} partite con dettaglio',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: context.colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
+    ],
+  );
+}
+
+class _PlayedMatchesTotal extends ConsumerWidget {
+  const _PlayedMatchesTotal();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summary = ref.watch(rankingMatchSummaryProvider);
+    final data = summary.asData?.value;
+    final since = data == null
+        ? null
+        : DateFormat('d MMMM yyyy', 'it_IT').format(DateTime.parse(data.since));
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.colors.primary.withValues(alpha: .3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: context.colors.primary.withValues(alpha: .1),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(Icons.sports_tennis, color: context.colors.primaryText),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'PARTITE GIOCATE',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Ranking con risultato${since == null ? '' : '\nDal $since'}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+                if (summary.hasError)
+                  TextButton(
+                    onPressed: () =>
+                        ref.invalidate(rankingMatchSummaryProvider),
+                    child: const Text('Riprova'),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              data == null
+                  ? '—'
+                  : NumberFormat.decimalPattern(
+                      'it_IT',
+                    ).format(data.totalPlayed),
+              style: context.fonts
+                  .monoStyle(fontSize: 38, fontWeight: FontWeight.w900)
+                  .copyWith(color: context.colors.primaryText),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _DecadeRankingSection extends StatelessWidget {

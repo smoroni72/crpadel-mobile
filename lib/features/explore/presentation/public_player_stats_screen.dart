@@ -177,6 +177,7 @@ class PublicPlayerStatsScreen extends ConsumerWidget {
                           ) ...[
                             _RecentMatchCard(
                               match: stats.recentHistory[i],
+                              playerName: player.playerName,
                               showRankingDetails: showRankingDetails,
                             ),
                             if (i < stats.recentHistory.length - 1)
@@ -565,7 +566,19 @@ class _Section extends StatelessWidget {
   final String? subtitle;
   final Widget child;
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: context.colors.border),
+      color: context.colors.surface,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: .035),
+          blurRadius: 18,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -651,13 +664,26 @@ class _Metric extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.background,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colors.border),
+        border: Border.all(color: accent.withValues(alpha: .24)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: accent),
+          Row(
+            children: [
+              Icon(icon, size: 18, color: accent),
+              const Spacer(),
+              Container(
+                width: 24,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: .65),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+            ],
+          ),
           const Spacer(),
           Text(
             value,
@@ -863,125 +889,172 @@ class _TrendPainter extends CustomPainter {
 class _RecentMatchCard extends StatelessWidget {
   const _RecentMatchCard({
     required this.match,
+    required this.playerName,
     required this.showRankingDetails,
   });
   final RecentPlayerMatch match;
+  final String playerName;
   final bool showRankingDetails;
   @override
   Widget build(BuildContext context) {
     final color = match.won ? const Color(0xff16a34a) : const Color(0xffef4444);
     final opponents = match.opponents.isEmpty
-        ? 'Avversari non indicati'
-        : match.opponents.join(' / ');
-    final mate = match.teamMates.isEmpty ? null : match.teamMates.join(' / ');
+        ? const ['Avversari non indicati']
+        : match.opponents;
+    final team = <String>[
+      playerName,
+      ...match.teamMates.where((name) => name.trim().isNotEmpty),
+    ];
     return Container(
-      padding: const EdgeInsets.all(14),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: context.colors.background,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colors.border),
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: .3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color.withValues(alpha: .14),
-                ),
-                child: Text(
-                  match.won ? 'V' : 'S',
-                  style: TextStyle(color: color, fontWeight: FontWeight.w900),
-                ),
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 11),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: .09),
+              border: Border(
+                bottom: BorderSide(color: color.withValues(alpha: .2)),
               ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${_longDate(match.date)}${match.timeSlot.isEmpty ? '' : ' · ${match.timeSlot}'}',
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    Text(
-                      match.courtName.isEmpty
-                          ? 'Campo non indicato'
-                          : match.courtName,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: context.colors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: .12),
-                  borderRadius: BorderRadius.circular(99),
-                ),
-                child: Text(
-                  match.resultLabel,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: color,
-                    fontWeight: FontWeight.w800,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color.withValues(alpha: .16),
+                    border: Border.all(color: color.withValues(alpha: .45)),
+                  ),
+                  child: Text(
+                    match.won ? 'V' : 'S',
+                    style: TextStyle(color: color, fontWeight: FontWeight.w900),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${_longDate(match.date)}${match.timeSlot.isEmpty ? '' : ' · ${match.timeSlot}'}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        match.courtName.isEmpty
+                            ? 'Campo non indicato'
+                            : match.courtName,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: context.colors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _OutcomeBadge(label: match.resultLabel, color: color),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (mate != null)
-                      _MatchLine(
-                        icon: Icons.people_alt_outlined,
-                        label: 'In coppia con $mate',
-                      ),
-                    _MatchLine(
-                      icon: Icons.sports_tennis_rounded,
-                      label: 'vs $opponents',
-                    ),
-                  ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 15),
+            child: Column(
+              children: [
+                _TeamPanel(
+                  label: 'LA SUA COPPIA',
+                  names: team,
+                  accent: color,
+                  highlighted: match.won,
                 ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    match.score.isEmpty ? '—' : match.score,
-                    style: context.fonts.monoStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  if (showRankingDetails && match.rankingScoreDelta != null)
-                    Text(
-                      '${_signed(match.rankingScoreDelta!)} classifica',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: match.rankingScoreDelta! >= 0
-                            ? const Color(0xff16a34a)
-                            : const Color(0xffef4444),
-                        fontWeight: FontWeight.w800,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 9),
+                  child: Row(
+                    children: [
+                      Expanded(child: Divider(color: context.colors.divider)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          'VS',
+                          style: TextStyle(
+                            color: context.colors.textSecondary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
                       ),
-                    ),
-                ],
-              ),
-            ],
+                      Expanded(child: Divider(color: context.colors.divider)),
+                    ],
+                  ),
+                ),
+                _TeamPanel(
+                  label: 'AVVERSARI',
+                  names: opponents,
+                  accent: const Color(0xff16a34a),
+                  highlighted: !match.won && match.resultLabel == 'Sconfitta',
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: .09),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: color.withValues(alpha: .25)),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'RISULTATO · SUA COPPIA PRIMA',
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: context.colors.textSecondary,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        match.score.isEmpty ? '—' : match.score,
+                        textAlign: TextAlign.center,
+                        style: context.fonts.monoStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (showRankingDetails &&
+                          match.rankingScoreDelta != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_signed(match.rankingScoreDelta!)} classifica',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: match.rankingScoreDelta! >= 0
+                                ? const Color(0xff16a34a)
+                                : const Color(0xffef4444),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -989,25 +1062,97 @@ class _RecentMatchCard extends StatelessWidget {
   }
 }
 
-class _MatchLine extends StatelessWidget {
-  const _MatchLine({required this.icon, required this.label});
-  final IconData icon;
+class _OutcomeBadge extends StatelessWidget {
+  const _OutcomeBadge({required this.label, required this.color});
   final String label;
+  final Color color;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 3),
-    child: Row(
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: .13),
+      borderRadius: BorderRadius.circular(99),
+      border: Border.all(color: color.withValues(alpha: .3)),
+    ),
+    child: Text(
+      label,
+      style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w900),
+    ),
+  );
+}
+
+class _TeamPanel extends StatelessWidget {
+  const _TeamPanel({
+    required this.label,
+    required this.names,
+    required this.accent,
+    this.highlighted = false,
+  });
+  final String label;
+  final List<String> names;
+  final Color accent;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
+    decoration: BoxDecoration(
+      color: highlighted
+          ? accent.withValues(alpha: .07)
+          : context.colors.background,
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(
+        color: highlighted
+            ? accent.withValues(alpha: .28)
+            : context.colors.border,
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: context.colors.textSecondary),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 11, color: context.colors.textSecondary),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.1,
+            color: highlighted ? accent : context.colors.textSecondary,
           ),
         ),
+        const SizedBox(height: 7),
+        for (var index = 0; index < names.length; index++) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 7,
+                height: 7,
+                margin: const EdgeInsets.only(top: 5),
+                decoration: BoxDecoration(
+                  color: highlighted
+                      ? accent
+                      : context.colors.textSecondary.withValues(alpha: .55),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  names[index],
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.25,
+                    fontWeight: highlighted && index == 0
+                        ? FontWeight.w900
+                        : FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (index < names.length - 1) const SizedBox(height: 5),
+        ],
       ],
     ),
   );
