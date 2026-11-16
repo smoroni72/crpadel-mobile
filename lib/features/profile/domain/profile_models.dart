@@ -120,6 +120,11 @@ class MostPlayedPlayer {
     this.photoUrl,
     this.playerRef,
     this.ranking,
+    this.difficultyLevel,
+    this.underdogMatches = 0,
+    this.underdogWins = 0,
+    this.underdogWinPercentage,
+    this.matchesWithCoefficients = 0,
   });
   final int position,
       matchesPlayed,
@@ -134,6 +139,9 @@ class MostPlayedPlayer {
   final String? photoUrl;
   final String? playerRef;
   final PlayerRanking? ranking;
+  final String? difficultyLevel;
+  final int underdogMatches, underdogWins, matchesWithCoefficients;
+  final double? underdogWinPercentage;
 
   factory MostPlayedPlayer.fromJson(Map<String, dynamic> json) =>
       MostPlayedPlayer(
@@ -152,6 +160,13 @@ class MostPlayedPlayer {
         gamesWon: (json['games_won'] as num).toInt(),
         gamesLost: (json['games_lost'] as num).toInt(),
         matchesWithScore: (json['matches_with_score'] as num).toInt(),
+        difficultyLevel: json['difficulty_level'] as String?,
+        underdogMatches: (json['underdog_matches'] as num?)?.toInt() ?? 0,
+        underdogWins: (json['underdog_wins'] as num?)?.toInt() ?? 0,
+        underdogWinPercentage: (json['underdog_win_percentage'] as num?)
+            ?.toDouble(),
+        matchesWithCoefficients:
+            (json['matches_with_coefficients'] as num?)?.toInt() ?? 0,
       );
 }
 

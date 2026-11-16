@@ -44,6 +44,11 @@ void main() {
               gamesWon: 177,
               gamesLost: 105,
               matchesWithScore: 15,
+              difficultyLevel: 'Altissimo',
+              underdogMatches: 10,
+              underdogWins: 8,
+              underdogWinPercentage: 80,
+              matchesWithCoefficients: 15,
             ),
             MostPlayedPlayer(
               position: 8,
@@ -86,6 +91,12 @@ void main() {
       expect(find.text('Game vinti  177'), findsOneWidget);
       expect(find.text('Game persi  105'), findsOneWidget);
       expect(find.text('Set e game: 15 partite con dettaglio'), findsOneWidget);
+      expect(find.text('Altissimo'), findsOneWidget);
+      expect(
+        find.text('80% · 8 vittorie su 10 partite sotto coefficiente'),
+        findsOneWidget,
+      );
+      expect(find.text('Non disponibile'), findsOneWidget);
       expect(tester.takeException(), isNull);
       final search = find.byKey(const ValueKey('attendance-player-search'));
       await tester.enterText(search, 'altro');

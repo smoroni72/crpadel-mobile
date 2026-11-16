@@ -480,6 +480,55 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                       ],
                     ),
                     const SizedBox(height: 14),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        const Text(
+                          'Coefficiente di difficoltà',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Tooltip(
+                          message:
+                              'Vittorie nelle partite con coefficiente di coppia inferiore agli avversari. Altissimo da 70%, Alto da 50%, Medio da 40%, Basso da 30%, Bassissimo sotto 30%. Si usano i coefficienti registrati al risultato.',
+                          child: Icon(Icons.info_outline, size: 15),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.colors.primary.withValues(alpha: .1),
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                          child: Text(
+                            player.difficultyLevel ?? 'Non disponibile',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: context.colors.primaryText,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      player.underdogMatches > 0 &&
+                              player.underdogWinPercentage != null
+                          ? '${NumberFormat('0.#', 'it_IT').format(player.underdogWinPercentage)}% · ${player.underdogWins} vittorie su ${player.underdogMatches} partite sotto coefficiente'
+                          : 'Nessuna partita sotto coefficiente documentata',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.colors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     for (final pair in [
                       ('Vittorie', player.wins, 'Sconfitte', player.losses),
                       (

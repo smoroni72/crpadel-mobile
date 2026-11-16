@@ -52,6 +52,11 @@ void main() {
                 'games_won': 177,
                 'games_lost': 105,
                 'matches_with_score': 15,
+                'difficulty_level': 'Altissimo',
+                'underdog_matches': 10,
+                'underdog_wins': 8,
+                'underdog_win_percentage': 80.0,
+                'matches_with_coefficients': 15,
               },
             ],
           },
@@ -70,6 +75,10 @@ void main() {
       expect(player.gamesWon, 177);
       expect(player.gamesLost, 105);
       expect(player.matchesWithScore, 15);
+      expect(player.difficultyLevel, 'Altissimo');
+      expect(player.underdogMatches, 10);
+      expect(player.underdogWins, 8);
+      expect(player.underdogWinPercentage, 80);
       expect(player.playerRef, 'directory-1');
       expect(player.ranking?.playerRef, 'user-1');
       expect(player.ranking?.eloScore, 1187.25);
