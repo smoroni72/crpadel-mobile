@@ -18,6 +18,14 @@ class RankingsScreen extends ConsumerStatefulWidget {
   ConsumerState<RankingsScreen> createState() => _RankingsScreenState();
 }
 
+String _challengeAnimal(String? level) => switch (level) {
+  'Altissimo' => '🦁 Leone',
+  'Alto' => '🐺 Lupo',
+  'Basso' => '🦊 Volpe',
+  'Bassissimo' => '🐰 Coniglio',
+  _ => '',
+};
+
 enum _RankingView { general, monthly, decades, mostPlayed }
 
 void _openPlayerStats(BuildContext context, PlayerRanking player) {
@@ -521,7 +529,7 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         const Text(
-                          'Coefficiente di difficoltà',
+                          'Spirito di sfida',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -529,7 +537,7 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                         ),
                         const Tooltip(
                           message:
-                              'Percentuale di partite giocate da sfavorito sul totale con coefficienti documentati. Altissimo da 70%, Alto da 50%, Basso da 30%, Bassissimo sotto 30%. Il risultato non cambia questa percentuale.',
+                              'Percentuale di partite giocate da sfavorito sul totale con coefficienti documentati. 🦁 Leone: affronta le sfide più difficili (Altissimo da 70%). 🐺 Lupo: non teme avversari più forti (Alto da 50%). 🦊 Volpe: sceglie le sue sfide con astuzia (Basso da 30%). 🐰 Coniglio: preferisce partire da favorito (Bassissimo sotto 30%). Il risultato non cambia questa percentuale.',
                           child: Icon(Icons.info_outline, size: 15),
                         ),
                         Container(
@@ -544,7 +552,7 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                           child: Text(
                             player.underdogMatchPercentage == null
                                 ? 'Non disponibile'
-                                : '${NumberFormat('0.#', 'it_IT').format(player.underdogMatchPercentage)}% — ${player.difficultyLevel}',
+                                : '${_challengeAnimal(player.difficultyLevel)} · ${NumberFormat('0.#', 'it_IT').format(player.underdogMatchPercentage)}% — ${player.difficultyLevel}',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
@@ -557,7 +565,7 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                     const SizedBox(height: 5),
                     Text(
                       player.matchesWithCoefficients > 0
-                          ? '${player.underdogMatches} da sfavorito su ${player.matchesWithCoefficients} partite con coefficienti'
+                          ? '${player.underdogMatches} da sfavorito su ${player.matchesWithCoefficients} ${player.matchesWithCoefficients == 1 ? 'partita' : 'partite'} con coefficienti'
                           : 'Nessuna partita con coefficienti documentati',
                       style: TextStyle(
                         fontSize: 11,
