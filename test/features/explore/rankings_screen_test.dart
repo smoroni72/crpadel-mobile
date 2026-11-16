@@ -45,9 +45,9 @@ void main() {
               gamesLost: 105,
               matchesWithScore: 15,
               difficultyLevel: 'Altissimo',
-              underdogMatches: 10,
+              underdogMatches: 12,
               underdogWins: 8,
-              underdogWinPercentage: 80,
+              underdogMatchPercentage: 80,
               matchesWithCoefficients: 15,
             ),
             MostPlayedPlayer(
@@ -62,6 +62,22 @@ void main() {
               gamesWon: 60,
               gamesLost: 90,
               matchesWithScore: 10,
+              difficultyLevel: 'Bassissimo',
+              underdogMatchPercentage: 0,
+              matchesWithCoefficients: 10,
+            ),
+            MostPlayedPlayer(
+              position: 9,
+              playerRef: 'directory-3',
+              name: 'Coefficienti assenti',
+              matchesPlayed: 4,
+              wins: 0,
+              losses: 4,
+              setsWon: 0,
+              setsLost: 0,
+              gamesWon: 0,
+              gamesLost: 0,
+              matchesWithScore: 1,
             ),
           ],
         ),
@@ -91,12 +107,13 @@ void main() {
       expect(find.text('Game vinti  177'), findsOneWidget);
       expect(find.text('Game persi  105'), findsOneWidget);
       expect(find.text('Set e game: 15 partite con dettaglio'), findsOneWidget);
-      expect(find.text('Altissimo'), findsOneWidget);
+      expect(find.text('80% — Altissimo'), findsOneWidget);
       expect(
-        find.text('80% · 8 vittorie su 10 partite sotto coefficiente'),
+        find.text('12 da sfavorito su 15 partite con coefficienti'),
         findsOneWidget,
       );
       expect(find.text('Non disponibile'), findsOneWidget);
+      expect(find.text('0% — Bassissimo'), findsOneWidget);
       expect(tester.takeException(), isNull);
       final search = find.byKey(const ValueKey('attendance-player-search'));
       await tester.enterText(search, 'altro');
@@ -114,6 +131,7 @@ void main() {
       await tester.enterText(search, '  storico GIOCATORE ');
       await tester.pumpAndSettle();
       expect(find.text('Altro Giocatore'), findsNothing);
+      await tester.ensureVisible(find.text('Giocatore Storico'));
       await tester.tap(find.text('Giocatore Storico'));
       await tester.pumpAndSettle();
       expect(find.text('Statistiche giocatore'), findsOneWidget);
@@ -123,6 +141,23 @@ void main() {
       await tester.pageBack();
       await tester.pumpAndSettle();
       expect(find.text('  storico GIOCATORE '), findsOneWidget);
+      expect(find.text('Altro Giocatore'), findsNothing);
+      await tester.ensureVisible(search);
+      await tester.tap(find.byTooltip('Cancella ricerca'));
+      await tester.pumpAndSettle();
+      final sort = find.byKey(const ValueKey('attendance-sort'));
+      await tester.ensureVisible(sort);
+      await tester.tap(sort);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Da sfavorito: % più bassa').last);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopLeft(find.text('Altro Giocatore')).dy,
+        lessThan(tester.getTopLeft(find.text('Giocatore Storico')).dy),
+      );
+      await tester.enterText(search, 'storico');
+      await tester.pumpAndSettle();
+      expect(find.text('2°'), findsOneWidget);
       expect(find.text('Altro Giocatore'), findsNothing);
     },
   );

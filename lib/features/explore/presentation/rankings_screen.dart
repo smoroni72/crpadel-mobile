@@ -327,6 +327,7 @@ class _MostPlayedSection extends ConsumerStatefulWidget {
 class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
   final _search = TextEditingController();
   String _query = '';
+  MostPlayedSort _order = MostPlayedSort.matchesPlayed;
 
   @override
   void dispose() {
@@ -364,7 +365,14 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
         .toLowerCase()
         .split(RegExp(r'\s+'))
         .where((term) => term.isNotEmpty);
-    final players = widget.result.players
+    final ordered = sortMostPlayedPlayers(widget.result.players, _order);
+    final positions = {
+      for (var i = 0; i < ordered.length; i++)
+        ordered[i]: _order == MostPlayedSort.matchesPlayed
+            ? ordered[i].position
+            : i + 1,
+    };
+    final players = ordered
         .where(
           (player) =>
               terms.every((term) => player.name.toLowerCase().contains(term)),
@@ -400,6 +408,33 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                   ),
           ),
         ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<MostPlayedSort>(
+          key: const ValueKey('attendance-sort'),
+          initialValue: _order,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            labelText: 'Ordina per',
+            prefixIcon: Icon(Icons.sort),
+          ),
+          items: const [
+            DropdownMenuItem(
+              value: MostPlayedSort.matchesPlayed,
+              child: Text('Partite giocate'),
+            ),
+            DropdownMenuItem(
+              value: MostPlayedSort.underdogDescending,
+              child: Text('Da sfavorito: % più alta'),
+            ),
+            DropdownMenuItem(
+              value: MostPlayedSort.underdogAscending,
+              child: Text('Da sfavorito: % più bassa'),
+            ),
+          ],
+          onChanged: (value) {
+            if (value != null) setState(() => _order = value);
+          },
+        ),
         const SizedBox(height: 6),
         Text(
           'Partite, vittorie e sconfitte comprendono lo storico. Set e game si riferiscono ai risultati dettagliati disponibili. Il tie-break decisivo vale un set, senza aggiungere game.',
@@ -420,7 +455,7 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
               side: BorderSide(
-                color: player.position == 1
+                color: positions[player] == 1
                     ? context.colors.primary.withValues(alpha: .5)
                     : context.colors.border,
               ),
@@ -437,7 +472,7 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                     Row(
                       children: [
                         Text(
-                          '${player.position}°',
+                          '${positions[player]}°',
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             color: context.colors.primaryText,
@@ -494,7 +529,7 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                         ),
                         const Tooltip(
                           message:
-                              'Vittorie nelle partite con coefficiente di coppia inferiore agli avversari. Altissimo da 70%, Alto da 50%, Medio da 40%, Basso da 30%, Bassissimo sotto 30%. Si usano i coefficienti registrati al risultato.',
+                              'Percentuale di partite giocate da sfavorito sul totale con coefficienti documentati. Altissimo da 70%, Alto da 50%, Basso da 30%, Bassissimo sotto 30%. Il risultato non cambia questa percentuale.',
                           child: Icon(Icons.info_outline, size: 15),
                         ),
                         Container(
@@ -507,7 +542,9 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                             borderRadius: BorderRadius.circular(99),
                           ),
                           child: Text(
-                            player.difficultyLevel ?? 'Non disponibile',
+                            player.underdogMatchPercentage == null
+                                ? 'Non disponibile'
+                                : '${NumberFormat('0.#', 'it_IT').format(player.underdogMatchPercentage)}% — ${player.difficultyLevel}',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
@@ -519,10 +556,9 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      player.underdogMatches > 0 &&
-                              player.underdogWinPercentage != null
-                          ? '${NumberFormat('0.#', 'it_IT').format(player.underdogWinPercentage)}% · ${player.underdogWins} vittorie su ${player.underdogMatches} partite sotto coefficiente'
-                          : 'Nessuna partita sotto coefficiente documentata',
+                      player.matchesWithCoefficients > 0
+                          ? '${player.underdogMatches} da sfavorito su ${player.matchesWithCoefficients} partite con coefficienti'
+                          : 'Nessuna partita con coefficienti documentati',
                       style: TextStyle(
                         fontSize: 11,
                         color: context.colors.textSecondary,

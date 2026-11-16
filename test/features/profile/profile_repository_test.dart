@@ -24,6 +24,59 @@ Map<String, dynamic> _row(
 
 void main() {
   test(
+    'ordina per quota da sfavorito nelle due direzioni, senza usare le vittorie',
+    () {
+      MostPlayedPlayer row(
+        String name,
+        int played,
+        int wins,
+        double? percentage,
+      ) => MostPlayedPlayer(
+        position: 1,
+        name: name,
+        playerRef: name,
+        matchesPlayed: played,
+        wins: wins,
+        losses: played - wins,
+        setsWon: 0,
+        setsLost: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+        matchesWithScore: 0,
+        underdogMatchPercentage: percentage,
+      );
+      final players = [
+        row('A', 100, 90, 20),
+        row('C', 40, 40, 0),
+        row('B', 20, 0, 80),
+        row('D', 10, 9, null),
+      ];
+      expect(
+        sortMostPlayedPlayers(
+          players,
+          MostPlayedSort.underdogDescending,
+        ).map((p) => p.name),
+        ['B', 'A', 'C', 'D'],
+      );
+      expect(
+        sortMostPlayedPlayers(
+          players,
+          MostPlayedSort.underdogAscending,
+        ).map((p) => p.name),
+        ['C', 'A', 'B', 'D'],
+      );
+      expect(
+        sortMostPlayedPlayers(
+          players,
+          MostPlayedSort.matchesPlayed,
+        ).map((p) => p.name),
+        ['A', 'C', 'B', 'D'],
+      );
+      expect(players.map((p) => p.name), ['A', 'C', 'B', 'D']);
+    },
+  );
+
+  test(
     'classifica presenze legge tutti gli esiti e la copertura dei punteggi',
     () async {
       final adapter = FakeAdapter(
@@ -53,9 +106,9 @@ void main() {
                 'games_lost': 105,
                 'matches_with_score': 15,
                 'difficulty_level': 'Altissimo',
-                'underdog_matches': 10,
+                'underdog_matches': 12,
                 'underdog_wins': 8,
-                'underdog_win_percentage': 80.0,
+                'underdog_match_percentage': 80.0,
                 'matches_with_coefficients': 15,
               },
             ],
@@ -76,9 +129,9 @@ void main() {
       expect(player.gamesLost, 105);
       expect(player.matchesWithScore, 15);
       expect(player.difficultyLevel, 'Altissimo');
-      expect(player.underdogMatches, 10);
+      expect(player.underdogMatches, 12);
       expect(player.underdogWins, 8);
-      expect(player.underdogWinPercentage, 80);
+      expect(player.underdogMatchPercentage, 80);
       expect(player.playerRef, 'directory-1');
       expect(player.ranking?.playerRef, 'user-1');
       expect(player.ranking?.eloScore, 1187.25);

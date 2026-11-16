@@ -105,6 +105,34 @@ class MostPlayedRankingResult {
   final List<MostPlayedPlayer> players;
 }
 
+enum MostPlayedSort { matchesPlayed, underdogDescending, underdogAscending }
+
+List<MostPlayedPlayer> sortMostPlayedPlayers(
+  List<MostPlayedPlayer> players,
+  MostPlayedSort order,
+) {
+  if (order == MostPlayedSort.matchesPlayed) return [...players];
+  return [...players]..sort((a, b) {
+    final left = a.underdogMatchPercentage;
+    final right = b.underdogMatchPercentage;
+    if (left == null && right != null) return 1;
+    if (left != null && right == null) return -1;
+    if (left != null && right != null && left != right) {
+      return order == MostPlayedSort.underdogAscending
+          ? left.compareTo(right)
+          : right.compareTo(left);
+    }
+    final byMatches = b.matchesPlayed.compareTo(a.matchesPlayed);
+    if (byMatches != 0) return byMatches;
+    final byWins = b.wins.compareTo(a.wins);
+    if (byWins != 0) return byWins;
+    final byName = a.name.compareTo(b.name);
+    return byName != 0
+        ? byName
+        : (a.playerRef ?? '').compareTo(b.playerRef ?? '');
+  });
+}
+
 class MostPlayedPlayer {
   const MostPlayedPlayer({
     required this.position,
@@ -123,7 +151,7 @@ class MostPlayedPlayer {
     this.difficultyLevel,
     this.underdogMatches = 0,
     this.underdogWins = 0,
-    this.underdogWinPercentage,
+    this.underdogMatchPercentage,
     this.matchesWithCoefficients = 0,
   });
   final int position,
@@ -141,7 +169,7 @@ class MostPlayedPlayer {
   final PlayerRanking? ranking;
   final String? difficultyLevel;
   final int underdogMatches, underdogWins, matchesWithCoefficients;
-  final double? underdogWinPercentage;
+  final double? underdogMatchPercentage;
 
   factory MostPlayedPlayer.fromJson(Map<String, dynamic> json) =>
       MostPlayedPlayer(
@@ -163,7 +191,7 @@ class MostPlayedPlayer {
         difficultyLevel: json['difficulty_level'] as String?,
         underdogMatches: (json['underdog_matches'] as num?)?.toInt() ?? 0,
         underdogWins: (json['underdog_wins'] as num?)?.toInt() ?? 0,
-        underdogWinPercentage: (json['underdog_win_percentage'] as num?)
+        underdogMatchPercentage: (json['underdog_match_percentage'] as num?)
             ?.toDouble(),
         matchesWithCoefficients:
             (json['matches_with_coefficients'] as num?)?.toInt() ?? 0,
