@@ -18,13 +18,14 @@ class RankingsScreen extends ConsumerStatefulWidget {
   ConsumerState<RankingsScreen> createState() => _RankingsScreenState();
 }
 
-String _challengeAnimal(String? level) => switch (level) {
-  'Altissimo' => '🦁 Leone',
-  'Alto' => '🐺 Lupo',
-  'Basso' => '🦊 Volpe',
-  'Bassissimo' => '🐰 Coniglio',
-  _ => '',
-};
+({String emoji, String name}) _challengeAnimal(String? level) =>
+    switch (level) {
+      'Altissimo' => (emoji: '🦁', name: 'Leone'),
+      'Alto' => (emoji: '🐺', name: 'Lupo'),
+      'Basso' => (emoji: '🦊', name: 'Volpe'),
+      'Bassissimo' => (emoji: '🐰', name: 'Coniglio'),
+      _ => (emoji: '', name: ''),
+    };
 
 enum _RankingView { general, monthly, decades, mostPlayed }
 
@@ -540,28 +541,71 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                               'Percentuale di partite giocate da sfavorito sul totale con coefficienti documentati. 🦁 Leone: affronta le sfide più difficili (Altissimo da 70%). 🐺 Lupo: non teme avversari più forti (Alto da 50%). 🦊 Volpe: sceglie le sue sfide con astuzia (Basso da 30%). 🐰 Coniglio: preferisce partire da favorito (Bassissimo sotto 30%). Il risultato non cambia questa percentuale.',
                           child: Icon(Icons.info_outline, size: 15),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: context.colors.primary.withValues(alpha: .1),
-                            borderRadius: BorderRadius.circular(99),
-                          ),
-                          child: Text(
-                            player.underdogMatchPercentage == null
-                                ? 'Non disponibile'
-                                : '${_challengeAnimal(player.difficultyLevel)} · ${NumberFormat('0.#', 'it_IT').format(player.underdogMatchPercentage)}% — ${player.difficultyLevel}',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: context.colors.primaryText,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    if (player.underdogMatchPercentage != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: context.colors.primary.withValues(alpha: .05),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            ExcludeSemantics(
+                              child: Container(
+                                width: 68,
+                                height: 68,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: context.colors.primary.withValues(
+                                    alpha: .1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  _challengeAnimal(
+                                    player.difficultyLevel,
+                                  ).emoji,
+                                  style: const TextStyle(
+                                    fontSize: 48,
+                                    height: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _challengeAnimal(
+                                      player.difficultyLevel,
+                                    ).name,
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      color: context.colors.primaryText,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${NumberFormat('0.#', 'it_IT').format(player.underdogMatchPercentage)}% — ${player.difficultyLevel}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      const Text('Non disponibile'),
                     const SizedBox(height: 5),
                     Text(
                       player.matchesWithCoefficients > 0

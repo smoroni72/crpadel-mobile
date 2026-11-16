@@ -107,13 +107,13 @@ void main() {
       expect(find.text('Game vinti  177'), findsOneWidget);
       expect(find.text('Game persi  105'), findsOneWidget);
       expect(find.text('Set e game: 15 partite con dettaglio'), findsOneWidget);
-      expect(find.text('🦁 Leone · 80% — Altissimo'), findsOneWidget);
+      expect(find.text('80% — Altissimo'), findsOneWidget);
       expect(
         find.text('12 da sfavorito su 15 partite con coefficienti'),
         findsOneWidget,
       );
       expect(find.text('Non disponibile'), findsOneWidget);
-      expect(find.text('🐰 Coniglio · 0% — Bassissimo'), findsOneWidget);
+      expect(find.text('0% — Bassissimo'), findsOneWidget);
       expect(tester.takeException(), isNull);
       final search = find.byKey(const ValueKey('attendance-player-search'));
       await tester.enterText(search, 'altro');
