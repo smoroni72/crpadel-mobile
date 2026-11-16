@@ -51,6 +51,7 @@ class FakeProfileRepository implements ProfileRepository {
   MonthlyRankingResult monthlyRankings;
   DecadeRankingResult decadeRankings;
   final cancelledLessons = <String>[];
+  final publicStatsRequests = <PlayerRanking>[];
 
   /// Se impostato, ogni chiamata fallisce con questo errore.
   Object? error;
@@ -95,6 +96,7 @@ class FakeProfileRepository implements ProfileRepository {
   @override
   Future<ProfileStats> publicStats({required PlayerRanking player}) async {
     _check();
+    publicStatsRequests.add(player);
     return profileStats;
   }
 

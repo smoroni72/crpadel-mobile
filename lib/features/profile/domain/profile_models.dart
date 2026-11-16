@@ -118,6 +118,8 @@ class MostPlayedPlayer {
     required this.gamesLost,
     required this.matchesWithScore,
     this.photoUrl,
+    this.playerRef,
+    this.ranking,
   });
   final int position,
       matchesPlayed,
@@ -130,12 +132,18 @@ class MostPlayedPlayer {
       matchesWithScore;
   final String name;
   final String? photoUrl;
+  final String? playerRef;
+  final PlayerRanking? ranking;
 
   factory MostPlayedPlayer.fromJson(Map<String, dynamic> json) =>
       MostPlayedPlayer(
         position: (json['position'] as num).toInt(),
         name: json['player_name'] as String,
         photoUrl: json['player_photo_url'] as String?,
+        playerRef: json['player_ref'] as String?,
+        ranking: json['ranking'] is Map<String, dynamic>
+            ? PlayerRanking.fromJson(json['ranking'] as Map<String, dynamic>)
+            : null,
         matchesPlayed: (json['matches_played'] as num).toInt(),
         wins: (json['wins'] as num).toInt(),
         losses: (json['losses'] as num).toInt(),

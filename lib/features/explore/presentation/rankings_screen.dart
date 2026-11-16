@@ -316,126 +316,235 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   );
 }
 
-class _MostPlayedSection extends StatelessWidget {
+class _MostPlayedSection extends ConsumerStatefulWidget {
   const _MostPlayedSection({required this.result});
   final MostPlayedRankingResult result;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        'Classifica presenze Ranking',
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
-      const SizedBox(height: 6),
-      Text(
-        'Partite, vittorie e sconfitte comprendono lo storico. Set e game si riferiscono ai risultati dettagliati disponibili. Il tie-break decisivo vale un set, senza aggiungere game.',
-        style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
-      ),
-      const SizedBox(height: 14),
-      if (result.players.isEmpty)
-        const Text('Nessuna partita Ranking giocata.'),
-      for (final player in result.players) ...[
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: player.position == 1
-                  ? context.colors.primary.withValues(alpha: .5)
-                  : context.colors.border,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    '${player.position}°',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      color: context.colors.primaryText,
-                    ),
+  ConsumerState<_MostPlayedSection> createState() => _MostPlayedSectionState();
+}
+
+class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _openPlayer(MostPlayedPlayer player) {
+    final reference = player.playerRef;
+    if (reference == null || reference.isEmpty) return;
+    PlayerRanking? general;
+    for (final candidate
+        in ref.read(fullRankingsProvider).asData?.value ?? <PlayerRanking>[]) {
+      if (candidate.playerRef == (player.ranking?.playerRef ?? reference)) {
+        general = candidate;
+        break;
+      }
+    }
+    final selected =
+        (general ?? player.ranking ?? PlayerRanking(playerName: player.name))
+            .copyWith(
+              playerRef: reference,
+              playerName: player.name,
+              playerPhotoUrl: player.photoUrl,
+              matchesPlayed: player.matchesPlayed,
+              matchesWon: player.wins,
+            );
+    _openPlayerStats(context, selected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final terms = _query
+        .trim()
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((term) => term.isNotEmpty);
+    final players = widget.result.players
+        .where(
+          (player) =>
+              terms.every((term) => player.name.toLowerCase().contains(term)),
+        )
+        .toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Classifica presenze Ranking',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          key: const ValueKey('attendance-player-search'),
+          controller: _search,
+          autocorrect: false,
+          textInputAction: TextInputAction.search,
+          onChanged: (value) => setState(() => _query = value),
+          onSubmitted: (_) => FocusScope.of(context).unfocus(),
+          decoration: InputDecoration(
+            labelText: 'Cerca un giocatore',
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _query.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: 'Cancella ricerca',
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      _search.clear();
+                      setState(() => _query = '');
+                    },
                   ),
-                  const SizedBox(width: 10),
-                  PlayerAvatar(
-                    name: player.name,
-                    photoUrl: player.photoUrl,
-                    size: 34,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      player.name,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    children: [
-                      Text(
-                        '${player.matchesPlayed}',
-                        style: context.fonts
-                            .monoStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
-                            )
-                            .copyWith(color: context.colors.primaryText),
-                      ),
-                      const Text(
-                        'PARTITE',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              for (final pair in [
-                ('Vittorie', player.wins, 'Sconfitte', player.losses),
-                ('Set vinti', player.setsWon, 'Set persi', player.setsLost),
-                ('Game vinti', player.gamesWon, 'Game persi', player.gamesLost),
-              ])
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${pair.$1}  ${pair.$2}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          '${pair.$3}  ${pair.$4}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 6),
-              Text(
-                'Set e game: ${player.matchesWithScore} partite con dettaglio',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: context.colors.textSecondary,
-                ),
-              ),
-            ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
+        Text(
+          'Partite, vittorie e sconfitte comprendono lo storico. Set e game si riferiscono ai risultati dettagliati disponibili. Il tie-break decisivo vale un set, senza aggiungere game.',
+          style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
+        ),
+        const SizedBox(height: 14),
+        if (widget.result.players.isEmpty)
+          const Text('Nessuna partita Ranking giocata.'),
+        if (players.isEmpty && widget.result.players.isNotEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Text('Nessun giocatore trovato'),
+          ),
+        for (final player in players) ...[
+          Material(
+            color: context.colors.surface,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(
+                color: player.position == 1
+                    ? context.colors.primary.withValues(alpha: .5)
+                    : context.colors.border,
+              ),
+            ),
+            child: InkWell(
+              onTap: player.playerRef == null || player.playerRef!.isEmpty
+                  ? null
+                  : () => _openPlayer(player),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '${player.position}°',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: context.colors.primaryText,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        PlayerAvatar(
+                          name: player.name,
+                          photoUrl: player.photoUrl,
+                          size: 34,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            player.name,
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          children: [
+                            Text(
+                              '${player.matchesPlayed}',
+                              style: context.fonts
+                                  .monoStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                  )
+                                  .copyWith(color: context.colors.primaryText),
+                            ),
+                            const Text(
+                              'PARTITE',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    for (final pair in [
+                      ('Vittorie', player.wins, 'Sconfitte', player.losses),
+                      (
+                        'Set vinti',
+                        player.setsWon,
+                        'Set persi',
+                        player.setsLost,
+                      ),
+                      (
+                        'Game vinti',
+                        player.gamesWon,
+                        'Game persi',
+                        player.gamesLost,
+                      ),
+                    ])
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${pair.$1}  ${pair.$2}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                '${pair.$3}  ${pair.$4}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Set e game: ${player.matchesWithScore} partite con dettaglio',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: context.colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        if (player.playerRef != null &&
+                            player.playerRef!.isNotEmpty)
+                          Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: context.colors.primaryText,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
       ],
-    ],
-  );
+    );
+  }
 }
 
 class _PlayedMatchesTotal extends ConsumerWidget {

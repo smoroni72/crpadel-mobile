@@ -35,6 +35,14 @@ void main() {
               {
                 'position': 1,
                 'player_name': 'Giocatore Storico',
+                'player_ref': 'directory-1',
+                'ranking': {
+                  'player_ref': 'user-1',
+                  'player_name': 'Giocatore Storico',
+                  'elo_score': 1187.25,
+                  'ranking_band_name': 'Rosso',
+                  'ranking_band_color': '#ff0000',
+                },
                 'player_photo_url': null,
                 'matches_played': 97,
                 'wins': 79,
@@ -62,6 +70,9 @@ void main() {
       expect(player.gamesWon, 177);
       expect(player.gamesLost, 105);
       expect(player.matchesWithScore, 15);
+      expect(player.playerRef, 'directory-1');
+      expect(player.ranking?.playerRef, 'user-1');
+      expect(player.ranking?.eloScore, 1187.25);
       expect(adapter.requests.single.path, '/rankings/most-played');
     },
   );

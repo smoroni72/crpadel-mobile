@@ -29,6 +29,12 @@ void main() {
           players: [
             MostPlayedPlayer(
               position: 1,
+              playerRef: 'directory-1',
+              ranking: PlayerRanking(
+                playerRef: 'user-1',
+                playerName: 'Giocatore Storico',
+                eloScore: 1187.25,
+              ),
               name: 'Giocatore Storico',
               matchesPlayed: 97,
               wins: 79,
@@ -38,6 +44,19 @@ void main() {
               gamesWon: 177,
               gamesLost: 105,
               matchesWithScore: 15,
+            ),
+            MostPlayedPlayer(
+              position: 8,
+              playerRef: 'directory-2',
+              name: 'Altro Giocatore',
+              matchesPlayed: 10,
+              wins: 4,
+              losses: 6,
+              setsWon: 7,
+              setsLost: 12,
+              gamesWon: 60,
+              gamesLost: 90,
+              matchesWithScore: 10,
             ),
           ],
         ),
@@ -68,6 +87,32 @@ void main() {
       expect(find.text('Game persi  105'), findsOneWidget);
       expect(find.text('Set e game: 15 partite con dettaglio'), findsOneWidget);
       expect(tester.takeException(), isNull);
+      final search = find.byKey(const ValueKey('attendance-player-search'));
+      await tester.enterText(search, 'altro');
+      await tester.pumpAndSettle();
+      expect(find.text('Altro Giocatore'), findsOneWidget);
+      expect(find.text('Giocatore Storico'), findsNothing);
+      expect(find.text('8°'), findsOneWidget);
+      await tester.enterText(search, 'nessun-nome');
+      await tester.pumpAndSettle();
+      expect(find.text('Nessun giocatore trovato'), findsOneWidget);
+      await tester.tap(find.byTooltip('Cancella ricerca'));
+      await tester.pumpAndSettle();
+      expect(find.text('Altro Giocatore'), findsOneWidget);
+      expect(find.text('Giocatore Storico'), findsOneWidget);
+      await tester.enterText(search, '  storico GIOCATORE ');
+      await tester.pumpAndSettle();
+      expect(find.text('Altro Giocatore'), findsNothing);
+      await tester.tap(find.text('Giocatore Storico'));
+      await tester.pumpAndSettle();
+      expect(find.text('Statistiche giocatore'), findsOneWidget);
+      expect(find.text('1187.25'), findsOneWidget);
+      expect(repository.publicStatsRequests.single.playerRef, 'directory-1');
+      expect(repository.publicStatsRequests.single.position, 0);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('  storico GIOCATORE '), findsOneWidget);
+      expect(find.text('Altro Giocatore'), findsNothing);
     },
   );
 
