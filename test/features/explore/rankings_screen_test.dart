@@ -39,6 +39,8 @@ void main() {
               matchesPlayed: 97,
               wins: 79,
               losses: 18,
+              tiebreaksPlayed: 7,
+              tiebreaksWon: 5,
               setsWon: 29,
               setsLost: 4,
               gamesWon: 177,
@@ -106,7 +108,12 @@ void main() {
       expect(find.text('Set persi  4'), findsOneWidget);
       expect(find.text('Game vinti  177'), findsOneWidget);
       expect(find.text('Game persi  105'), findsOneWidget);
-      expect(find.text('Set e game: 15 partite con dettaglio'), findsOneWidget);
+      expect(find.text('Tie-break giocati  7'), findsOneWidget);
+      expect(find.text('Tie-break vinti  5'), findsOneWidget);
+      expect(
+        find.text('Set, game e tie-break: 15 partite con dettaglio'),
+        findsOneWidget,
+      );
       expect(find.text('80% — Altissimo'), findsOneWidget);
       expect(
         find.text('12 da sfavorito su 15 partite con coefficienti'),

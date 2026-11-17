@@ -631,6 +631,12 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                         'Game persi',
                         player.gamesLost,
                       ),
+                      (
+                        'Tie-break giocati',
+                        player.tiebreaksPlayed,
+                        'Tie-break vinti',
+                        player.tiebreaksWon,
+                      ),
                     ])
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -656,7 +662,7 @@ class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
                       children: [
                         Expanded(
                           child: Text(
-                            'Set e game: ${player.matchesWithScore} partite con dettaglio',
+                            'Set, game e tie-break: ${player.matchesWithScore} partite con dettaglio',
                             style: TextStyle(
                               fontSize: 10,
                               color: context.colors.textSecondary,

@@ -100,6 +100,8 @@ void main() {
                 'matches_played': 97,
                 'wins': 79,
                 'losses': 18,
+                'tiebreaks_played': 7,
+                'tiebreaks_won': 5,
                 'sets_won': 29,
                 'sets_lost': 4,
                 'games_won': 177,
@@ -123,6 +125,8 @@ void main() {
       expect(player.matchesPlayed, 97);
       expect(player.wins, 79);
       expect(player.losses, 18);
+      expect(player.tiebreaksPlayed, 7);
+      expect(player.tiebreaksWon, 5);
       expect(player.setsWon, 29);
       expect(player.setsLost, 4);
       expect(player.gamesWon, 177);
@@ -394,6 +398,8 @@ void main() {
                   'ranking_matches': 18,
                   'friendly_matches': 2,
                   'tournament_matches': 0,
+                  'tiebreaks_played': 8,
+                  'tiebreaks_won': 3,
                   'sets_won': 28,
                   'sets_lost': 19,
                   'games_won': 210,
@@ -461,6 +467,8 @@ void main() {
       expect(stats.matchesPlayed, 20);
       expect(stats.matchesWon, 12);
       expect(stats.matchesLost, 8);
+      expect(stats.tiebreaksPlayed, 8);
+      expect(stats.tiebreaksWon, 3);
       expect(stats.gamesWon, 210);
       expect(stats.underdogMatches, 5);
       expect(stats.favoriteWins, 6);
