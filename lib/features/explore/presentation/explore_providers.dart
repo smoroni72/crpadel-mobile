@@ -31,8 +31,10 @@ final mostPlayedRankingsProvider = FutureProvider<MostPlayedRankingResult>(
   (ref) => ref.read(profileRepositoryProvider).mostPlayedLeaderboard(),
 );
 
-final publicPlayerStatsProvider =
-    FutureProvider.family<ProfileStats, PlayerRanking>(
+// La scheda deve rileggere lo storico a ogni apertura, anche quando lo stesso
+// giocatore viene raggiunto da classifiche con riferimenti diversi.
+final publicPlayerStatsProvider = FutureProvider.autoDispose
+    .family<ProfileStats, PlayerRanking>(
       (ref, player) =>
           ref.read(profileRepositoryProvider).publicStats(player: player),
     );
