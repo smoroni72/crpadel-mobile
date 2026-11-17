@@ -108,6 +108,16 @@ class PublicPlayerStatsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     _ProgressMetric(
+                      label: 'Tie-break',
+                      value: stats.tiebreaksPlayed == 0
+                          ? 0
+                          : (stats.tiebreaksWon * 100 / stats.tiebreaksPlayed)
+                                .round(),
+                      detail:
+                          '${stats.tiebreaksPlayed} giocati · ${stats.tiebreaksWon} vinti',
+                    ),
+                    const SizedBox(height: 16),
+                    _ProgressMetric(
                       label: 'Game vinti',
                       value: stats.gameWinRate,
                       detail:

@@ -880,6 +880,8 @@ class _PlayerPerformance extends ConsumerWidget {
               metrics: [
                 ('Set vinti', '${stats.setsWon}'),
                 ('Set persi', '${stats.setsLost}'),
+                ('Tie-break giocati', '${stats.tiebreaksPlayed}'),
+                ('Tie-break vinti', '${stats.tiebreaksWon}'),
                 ('% set', '${stats.setWinRate}%'),
                 ('Differenza game', '${stats.gamesWon - stats.gamesLost}'),
               ],

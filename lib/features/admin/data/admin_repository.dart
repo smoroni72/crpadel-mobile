@@ -258,6 +258,8 @@ class AdminPlayerStatistics {
     required this.setsLost,
     required this.gamesWon,
     required this.gamesLost,
+    this.tiebreaksPlayed = 0,
+    this.tiebreaksWon = 0,
     required this.underdogMatches,
     required this.underdogWins,
     required this.favoriteMatches,
@@ -279,6 +281,8 @@ class AdminPlayerStatistics {
   final int setsLost;
   final int gamesWon;
   final int gamesLost;
+  final int tiebreaksPlayed;
+  final int tiebreaksWon;
   final int underdogMatches;
   final int underdogWins;
   final int favoriteMatches;
@@ -307,6 +311,8 @@ class AdminPlayerStatistics {
       setsLost: _intValue(totals['sets_lost']),
       gamesWon: _intValue(totals['games_won']),
       gamesLost: _intValue(totals['games_lost']),
+      tiebreaksPlayed: _intValue(totals['tiebreaks_played']),
+      tiebreaksWon: _intValue(totals['tiebreaks_won']),
       underdogMatches: _intValue(totals['underdog_matches']),
       underdogWins: _intValue(totals['underdog_wins']),
       favoriteMatches: _intValue(totals['favorite_matches']),

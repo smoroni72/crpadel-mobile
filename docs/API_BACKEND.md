@@ -119,3 +119,14 @@ chiusura precedente. `frozen_at` indica la data effettiva della fotografia.
 `minimum_matches` descrive la soglia della fotografia restituita.
 Se manca la fotografia richiesta, `snapshot_available: false` e `data: []`:
 non mostrare come chiusura i valori dell'inizio del periodo.
+
+## Tie-break — 17 novembre 2026
+
+`GET /rankings/most-played` e `GET /players/:id/statistics` (riepiloghi
+`totals` e `period`) includono `tiebreaks_played` e `tiebreaks_won`.
+Si contano i set conclusi 7-6/6-7 e i tie-break decisivi marcati TB, anche
+nello storico importato. Un TB iniziato e incompleto conta come giocato,
+senza vittoria; 0-0 è escluso. Il dato conta i tie-break, non le partite.
+I client precedenti restano compatibili; se i nuovi campi sono assenti
+l'app usa zero. Le schede in classifica, il profilo personale e il dettaglio
+giocatore mostrano i due contatori. Nessuna modifica ai punti ranking.

@@ -149,6 +149,8 @@ class MostPlayedPlayer {
     this.playerRef,
     this.ranking,
     this.difficultyLevel,
+    this.tiebreaksPlayed = 0,
+    this.tiebreaksWon = 0,
     this.underdogMatches = 0,
     this.underdogWins = 0,
     this.underdogMatchPercentage,
@@ -168,6 +170,7 @@ class MostPlayedPlayer {
   final String? playerRef;
   final PlayerRanking? ranking;
   final String? difficultyLevel;
+  final int tiebreaksPlayed, tiebreaksWon;
   final int underdogMatches, underdogWins, matchesWithCoefficients;
   final double? underdogMatchPercentage;
 
@@ -189,6 +192,8 @@ class MostPlayedPlayer {
         gamesLost: (json['games_lost'] as num).toInt(),
         matchesWithScore: (json['matches_with_score'] as num).toInt(),
         difficultyLevel: json['difficulty_level'] as String?,
+        tiebreaksPlayed: (json['tiebreaks_played'] as num?)?.toInt() ?? 0,
+        tiebreaksWon: (json['tiebreaks_won'] as num?)?.toInt() ?? 0,
         underdogMatches: (json['underdog_matches'] as num?)?.toInt() ?? 0,
         underdogWins: (json['underdog_wins'] as num?)?.toInt() ?? 0,
         underdogMatchPercentage: (json['underdog_match_percentage'] as num?)
@@ -281,6 +286,8 @@ class ProfileStats {
     this.setsLost = 0,
     this.gamesWon = 0,
     this.gamesLost = 0,
+    this.tiebreaksPlayed = 0,
+    this.tiebreaksWon = 0,
     this.underdogMatches = 0,
     this.underdogWins = 0,
     this.favoriteMatches = 0,
@@ -319,6 +326,8 @@ class ProfileStats {
   final int setsLost;
   final int gamesWon;
   final int gamesLost;
+  final int tiebreaksPlayed;
+  final int tiebreaksWon;
   final int underdogMatches;
   final int underdogWins;
   final int favoriteMatches;

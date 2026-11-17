@@ -113,6 +113,11 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
                     Icons.bar_chart,
                   ),
                   _Metric(
+                    'Tie-break giocati / vinti',
+                    '${data.tiebreaksPlayed} / ${data.tiebreaksWon}',
+                    Icons.sports_tennis,
+                  ),
+                  _Metric(
                     'Da sfavorito',
                     '${data.underdogMatches} · ${data.underdogWins} V',
                     Icons.south_east,

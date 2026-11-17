@@ -316,9 +316,7 @@ void main() {
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'nuova@example.com');
     await tester.enterText(fields.at(1), 'password');
-    await tester.tap(
-      find.widgetWithText(ElevatedButton, 'Invia link di verifica'),
-    );
+    await tester.tap(find.text('Invia link di verifica'));
     await tester.pumpAndSettle();
 
     expect(
