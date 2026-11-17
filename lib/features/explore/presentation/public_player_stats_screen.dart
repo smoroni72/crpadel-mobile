@@ -12,12 +12,40 @@ import '../../profile/domain/profile_models.dart';
 import '../../profile/presentation/widgets/player_avatar.dart';
 import 'explore_providers.dart';
 
-class PublicPlayerStatsScreen extends ConsumerWidget {
+class PublicPlayerStatsScreen extends ConsumerStatefulWidget {
   const PublicPlayerStatsScreen({super.key, required this.player});
   final PlayerRanking player;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PublicPlayerStatsScreen> createState() =>
+      _PublicPlayerStatsScreenState();
+}
+
+class _PublicPlayerStatsScreenState
+    extends ConsumerState<PublicPlayerStatsScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(publicPlayerStatsProvider(widget.player));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final player = widget.player;
     final showRankingDetails =
         ref.watch(authControllerProvider).value?.isAdmin ?? false;
     return Scaffold(
