@@ -290,6 +290,10 @@ class ProfileStats {
     this.tiebreaksWon = 0,
     this.underdogMatches = 0,
     this.underdogWins = 0,
+    this.equalMatches = 0,
+    this.equalWins = 0,
+    this.unfinishedRankingMatches = 0,
+    this.rankingMatchesWithoutCoefficients = 0,
     this.favoriteMatches = 0,
     this.favoriteWins = 0,
     this.rankingPointsEarned = 0,
@@ -334,6 +338,10 @@ class ProfileStats {
   final int tiebreaksWon;
   final int underdogMatches;
   final int underdogWins;
+  final int equalMatches;
+  final int equalWins;
+  final int unfinishedRankingMatches;
+  final int rankingMatchesWithoutCoefficients;
   final int favoriteMatches;
   final int favoriteWins;
   final double rankingPointsEarned;

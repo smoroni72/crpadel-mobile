@@ -262,6 +262,9 @@ class AdminPlayerStatistics {
     this.tiebreaksWon = 0,
     required this.underdogMatches,
     required this.underdogWins,
+    this.equalMatches = 0,
+    this.equalWins = 0,
+    this.unfinishedRankingMatches = 0,
     required this.favoriteMatches,
     required this.favoriteWins,
     required this.rankingPoints,
@@ -285,6 +288,9 @@ class AdminPlayerStatistics {
   final int tiebreaksWon;
   final int underdogMatches;
   final int underdogWins;
+  final int equalMatches;
+  final int equalWins;
+  final int unfinishedRankingMatches;
   final int favoriteMatches;
   final int favoriteWins;
   final double rankingPoints;
@@ -317,6 +323,9 @@ class AdminPlayerStatistics {
       tiebreaksWon: _intValue(totals['tiebreaks_won']),
       underdogMatches: _intValue(totals['underdog_matches']),
       underdogWins: _intValue(totals['underdog_wins']),
+      equalMatches: _intValue(totals['equal_matches']),
+      equalWins: _intValue(totals['equal_wins']),
+      unfinishedRankingMatches: _intValue(totals['unfinished_ranking_matches']),
       favoriteMatches: _intValue(totals['favorite_matches']),
       favoriteWins: _intValue(totals['favorite_wins']),
       rankingPoints: _doubleValue(totals['ranking_points_earned']),

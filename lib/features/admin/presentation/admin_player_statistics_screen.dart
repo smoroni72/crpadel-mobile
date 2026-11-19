@@ -134,6 +134,16 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
                     Icons.north_east,
                   ),
                   _Metric(
+                    'A parità',
+                    '${data.equalMatches} · ${data.equalWins} V',
+                    Icons.balance,
+                  ),
+                  _Metric(
+                    'Ranking non terminate',
+                    '${data.unfinishedRankingMatches}',
+                    Icons.pause_circle_outline,
+                  ),
+                  _Metric(
                     'Punti reali',
                     data.rankingPoints.toStringAsFixed(2),
                     Icons.add_chart,
