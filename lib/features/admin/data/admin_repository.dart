@@ -294,7 +294,9 @@ class AdminPlayerStatistics {
   final List<AdminPlayerMatchStatistic> matches;
 
   int get winRate =>
-      matchesPlayed == 0 ? 0 : (wins * 100 / matchesPlayed).round();
+      wins + losses == 0 ? 0 : (wins * 100 / (wins + losses)).round();
+  int get undecided =>
+      matchesPlayed > wins + losses ? matchesPlayed - wins - losses : 0;
   int get matchesCount => matchesPlayed;
   List<AdminPlayerMatchStatistic> get history => matches;
 

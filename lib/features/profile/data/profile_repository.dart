@@ -224,7 +224,12 @@ class ApiProfileRepository implements ProfileRepository {
           own?.matchesPlayed ??
           0,
       matchesWon: (totals['wins'] as num?)?.toInt() ?? own?.matchesWon ?? 0,
-      matchesLost: (totals['losses'] as num?)?.toInt() ?? 0,
+      matchesLost:
+          (totals['losses'] as num?)?.toInt() ??
+          ((own?.matchesPlayed ?? 0) - (own?.matchesWon ?? 0)).clamp(
+            0,
+            1 << 30,
+          ),
       undecided: (totals['undecided'] as num?)?.toInt() ?? 0,
       rankingMatches: (totals['ranking_matches'] as num?)?.toInt() ?? 0,
       friendlyMatches: (totals['friendly_matches'] as num?)?.toInt() ?? 0,
@@ -323,7 +328,9 @@ class ApiProfileRepository implements ProfileRepository {
       matchesPlayed:
           (totals['matches_played'] as num?)?.toInt() ?? player.matchesPlayed,
       matchesWon: (totals['wins'] as num?)?.toInt() ?? player.matchesWon,
-      matchesLost: (totals['losses'] as num?)?.toInt() ?? 0,
+      matchesLost:
+          (totals['losses'] as num?)?.toInt() ??
+          (player.matchesPlayed - player.matchesWon).clamp(0, 1 << 30),
       undecided: (totals['undecided'] as num?)?.toInt() ?? 0,
       rankingMatches: (totals['ranking_matches'] as num?)?.toInt() ?? 0,
       friendlyMatches: (totals['friendly_matches'] as num?)?.toInt() ?? 0,

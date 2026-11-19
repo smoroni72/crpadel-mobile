@@ -92,6 +92,18 @@ class _PublicPlayerStatsScreenState
                       label: 'Win rate',
                       value: '${stats.winRate}%',
                     ),
+                    if (stats.undecided > 0) ...[
+                      _Metric(
+                        icon: Icons.timelapse_rounded,
+                        label: 'Non terminate',
+                        value: '${stats.undecided}',
+                      ),
+                      _Metric(
+                        icon: Icons.check_circle_outline,
+                        label: 'Con esito',
+                        value: '${stats.decidedMatches}',
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -496,7 +508,7 @@ class _PlayerHero extends StatelessWidget {
               _HeroValue(label: 'WIN RATE', value: '${stats.winRate}%'),
             ],
           ),
-          if (player.recentForm.isNotEmpty) ...[
+          if (stats.recentHistory.isNotEmpty) ...[
             const SizedBox(height: 18),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -514,8 +526,8 @@ class _PlayerHero extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    for (final result in player.recentForm.take(5))
-                      _FormDot(result: result),
+                    for (final match in stats.recentHistory)
+                      _FormDot(result: match.won ? 'V' : 'S'),
                   ],
                 ),
               ],

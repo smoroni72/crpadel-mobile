@@ -127,4 +127,65 @@ void main() {
     expect(repository.publicStatsRequests.length, 2);
     expect(tester.takeException(), isNull);
   });
+  testWidgets(
+    'recent form and incomplete-result totals use the fetched history, not the stale ranking card',
+    (tester) async {
+      final stats = ProfileStats(
+        matchesPlayed: 26,
+        matchesWon: 19,
+        matchesLost: 6,
+        undecided: 1,
+        recentMatches: 5,
+        recentWins: 4,
+        recentHistory: List.generate(
+          5,
+          (i) => RecentPlayerMatch(
+            id: 'match-$i',
+            date: '2026-11-${12 - i}',
+            timeSlot: '13:30-15:00',
+            courtName: 'Campo 3',
+            score: '6-3 6-3',
+            resultLabel: i == 3 ? 'Sconfitta' : 'Vittoria',
+            won: i != 3,
+            teamMates: const [],
+            opponents: const [],
+            rankingScoreDelta: null,
+          ),
+        ),
+      );
+      final repository = FakeProfileRepository(profileStats: stats);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const PublicPlayerStatsScreen(
+              player: PlayerRanking(
+                playerRef: 'fabio',
+                playerName: 'DI COSTANTINI FABIO',
+                position: 3,
+                eloScore: 1178.04,
+                rankingBandName: 'Arancio',
+                rankingBandColor: '#f2a807',
+                recentForm: ['V', 'V'],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('FORMA RECENTE · ULTIME 5'), findsOneWidget);
+      expect(find.text('V'), findsNWidgets(4));
+      expect(find.text('S'), findsOneWidget);
+      expect(find.text('76%'), findsWidgets);
+      await tester.scrollUntilVisible(
+        find.text('Non terminate'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Non terminate'), findsOneWidget);
+      expect(find.text('Con esito'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

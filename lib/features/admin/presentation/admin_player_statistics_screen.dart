@@ -87,6 +87,12 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
                     '${data.winRate}%',
                     Icons.trending_up,
                   ),
+                  if (data.undecided > 0)
+                    _Metric(
+                      'Non terminate',
+                      '${data.undecided}',
+                      Icons.timelapse_rounded,
+                    ),
                   _Metric(
                     'Ranking',
                     '${data.rankingMatches}',

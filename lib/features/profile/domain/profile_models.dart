@@ -350,12 +350,13 @@ class ProfileStats {
   final String? photoStorageId;
   final bool photoPublicConsent;
 
-  /// Percentuale di vittorie arrotondata, come sul sito.
+  /// Le partite senza esito non assegnano vittorie o sconfitte.
+  int get decidedMatches => matchesWon + matchesLost;
   int get winRate =>
-      matchesPlayed == 0 ? 0 : (matchesWon * 100 / matchesPlayed).round();
+      decidedMatches == 0 ? 0 : (matchesWon * 100 / decidedMatches).round();
 
   int get lossRate =>
-      matchesPlayed == 0 ? 0 : (matchesLost * 100 / matchesPlayed).round();
+      decidedMatches == 0 ? 0 : (matchesLost * 100 / decidedMatches).round();
 
   int get setWinRate => setsWon + setsLost == 0
       ? 0
