@@ -302,6 +302,10 @@ class ProfileStats {
     this.recentHistory = const [],
     this.currentStreakType,
     this.currentStreakCount = 0,
+    this.partnersCount = 0,
+    this.opponentsCount = 0,
+    this.pairingsMatches = 0,
+    this.mostFrequentPartners = const [],
     this.bestPartner,
     this.mostFacedOpponent,
     this.badges = const [],
@@ -342,6 +346,10 @@ class ProfileStats {
   final List<RecentPlayerMatch> recentHistory;
   final String? currentStreakType;
   final int currentStreakCount;
+  final int partnersCount;
+  final int opponentsCount;
+  final int pairingsMatches;
+  final List<PlayerHighlightPerson> mostFrequentPartners;
   final PlayerHighlightPerson? bestPartner;
   final PlayerHighlightPerson? mostFacedOpponent;
   final List<String> badges;

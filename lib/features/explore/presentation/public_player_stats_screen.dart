@@ -10,6 +10,7 @@ import '../../../core/widgets/async_value_view.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../profile/domain/profile_models.dart';
 import '../../profile/presentation/widgets/player_avatar.dart';
+import '../../profile/presentation/widgets/player_pairings_table.dart';
 import 'explore_providers.dart';
 
 class PublicPlayerStatsScreen extends ConsumerStatefulWidget {
@@ -118,12 +119,14 @@ class _PublicPlayerStatsScreenState
                     ? const _EmptyState(label: 'Nessun risultato disponibile')
                     : _TrendChart(matches: stats.recentHistory),
               ),
+              const SizedBox(height: 16),
+              PlayerPairingsTable(stats: stats),
               if (_hasHighlights(stats)) ...[
                 const SizedBox(height: 16),
                 _Section(
                   icon: Icons.auto_awesome_rounded,
                   title: 'Identità sportiva',
-                  subtitle: 'Serie, intese e sfide della stagione',
+                  subtitle: 'Serie e riconoscimenti del periodo',
                   child: _PlayerHighlights(stats: stats),
                 ),
               ],
@@ -257,10 +260,7 @@ String _signed(double value) =>
     '${value > 0 ? '+' : ''}${value.toStringAsFixed(2).replaceAll('.', ',')}';
 
 bool _hasHighlights(ProfileStats stats) =>
-    stats.currentStreakCount > 0 ||
-    stats.bestPartner != null ||
-    stats.mostFacedOpponent != null ||
-    stats.badges.isNotEmpty;
+    stats.currentStreakCount > 0 || stats.badges.isNotEmpty;
 
 class _PlayerHighlights extends StatelessWidget {
   const _PlayerHighlights({required this.stats});
@@ -316,22 +316,6 @@ class _PlayerHighlights extends StatelessWidget {
               detail: stats.currentStreakType == 'win'
                   ? 'Momento positivo'
                   : 'Pronto a ripartire',
-            ),
-          if (stats.bestPartner != null)
-            _HighlightCard(
-              icon: Icons.handshake_outlined,
-              title: 'Miglior compagno',
-              value: stats.bestPartner!.name,
-              detail:
-                  '${stats.bestPartner!.matches} partite · ${stats.bestPartner!.winRate.toStringAsFixed(0)}% vittorie',
-            ),
-          if (stats.mostFacedOpponent != null)
-            _HighlightCard(
-              icon: Icons.sports_martial_arts_outlined,
-              title: 'Avversario più affrontato',
-              value: stats.mostFacedOpponent!.name,
-              detail:
-                  '${stats.mostFacedOpponent!.matches} sfide · ${stats.mostFacedOpponent!.wins} V / ${stats.mostFacedOpponent!.losses} S',
             ),
         ],
       ),

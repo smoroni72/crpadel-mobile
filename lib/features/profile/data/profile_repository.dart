@@ -256,6 +256,14 @@ class ApiProfileRepository implements ProfileRepository {
       recentHistory: recentHistory,
       currentStreakType: streak['type'] as String?,
       currentStreakCount: (streak['count'] as num?)?.toInt() ?? 0,
+      partnersCount: (highlights['partners_count'] as num?)?.toInt() ?? 0,
+      opponentsCount: (highlights['opponents_count'] as num?)?.toInt() ?? 0,
+      pairingsMatches: (highlights['pairings_matches'] as num?)?.toInt() ?? 0,
+      mostFrequentPartners:
+          (highlights['most_frequent_partners'] as List<dynamic>? ?? const [])
+              .map(_highlightPerson)
+              .whereType<PlayerHighlightPerson>()
+              .toList(growable: false),
       bestPartner: _highlightPerson(highlights['best_partner']),
       mostFacedOpponent: _highlightPerson(highlights['most_faced_opponent']),
       badges: (highlights['badges'] as List<dynamic>? ?? const [])
@@ -357,6 +365,14 @@ class ApiProfileRepository implements ProfileRepository {
       recentHistory: recentHistory,
       currentStreakType: streak['type'] as String?,
       currentStreakCount: (streak['count'] as num?)?.toInt() ?? 0,
+      partnersCount: (highlights['partners_count'] as num?)?.toInt() ?? 0,
+      opponentsCount: (highlights['opponents_count'] as num?)?.toInt() ?? 0,
+      pairingsMatches: (highlights['pairings_matches'] as num?)?.toInt() ?? 0,
+      mostFrequentPartners:
+          (highlights['most_frequent_partners'] as List<dynamic>? ?? const [])
+              .map(_highlightPerson)
+              .whereType<PlayerHighlightPerson>()
+              .toList(growable: false),
       bestPartner: _highlightPerson(highlights['best_partner']),
       mostFacedOpponent: _highlightPerson(highlights['most_faced_opponent']),
       badges: (highlights['badges'] as List<dynamic>? ?? const [])

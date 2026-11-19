@@ -275,7 +275,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Statistiche giocatore'), findsOneWidget);
     expect(find.text('Rendimento'), findsOneWidget);
-    await tester.drag(find.byType(ListView).last, const Offset(0, -1300));
+    await tester.scrollUntilVisible(
+      find.text('Analisi ranking'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.text('Analisi ranking'), findsOneWidget);
     expect(find.textContaining('Punti classifica'), findsNothing);
