@@ -30,6 +30,7 @@ import 'delete_account.dart';
 import 'profile_labels.dart';
 import 'profile_providers.dart';
 import 'widgets/player_mood_avatar.dart';
+import 'widgets/player_pairings_table.dart';
 import 'widgets/player_avatar.dart';
 
 /// Profilo uguale a quello del sito: card, 4 riquadri, schede, Esci ed
@@ -819,6 +820,8 @@ class _PlayerPerformance extends ConsumerWidget {
               _PersonalTrendChart(matches: stats.recentHistory),
               const SizedBox(height: 18),
             ],
+            PlayerPairingsTable(stats: stats),
+            const SizedBox(height: 18),
             if (_hasPersonalHighlights(stats)) ...[
               _PersonalHighlights(stats: stats),
               const SizedBox(height: 18),
@@ -998,10 +1001,7 @@ String _signedProfileScore(double value) =>
     '${value > 0 ? '+' : ''}${value.toStringAsFixed(2).replaceAll('.', ',')}';
 
 bool _hasPersonalHighlights(ProfileStats stats) =>
-    stats.currentStreakCount > 0 ||
-    stats.bestPartner != null ||
-    stats.mostFacedOpponent != null ||
-    stats.badges.isNotEmpty;
+    stats.currentStreakCount > 0 || stats.badges.isNotEmpty;
 
 class _PersonalHighlights extends StatelessWidget {
   const _PersonalHighlights({required this.stats});
@@ -1054,24 +1054,6 @@ class _PersonalHighlights extends StatelessWidget {
             title: 'Serie attuale',
             value:
                 '${stats.currentStreakCount} ${stats.currentStreakType == 'win' ? 'vittorie' : 'sconfitte'}',
-          ),
-        ],
-        if (stats.bestPartner != null) ...[
-          const SizedBox(height: 8),
-          _PersonalHighlightTile(
-            icon: Icons.handshake_outlined,
-            title: 'Miglior compagno',
-            value:
-                '${stats.bestPartner!.name} · ${stats.bestPartner!.matches} partite · ${stats.bestPartner!.winRate.toStringAsFixed(0)}%',
-          ),
-        ],
-        if (stats.mostFacedOpponent != null) ...[
-          const SizedBox(height: 8),
-          _PersonalHighlightTile(
-            icon: Icons.sports_martial_arts_outlined,
-            title: 'Avversario più affrontato',
-            value:
-                '${stats.mostFacedOpponent!.name} · ${stats.mostFacedOpponent!.matches} sfide',
           ),
         ],
       ],
