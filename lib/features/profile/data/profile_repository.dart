@@ -242,6 +242,13 @@ class ApiProfileRepository implements ProfileRepository {
       tiebreaksWon: (totals['tiebreaks_won'] as num?)?.toInt() ?? 0,
       underdogMatches: (totals['underdog_matches'] as num?)?.toInt() ?? 0,
       underdogWins: (totals['underdog_wins'] as num?)?.toInt() ?? 0,
+      equalMatches: (totals['equal_matches'] as num?)?.toInt() ?? 0,
+      equalWins: (totals['equal_wins'] as num?)?.toInt() ?? 0,
+      unfinishedRankingMatches:
+          (totals['unfinished_ranking_matches'] as num?)?.toInt() ?? 0,
+      rankingMatchesWithoutCoefficients:
+          (totals['ranking_matches_without_coefficients'] as num?)?.toInt() ??
+          0,
       favoriteMatches: (totals['favorite_matches'] as num?)?.toInt() ?? 0,
       favoriteWins: (totals['favorite_wins'] as num?)?.toInt() ?? 0,
       rankingPointsEarned: _double(totals['ranking_points_earned']),
@@ -351,6 +358,13 @@ class ApiProfileRepository implements ProfileRepository {
       tiebreaksWon: (totals['tiebreaks_won'] as num?)?.toInt() ?? 0,
       underdogMatches: (totals['underdog_matches'] as num?)?.toInt() ?? 0,
       underdogWins: (totals['underdog_wins'] as num?)?.toInt() ?? 0,
+      equalMatches: (totals['equal_matches'] as num?)?.toInt() ?? 0,
+      equalWins: (totals['equal_wins'] as num?)?.toInt() ?? 0,
+      unfinishedRankingMatches:
+          (totals['unfinished_ranking_matches'] as num?)?.toInt() ?? 0,
+      rankingMatchesWithoutCoefficients:
+          (totals['ranking_matches_without_coefficients'] as num?)?.toInt() ??
+          0,
       favoriteMatches: (totals['favorite_matches'] as num?)?.toInt() ?? 0,
       favoriteWins: (totals['favorite_wins'] as num?)?.toInt() ?? 0,
       rankingPointsEarned: _double(totals['ranking_points_earned']),

@@ -174,7 +174,7 @@ class _PublicPlayerStatsScreenState
                 icon: Icons.workspace_premium_outlined,
                 title: 'Analisi ranking',
                 child: _MetricsGrid(
-                  ratio: 1.3,
+                  ratio: 1.2,
                   children: [
                     _Metric(
                       icon: Icons.arrow_downward_rounded,
@@ -187,6 +187,18 @@ class _PublicPlayerStatsScreenState
                       label: 'Da favorito',
                       value: '${stats.favoriteMatches}',
                       detail: '${stats.favoriteWins} vittorie',
+                    ),
+                    _Metric(
+                      icon: Icons.balance_rounded,
+                      label: 'A parità',
+                      value: '${stats.equalMatches}',
+                      detail: '${stats.equalWins} vittorie',
+                    ),
+                    _Metric(
+                      icon: Icons.pause_circle_outline_rounded,
+                      label: 'Non terminate',
+                      value: '${stats.unfinishedRankingMatches}',
+                      detail: 'Senza esito',
                     ),
                     if (showRankingDetails) ...[
                       _Metric(
@@ -211,6 +223,16 @@ class _PublicPlayerStatsScreenState
                 ),
               ),
               const SizedBox(height: 16),
+              if (stats.rankingMatchesWithoutCoefficients > 0) ...[
+                Text(
+                  '${stats.rankingMatchesWithoutCoefficients} partite Ranking senza coefficienti: escluse da favorito, sfavorito e parità.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               _Section(
                 icon: Icons.history_rounded,
                 title: stats.recentHistory.isEmpty

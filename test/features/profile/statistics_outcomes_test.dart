@@ -1,3 +1,5 @@
+import 'package:crpadel_mobile/features/profile/data/profile_repository.dart';
+import '../../helpers/fake_http.dart';
 import 'package:crpadel_mobile/features/profile/domain/profile_models.dart';
 import 'package:crpadel_mobile/features/admin/data/admin_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,6 +37,40 @@ void main() {
         },
       });
       expect(admin.winRate, current.winRate);
+    },
+  );
+  test(
+    'ranking analysis parses equal coefficients and unfinished categories without inference',
+    () async {
+      final totals = {
+        'equal_matches': 4,
+        'equal_wins': 3,
+        'unfinished_ranking_matches': 1,
+        'ranking_matches_without_coefficients': 3,
+      };
+      final repository = ApiProfileRepository(
+        fakeApiClient(
+          FakeAdapter(
+            (_) => (
+              200,
+              {
+                'data': {'period': totals},
+              },
+            ),
+          ),
+        ),
+      );
+      final stats = await repository.publicStats(
+        player: const PlayerRanking(playerRef: 'fabio', playerName: 'Fabio'),
+      );
+      expect(stats.equalMatches, 4);
+      expect(stats.equalWins, 3);
+      expect(stats.unfinishedRankingMatches, 1);
+      expect(stats.rankingMatchesWithoutCoefficients, 3);
+      final admin = AdminPlayerStatistics.fromJson({'totals': totals});
+      expect(admin.equalMatches, 4);
+      expect(admin.equalWins, 3);
+      expect(admin.unfinishedRankingMatches, 1);
     },
   );
 }

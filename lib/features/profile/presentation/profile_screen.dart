@@ -906,6 +906,19 @@ class _PlayerPerformance extends ConsumerWidget {
                       'Vittorie: ${stats.favoriteWins}',
                 ),
                 (
+                  'A parità',
+                  'Partite: ${stats.equalMatches}\nVittorie: ${stats.equalWins}',
+                ),
+                (
+                  'Non terminate',
+                  '${stats.unfinishedRankingMatches} · senza esito',
+                ),
+                if (stats.rankingMatchesWithoutCoefficients > 0)
+                  (
+                    'Senza coefficienti',
+                    '${stats.rankingMatchesWithoutCoefficients} · fuori dal confronto',
+                  ),
+                (
                   'PR conquistati',
                   intl.NumberFormat(
                     '0.0#',

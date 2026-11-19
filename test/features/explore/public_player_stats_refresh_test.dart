@@ -188,4 +188,80 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets(
+    'ranking analysis displays four categories and explains missing coefficients',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 844));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      const stats = ProfileStats(
+        bandName: 'Arancio',
+        underdogMatches: 1,
+        favoriteMatches: 17,
+        equalMatches: 4,
+        equalWins: 3,
+        unfinishedRankingMatches: 1,
+        rankingMatchesWithoutCoefficients: 3,
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            profileRepositoryProvider.overrideWithValue(
+              FakeProfileRepository(profileStats: stats),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const PublicPlayerStatsScreen(
+              player: PlayerRanking(playerRef: 'fabio', playerName: 'Fabio'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Analisi ranking'),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final section = find
+          .ancestor(
+            of: find.text('Analisi ranking'),
+            matching: find.byType(Container),
+          )
+          .first;
+      for (final label in [
+        'Da sfavorito',
+        'Da favorito',
+        'A parità',
+        'Non terminate',
+      ]) {
+        expect(
+          find.descendant(of: section, matching: find.text(label)),
+          findsOneWidget,
+        );
+      }
+      expect(
+        find.descendant(of: section, matching: find.text('4')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: section, matching: find.text('3 vittorie')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: section, matching: find.text('Senza esito')),
+        findsOneWidget,
+      );
+      await tester.scrollUntilVisible(
+        find.textContaining('3 partite Ranking senza coefficienti'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(
+        find.textContaining('3 partite Ranking senza coefficienti'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
