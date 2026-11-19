@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +9,7 @@ import '../../../core/widgets/async_value_view.dart';
 import '../../profile/domain/profile_models.dart';
 import '../../profile/presentation/widgets/player_avatar.dart';
 import 'explore_providers.dart';
+import 'public_player_stats_screen.dart';
 
 class RankingsScreen extends ConsumerStatefulWidget {
   const RankingsScreen({super.key});
@@ -15,13 +18,32 @@ class RankingsScreen extends ConsumerStatefulWidget {
   ConsumerState<RankingsScreen> createState() => _RankingsScreenState();
 }
 
-enum _RankingView { general, monthly, decades }
+({String emoji, String name}) _challengeAnimal(String? level) =>
+    switch (level) {
+      'Altissimo' => (emoji: '🦁', name: 'Leone'),
+      'Alto' => (emoji: '🐺', name: 'Lupo'),
+      'Basso' => (emoji: '🦊', name: 'Volpe'),
+      'Bassissimo' => (emoji: '🐰', name: 'Coniglio'),
+      _ => (emoji: '', name: ''),
+    };
+
+enum _RankingView { general, monthly, decades, mostPlayed }
+
+void _openPlayerStats(BuildContext context, PlayerRanking player) {
+  if (player.playerRef == null || player.playerRef!.isEmpty) return;
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => PublicPlayerStatsScreen(player: player),
+    ),
+  );
+}
 
 class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   late DateTime _month;
   _RankingView _view = _RankingView.general;
   bool _onlyEligible = false;
   String? _decadeStart;
+  Timer? _summaryRefresh;
 
   @override
   void initState() {
@@ -30,11 +52,24 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
     // Il giocatore del mese si apre sull'ultimo mese concluso. In questo modo
     // nei primi giorni del mese non viene mostrata una classifica ancora vuota.
     _month = DateTime(now.year, now.month - 1);
+    _summaryRefresh = Timer.periodic(const Duration(minutes: 1), (_) {
+      ref.invalidate(rankingMatchSummaryProvider);
+      if (_view == _RankingView.mostPlayed) {
+        ref.invalidate(mostPlayedRankingsProvider);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _summaryRefresh?.cancel();
+    super.dispose();
   }
 
   String get _monthKey => DateFormat('yyyy-MM').format(_month);
 
   Future<void> _refresh() async {
+    ref.invalidate(rankingMatchSummaryProvider);
     switch (_view) {
       case _RankingView.general:
         final _ = await ref.refresh(fullRankingsProvider.future);
@@ -44,6 +79,8 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
         final _ = await ref.refresh(
           decadeRankingsProvider(_decadeStart).future,
         );
+      case _RankingView.mostPlayed:
+        final _ = await ref.refresh(mostPlayedRankingsProvider.future);
     }
   }
 
@@ -166,7 +203,10 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         children: [
+          const _PlayedMatchesTotal(),
+          const SizedBox(height: 16),
           SegmentedButton<_RankingView>(
+            emptySelectionAllowed: true,
             showSelectedIcon: false,
             segments: const [
               ButtonSegment(
@@ -185,9 +225,25 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                 label: Text('Decadi'),
               ),
             ],
-            selected: {_view},
-            onSelectionChanged: (selection) =>
-                setState(() => _view = selection.single),
+            selected: _view == _RankingView.mostPlayed ? {} : {_view},
+            onSelectionChanged: (selection) => selection.isEmpty
+                ? null
+                : setState(() => _view = selection.single),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => setState(() => _view = _RankingView.mostPlayed),
+            icon: const Icon(Icons.emoji_events_outlined),
+            label: const Text('Chi ha giocato di più'),
+            style: _view == _RankingView.mostPlayed
+                ? OutlinedButton.styleFrom(
+                    backgroundColor: context.colors.primary.withValues(
+                      alpha: .1,
+                    ),
+                    foregroundColor: context.colors.primaryText,
+                    side: BorderSide(color: context.colors.primary),
+                  )
+                : null,
           ),
           const SizedBox(height: 20),
           if (_view == _RankingView.general) ...[
@@ -244,6 +300,13 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                 onlyEligible: _onlyEligible,
               ),
             ),
+          ] else if (_view == _RankingView.mostPlayed) ...[
+            AsyncValueView(
+              value: ref.watch(mostPlayedRankingsProvider),
+              errorText: 'Non riesco a caricare le presenze Ranking',
+              onRetry: () => ref.invalidate(mostPlayedRankingsProvider),
+              data: (result) => _MostPlayedSection(result: result),
+            ),
           ] else ...[
             AsyncValueView(
               value: ref.watch(decadeRankingsProvider(_decadeStart)),
@@ -260,6 +323,449 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
       ),
     ),
   );
+}
+
+class _MostPlayedSection extends ConsumerStatefulWidget {
+  const _MostPlayedSection({required this.result});
+  final MostPlayedRankingResult result;
+
+  @override
+  ConsumerState<_MostPlayedSection> createState() => _MostPlayedSectionState();
+}
+
+class _MostPlayedSectionState extends ConsumerState<_MostPlayedSection> {
+  final _search = TextEditingController();
+  String _query = '';
+  MostPlayedSort _order = MostPlayedSort.matchesPlayed;
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _openPlayer(MostPlayedPlayer player) {
+    final reference = player.playerRef;
+    if (reference == null || reference.isEmpty) return;
+    PlayerRanking? general;
+    for (final candidate
+        in ref.read(fullRankingsProvider).asData?.value ?? <PlayerRanking>[]) {
+      if (candidate.playerRef == (player.ranking?.playerRef ?? reference)) {
+        general = candidate;
+        break;
+      }
+    }
+    final selected =
+        (general ?? player.ranking ?? PlayerRanking(playerName: player.name))
+            .copyWith(
+              playerRef: reference,
+              playerName: player.name,
+              playerPhotoUrl: player.photoUrl,
+              matchesPlayed: player.matchesPlayed,
+              matchesWon: player.wins,
+            );
+    _openPlayerStats(context, selected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final terms = _query
+        .trim()
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((term) => term.isNotEmpty);
+    final ordered = sortMostPlayedPlayers(widget.result.players, _order);
+    final positions = {
+      for (var i = 0; i < ordered.length; i++)
+        ordered[i]: _order == MostPlayedSort.matchesPlayed
+            ? ordered[i].position
+            : i + 1,
+    };
+    final players = ordered
+        .where(
+          (player) =>
+              terms.every((term) => player.name.toLowerCase().contains(term)),
+        )
+        .toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Classifica presenze Ranking',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          key: const ValueKey('attendance-player-search'),
+          controller: _search,
+          autocorrect: false,
+          textInputAction: TextInputAction.search,
+          onChanged: (value) => setState(() => _query = value),
+          onSubmitted: (_) => FocusScope.of(context).unfocus(),
+          decoration: InputDecoration(
+            labelText: 'Cerca un giocatore',
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _query.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: 'Cancella ricerca',
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      _search.clear();
+                      setState(() => _query = '');
+                    },
+                  ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<MostPlayedSort>(
+          key: const ValueKey('attendance-sort'),
+          initialValue: _order,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            labelText: 'Ordina per',
+            prefixIcon: Icon(Icons.sort),
+          ),
+          items: const [
+            DropdownMenuItem(
+              value: MostPlayedSort.matchesPlayed,
+              child: Text('Partite giocate'),
+            ),
+            DropdownMenuItem(
+              value: MostPlayedSort.underdogDescending,
+              child: Text('Da sfavorito: % più alta'),
+            ),
+            DropdownMenuItem(
+              value: MostPlayedSort.underdogAscending,
+              child: Text('Da sfavorito: % più bassa'),
+            ),
+          ],
+          onChanged: (value) {
+            if (value != null) setState(() => _order = value);
+          },
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Partite, vittorie e sconfitte comprendono lo storico. Set e game si riferiscono ai risultati dettagliati disponibili. Il tie-break decisivo vale un set, senza aggiungere game.',
+          style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
+        ),
+        const SizedBox(height: 14),
+        if (widget.result.players.isEmpty)
+          const Text('Nessuna partita Ranking giocata.'),
+        if (players.isEmpty && widget.result.players.isNotEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Text('Nessun giocatore trovato'),
+          ),
+        for (final player in players) ...[
+          Material(
+            color: context.colors.surface,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(
+                color: positions[player] == 1
+                    ? context.colors.primary.withValues(alpha: .5)
+                    : context.colors.border,
+              ),
+            ),
+            child: InkWell(
+              onTap: player.playerRef == null || player.playerRef!.isEmpty
+                  ? null
+                  : () => _openPlayer(player),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '${positions[player]}°',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: context.colors.primaryText,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        PlayerAvatar(
+                          name: player.name,
+                          photoUrl: player.photoUrl,
+                          size: 34,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            player.name,
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          children: [
+                            Text(
+                              '${player.matchesPlayed}',
+                              style: context.fonts
+                                  .monoStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                  )
+                                  .copyWith(color: context.colors.primaryText),
+                            ),
+                            const Text(
+                              'PARTITE',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        const Text(
+                          'Spirito di sfida',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Tooltip(
+                          message:
+                              'Percentuale di partite giocate da sfavorito sul totale con coefficienti documentati. 🦁 Leone: affronta le sfide più difficili (Altissimo da 70%). 🐺 Lupo: non teme avversari più forti (Alto da 50%). 🦊 Volpe: sceglie le sue sfide con astuzia (Basso da 30%). 🐰 Coniglio: preferisce partire da favorito (Bassissimo sotto 30%). Il risultato non cambia questa percentuale.',
+                          child: Icon(Icons.info_outline, size: 15),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (player.underdogMatchPercentage != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: context.colors.primary.withValues(alpha: .05),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            ExcludeSemantics(
+                              child: Container(
+                                width: 68,
+                                height: 68,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: context.colors.primary.withValues(
+                                    alpha: .1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  _challengeAnimal(
+                                    player.difficultyLevel,
+                                  ).emoji,
+                                  style: const TextStyle(
+                                    fontSize: 48,
+                                    height: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _challengeAnimal(
+                                      player.difficultyLevel,
+                                    ).name,
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      color: context.colors.primaryText,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${NumberFormat('0.#', 'it_IT').format(player.underdogMatchPercentage)}% — ${player.difficultyLevel}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      const Text('Non disponibile'),
+                    const SizedBox(height: 5),
+                    Text(
+                      player.matchesWithCoefficients > 0
+                          ? '${player.underdogMatches} da sfavorito su ${player.matchesWithCoefficients} ${player.matchesWithCoefficients == 1 ? 'partita' : 'partite'} con coefficienti'
+                          : 'Nessuna partita con coefficienti documentati',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.colors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    for (final pair in [
+                      ('Vittorie', player.wins, 'Sconfitte', player.losses),
+                      (
+                        'Set vinti',
+                        player.setsWon,
+                        'Set persi',
+                        player.setsLost,
+                      ),
+                      (
+                        'Game vinti',
+                        player.gamesWon,
+                        'Game persi',
+                        player.gamesLost,
+                      ),
+                      (
+                        'Tie-break giocati',
+                        player.tiebreaksPlayed,
+                        'Tie-break vinti',
+                        player.tiebreaksWon,
+                      ),
+                    ])
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${pair.$1}  ${pair.$2}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                '${pair.$3}  ${pair.$4}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Set, game e tie-break: ${player.matchesWithScore} partite con dettaglio',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: context.colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        if (player.playerRef != null &&
+                            player.playerRef!.isNotEmpty)
+                          Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: context.colors.primaryText,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ],
+    );
+  }
+}
+
+class _PlayedMatchesTotal extends ConsumerWidget {
+  const _PlayedMatchesTotal();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summary = ref.watch(rankingMatchSummaryProvider);
+    final data = summary.asData?.value;
+    final since = data == null
+        ? null
+        : DateFormat('d MMMM yyyy', 'it_IT').format(DateTime.parse(data.since));
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.colors.primary.withValues(alpha: .3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: context.colors.primary.withValues(alpha: .1),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(Icons.sports_tennis, color: context.colors.primaryText),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'PARTITE GIOCATE',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Ranking con risultato${since == null ? '' : '\nDal $since'}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+                if (summary.hasError)
+                  TextButton(
+                    onPressed: () =>
+                        ref.invalidate(rankingMatchSummaryProvider),
+                    child: const Text('Riprova'),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              data == null
+                  ? '—'
+                  : NumberFormat.decimalPattern(
+                      'it_IT',
+                    ).format(data.totalPlayed),
+              style: context.fonts
+                  .monoStyle(fontSize: 38, fontWeight: FontWeight.w900)
+                  .copyWith(color: context.colors.primaryText),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _DecadeRankingSection extends StatelessWidget {
@@ -363,58 +869,73 @@ class _DecadeRankingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 38,
-            child: Text(
-              '#$position',
-              style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () => _openPlayerStats(
+        context,
+        PlayerRanking(
+          playerRef: player.playerRef,
+          playerName: player.playerName,
+          position: position,
+          rankingBandName: player.rankingBandName,
+          rankingBandColor: player.rankingBandColor,
+          playerPhotoUrl: player.playerPhotoUrl,
+          eloScore: player.eloScore,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 38,
+              child: Text(
+                '#$position',
+                style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+              ),
             ),
-          ),
-          Container(
-            width: 13,
-            height: 13,
-            decoration: BoxDecoration(
-              color: _color(player.rankingBandColor),
-              shape: BoxShape.circle,
-              border: Border.all(color: context.colors.border),
+            Container(
+              width: 13,
+              height: 13,
+              decoration: BoxDecoration(
+                color: _color(player.rankingBandColor),
+                shape: BoxShape.circle,
+                border: Border.all(color: context.colors.border),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          PlayerAvatar(
-            name: player.playerName,
-            photoUrl: player.playerPhotoUrl,
-            size: 32,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  player.playerName,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                Text(
-                  '${player.rankingBandName ?? 'Senza fascia'} · coeff. ${player.coefficient.toStringAsFixed(2).replaceAll('.', ',')}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.colors.textSecondary,
+            const SizedBox(width: 10),
+            PlayerAvatar(
+              name: player.playerName,
+              photoUrl: player.playerPhotoUrl,
+              size: 32,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    player.playerName,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                ),
-              ],
+                  Text(
+                    '${player.rankingBandName ?? 'Senza fascia'} · coeff. ${player.coefficient.toStringAsFixed(2).replaceAll('.', ',')}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Text(
-            player.eloScore.toStringAsFixed(1),
-            style: context.fonts
-                .monoStyle(fontWeight: FontWeight.w700)
-                .copyWith(color: context.colors.primaryText),
-          ),
-        ],
+            Text(
+              player.eloScore.toStringAsFixed(1),
+              style: context.fonts
+                  .monoStyle(fontWeight: FontWeight.w700)
+                  .copyWith(color: context.colors.primaryText),
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -694,61 +1215,123 @@ class _RankingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 38,
-            child: Text(
-              '#$position',
-              style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () => _openPlayerStats(context, player),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 38,
+              child: Text(
+                '#$position',
+                style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+              ),
             ),
-          ),
-          Container(
-            width: 13,
-            height: 13,
-            decoration: BoxDecoration(
-              color: _color(player.rankingBandColor),
-              shape: BoxShape.circle,
-              border: Border.all(color: context.colors.border),
+            Container(
+              width: 13,
+              height: 13,
+              decoration: BoxDecoration(
+                color: _color(player.rankingBandColor),
+                shape: BoxShape.circle,
+                border: Border.all(color: context.colors.border),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          PlayerAvatar(
-            name: player.playerName,
-            photoUrl: player.playerPhotoUrl,
-            size: 34,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  player.playerName,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                Text(
-                  '${player.matchesPlayed} PG · ${player.matchesWon} V',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.colors.textSecondary,
+            const SizedBox(width: 10),
+            PlayerAvatar(
+              name: player.playerName,
+              photoUrl: player.playerPhotoUrl,
+              size: 34,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    player.playerName,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                ),
-              ],
+                  Text(
+                    '${player.matchesPlayed} PG · ${player.matchesWon} V',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+                  if (player.recentForm.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    _RecentForm(results: player.recentForm),
+                  ],
+                ],
+              ),
             ),
-          ),
-          Text(
-            player.eloScore.toStringAsFixed(1),
-            style: context.fonts
-                .monoStyle(fontWeight: FontWeight.w700)
-                .copyWith(color: context.colors.primaryText),
-          ),
-        ],
+            Text(
+              player.eloScore.toStringAsFixed(1),
+              style: context.fonts
+                  .monoStyle(fontWeight: FontWeight.w700)
+                  .copyWith(color: context.colors.primaryText),
+            ),
+          ],
+        ),
       ),
     ),
   );
+}
+
+class _RecentForm extends StatelessWidget {
+  const _RecentForm({required this.results});
+
+  final List<String> results;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = results
+        .where((result) => result == 'V' || result == 'S')
+        .take(5)
+        .toList();
+    return Semantics(
+      label: 'Forma ultime partite: ${visible.join(', ')}',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Ultime ${visible.length}',
+            style: TextStyle(fontSize: 10, color: context.colors.textSecondary),
+          ),
+          const SizedBox(width: 5),
+          for (final result in visible) ...[
+            Container(
+              width: 20,
+              height: 20,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: result == 'V'
+                    ? Colors.green.withValues(alpha: .14)
+                    : Colors.red.withValues(alpha: .12),
+                border: Border.all(
+                  color: result == 'V'
+                      ? Colors.green.withValues(alpha: .45)
+                      : Colors.red.withValues(alpha: .4),
+                ),
+              ),
+              child: Text(
+                result,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: result == 'V' ? Colors.green : Colors.red,
+                ),
+              ),
+            ),
+            const SizedBox(width: 3),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 String _monthLabel(DateTime value) {

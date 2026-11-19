@@ -96,8 +96,14 @@ class MatchActions {
   Future<String?> cancel(String matchId) =>
       _run(matchId, () => _matches.cancel(matchId));
 
-  Future<String?> submitResult(String matchId, String score) =>
-      _run(matchId, () => _matches.submitResult(matchId, score));
+  Future<String?> submitResult(
+    String matchId,
+    String? score, {
+    String resultOutcome = 'normal',
+  }) => _run(
+    matchId,
+    () => _matches.submitResult(matchId, score, resultOutcome: resultOutcome),
+  );
 
   Future<String?> _run(String matchId, Future<void> Function() action) async {
     try {

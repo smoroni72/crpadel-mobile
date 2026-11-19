@@ -23,6 +23,216 @@ Map<String, dynamic> _row(
 };
 
 void main() {
+  test(
+    'ordina per quota da sfavorito nelle due direzioni, senza usare le vittorie',
+    () {
+      MostPlayedPlayer row(
+        String name,
+        int played,
+        int wins,
+        double? percentage,
+      ) => MostPlayedPlayer(
+        position: 1,
+        name: name,
+        playerRef: name,
+        matchesPlayed: played,
+        wins: wins,
+        losses: played - wins,
+        setsWon: 0,
+        setsLost: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+        matchesWithScore: 0,
+        underdogMatchPercentage: percentage,
+      );
+      final players = [
+        row('A', 100, 90, 20),
+        row('C', 40, 40, 0),
+        row('B', 20, 0, 80),
+        row('D', 10, 9, null),
+      ];
+      expect(
+        sortMostPlayedPlayers(
+          players,
+          MostPlayedSort.underdogDescending,
+        ).map((p) => p.name),
+        ['B', 'A', 'C', 'D'],
+      );
+      expect(
+        sortMostPlayedPlayers(
+          players,
+          MostPlayedSort.underdogAscending,
+        ).map((p) => p.name),
+        ['C', 'A', 'B', 'D'],
+      );
+      expect(
+        sortMostPlayedPlayers(
+          players,
+          MostPlayedSort.matchesPlayed,
+        ).map((p) => p.name),
+        ['A', 'C', 'B', 'D'],
+      );
+      expect(players.map((p) => p.name), ['A', 'C', 'B', 'D']);
+    },
+  );
+
+  test(
+    'classifica presenze legge tutti gli esiti e la copertura dei punteggi',
+    () async {
+      final adapter = FakeAdapter(
+        (_) => (
+          200,
+          {
+            'meta': {'since': '2026-06-01'},
+            'data': [
+              {
+                'position': 1,
+                'player_name': 'Giocatore Storico',
+                'player_ref': 'directory-1',
+                'ranking': {
+                  'player_ref': 'user-1',
+                  'player_name': 'Giocatore Storico',
+                  'elo_score': 1187.25,
+                  'ranking_band_name': 'Rosso',
+                  'ranking_band_color': '#ff0000',
+                },
+                'player_photo_url': null,
+                'matches_played': 97,
+                'wins': 79,
+                'losses': 18,
+                'tiebreaks_played': 7,
+                'tiebreaks_won': 5,
+                'sets_won': 29,
+                'sets_lost': 4,
+                'games_won': 177,
+                'games_lost': 105,
+                'matches_with_score': 15,
+                'difficulty_level': 'Altissimo',
+                'underdog_matches': 12,
+                'underdog_wins': 8,
+                'underdog_match_percentage': 80.0,
+                'matches_with_coefficients': 15,
+              },
+            ],
+          },
+        ),
+      );
+      final result = await ApiProfileRepository(
+        fakeApiClient(adapter),
+      ).mostPlayedLeaderboard();
+      expect(result.since, '2026-06-01');
+      final player = result.players.single;
+      expect(player.matchesPlayed, 97);
+      expect(player.wins, 79);
+      expect(player.losses, 18);
+      expect(player.tiebreaksPlayed, 7);
+      expect(player.tiebreaksWon, 5);
+      expect(player.setsWon, 29);
+      expect(player.setsLost, 4);
+      expect(player.gamesWon, 177);
+      expect(player.gamesLost, 105);
+      expect(player.matchesWithScore, 15);
+      expect(player.difficultyLevel, 'Altissimo');
+      expect(player.underdogMatches, 12);
+      expect(player.underdogWins, 8);
+      expect(player.underdogMatchPercentage, 80);
+      expect(player.playerRef, 'directory-1');
+      expect(player.ranking?.playerRef, 'user-1');
+      expect(player.ranking?.eloScore, 1187.25);
+      expect(adapter.requests.single.path, '/rankings/most-played');
+    },
+  );
+
+  test(
+    'legge il totale delle partite dal riepilogo, senza sommare le presenze',
+    () async {
+      final adapter = FakeAdapter(
+        (_) => (
+          200,
+          {
+            'data': {
+              'total_played': 132,
+              'since': '2026-10-01',
+              'through': '2026-11-16',
+            },
+          },
+        ),
+      );
+      final result = await ApiProfileRepository(
+        fakeApiClient(adapter),
+      ).rankingMatchSummary();
+      expect(result.totalPlayed, 132);
+      expect(result.since, '2026-10-01');
+      expect(adapter.requests.single.path, '/rankings/match-summary');
+    },
+  );
+
+  for (final position in [0, 1, 2, 3]) {
+    test('storico: punteggio dalla prospettiva del posto $position', () async {
+      const scores = ['5-7 6-4 TB 10-4', '6-4 6-3', '6-4 6-7', ''];
+      final adapter = FakeAdapter(
+        (_) => (
+          200,
+          {
+            'data': {
+              'totals': <String, dynamic>{},
+              'matches': [
+                for (var i = 0; i < scores.length; i++)
+                  {
+                    'id': 'm$i',
+                    'status': 'completed',
+                    'position': position,
+                    'winner_team': i == 2 ? null : 'team1',
+                    'result_outcome': i == 2 ? 'time_expired' : 'normal',
+                    'score_team1': scores[i],
+                    'players': [
+                      {'name': 'Mario Rossi', 'team': position < 2 ? 'A' : 'B'},
+                      {'name': 'Compagno', 'team': position < 2 ? 'A' : 'B'},
+                      {
+                        'name': 'Avversario 1',
+                        'team': position < 2 ? 'B' : 'A',
+                      },
+                      {
+                        'name': 'Avversario 2',
+                        'team': position < 2 ? 'B' : 'A',
+                      },
+                    ],
+                  },
+              ],
+            },
+          },
+        ),
+      );
+      final stats = await ApiProfileRepository(fakeApiClient(adapter))
+          .publicStats(
+            player: const PlayerRanking(
+              playerRef: 'p1',
+              playerName: 'Mario Rossi',
+              position: 1,
+              eloScore: 1180,
+              matchesPlayed: 4,
+              matchesWon: 2,
+            ),
+          );
+
+      expect(
+        stats.recentHistory.map((match) => match.score),
+        position < 2 ? scores : ['7-5 4-6 TB 4-10', '4-6 3-6', '4-6 7-6', ''],
+      );
+      expect(stats.recentHistory.first.won, position < 2);
+      expect(
+        stats.recentHistory.first.resultLabel,
+        position < 2 ? 'Vittoria' : 'Sconfitta',
+      );
+      expect(stats.recentHistory.first.teamMates, ['Compagno']);
+      expect(stats.recentHistory.first.opponents, [
+        'Avversario 1',
+        'Avversario 2',
+      ]);
+      expect(stats.recentHistory[2].resultLabel, 'Tempo scaduto');
+    });
+  }
+
   test('la posizione viene dalla classifica completa', () async {
     final adapter = FakeAdapter((options) {
       if (options.queryParameters.containsKey('player_email')) {
@@ -69,6 +279,64 @@ void main() {
   });
 
   test(
+    'statistiche pubbliche usano le partite registrate e non i contatori importati',
+    () async {
+      final adapter = FakeAdapter(
+        (_) => (
+          200,
+          {
+            'data': {
+              'totals': {'matches_played': 26, 'wins': 19, 'losses': 7},
+              'period': {
+                'matches_played': 2,
+                'wins': 2,
+                'losses': 0,
+                'ranking_matches': 2,
+              },
+              'matches': [
+                {
+                  'id': 'm2',
+                  'date': '2026-11-10',
+                  'status': 'completed',
+                  'winner_team': 'team1',
+                  'position': 0,
+                  'players': <Object>[],
+                },
+                {
+                  'id': 'm1',
+                  'date': '2026-11-01',
+                  'status': 'completed',
+                  'winner_team': 'team2',
+                  'position': 2,
+                  'players': <Object>[],
+                },
+              ],
+            },
+          },
+        ),
+      );
+      final repository = ApiProfileRepository(fakeApiClient(adapter));
+
+      final stats = await repository.publicStats(
+        player: const PlayerRanking(
+          playerRef: 'player-1',
+          playerName: 'Fabio Di Costantini',
+          position: 3,
+          eloScore: 1178.04,
+          matchesPlayed: 26,
+          matchesWon: 19,
+        ),
+      );
+
+      expect(stats.matchesPlayed, 2);
+      expect(stats.matchesWon, 2);
+      expect(stats.matchesLost, 0);
+      expect(stats.recentMatches, 2);
+      expect(stats.recentHistory, hasLength(2));
+    },
+  );
+
+  test(
     'carica tutte le statistiche personali e calcola la forma recente',
     () async {
       final adapter = FakeAdapter((options) {
@@ -87,6 +355,24 @@ void main() {
             200,
             {
               'data': {
+                'highlights': {
+                  'current_streak': {'type': 'win', 'count': 3},
+                  'best_partner': {
+                    'name': 'Luca Bianchi',
+                    'matches': 6,
+                    'wins': 5,
+                    'losses': 1,
+                    'win_rate': 83.3,
+                  },
+                  'most_faced_opponent': {
+                    'name': 'Paolo Verdi',
+                    'matches': 4,
+                    'wins': 2,
+                    'losses': 2,
+                    'win_rate': 50,
+                  },
+                  'badges': ['In forma', 'Serie vincente'],
+                },
                 'ranking_alerts': {
                   'period_start': '2026-11-01',
                   'period_end': '2026-11-10',
@@ -112,6 +398,8 @@ void main() {
                   'ranking_matches': 18,
                   'friendly_matches': 2,
                   'tournament_matches': 0,
+                  'tiebreaks_played': 8,
+                  'tiebreaks_won': 3,
                   'sets_won': 28,
                   'sets_lost': 19,
                   'games_won': 210,
@@ -179,6 +467,8 @@ void main() {
       expect(stats.matchesPlayed, 20);
       expect(stats.matchesWon, 12);
       expect(stats.matchesLost, 8);
+      expect(stats.tiebreaksPlayed, 8);
+      expect(stats.tiebreaksWon, 3);
       expect(stats.gamesWon, 210);
       expect(stats.underdogMatches, 5);
       expect(stats.favoriteWins, 6);
@@ -193,6 +483,12 @@ void main() {
       expect(stats.rankingAlerts.favoritePointsAfterThreshold, 0.1);
       expect(stats.rankingAlerts.inactivityRisk, isTrue);
       expect(stats.rankingAlerts.matchesScheduledInDecade, 1);
+      expect(stats.currentStreakType, 'win');
+      expect(stats.currentStreakCount, 3);
+      expect(stats.bestPartner?.name, 'Luca Bianchi');
+      expect(stats.bestPartner?.winRate, 83.3);
+      expect(stats.mostFacedOpponent?.name, 'Paolo Verdi');
+      expect(stats.badges, ['In forma', 'Serie vincente']);
     },
   );
 

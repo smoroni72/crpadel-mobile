@@ -87,6 +87,12 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
                     '${data.winRate}%',
                     Icons.trending_up,
                   ),
+                  if (data.undecided > 0)
+                    _Metric(
+                      'Non terminate',
+                      '${data.undecided}',
+                      Icons.timelapse_rounded,
+                    ),
                   _Metric(
                     'Ranking',
                     '${data.rankingMatches}',
@@ -111,6 +117,11 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
                     'Game vinti / persi',
                     '${data.gamesWon} / ${data.gamesLost}',
                     Icons.bar_chart,
+                  ),
+                  _Metric(
+                    'Tie-break giocati / vinti',
+                    '${data.tiebreaksPlayed} / ${data.tiebreaksWon}',
+                    Icons.sports_tennis,
                   ),
                   _Metric(
                     'Da sfavorito',

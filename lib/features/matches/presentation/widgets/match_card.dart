@@ -100,7 +100,33 @@ class MatchCard extends StatelessWidget {
                     coefficient: match.teamCoefficient('B'),
                     myUserId: myUserId,
                   ),
-                  if (completed && (match.scoreTeam1?.isNotEmpty ?? false)) ...[
+                  if (completed && match.endedByTimeLimit) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 9,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.primaryTint,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        match.scoreTeam1?.isNotEmpty == true
+                            ? 'TEMPO SCADUTO · ${match.scoreTeam1}'
+                            : 'TEMPO SCADUTO · ENTRAMBE LE SQUADRE SCONFITTE',
+                        textAlign: TextAlign.center,
+                        style: context.fonts
+                            .monoStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            )
+                            .copyWith(color: colors.primaryText),
+                      ),
+                    ),
+                  ] else if (completed &&
+                      (match.scoreTeam1?.isNotEmpty ?? false)) ...[
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 9),

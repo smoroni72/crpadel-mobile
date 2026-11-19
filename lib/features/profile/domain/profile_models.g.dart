@@ -19,6 +19,11 @@ _PlayerRanking _$PlayerRankingFromJson(Map<String, dynamic> json) =>
           : nullableRankingScoreFromJson(json['elo_score']),
       matchesPlayed: (json['matches_played'] as num?)?.toInt() ?? 0,
       matchesWon: (json['matches_won'] as num?)?.toInt() ?? 0,
+      recentForm:
+          (json['recent_form'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
     );
 
 Map<String, dynamic> _$PlayerRankingToJson(_PlayerRanking instance) =>
@@ -32,6 +37,7 @@ Map<String, dynamic> _$PlayerRankingToJson(_PlayerRanking instance) =>
       'elo_score': instance.eloScore,
       'matches_played': instance.matchesPlayed,
       'matches_won': instance.matchesWon,
+      'recent_form': instance.recentForm,
     };
 
 _Lesson _$LessonFromJson(Map<String, dynamic> json) => _Lesson(

@@ -111,6 +111,10 @@ class SettingsScreen extends ConsumerWidget {
                   },
                 ),
                 _Item(
+                  title: 'Cambia email',
+                  onTap: () => context.goNamed(AppRoutes.changeEmail),
+                ),
+                _Item(
                   title: 'Cambia password',
                   onTap: () => context.goNamed(AppRoutes.changePassword),
                   last: true,

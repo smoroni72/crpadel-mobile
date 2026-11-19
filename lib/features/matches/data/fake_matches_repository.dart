@@ -117,6 +117,7 @@ class FakeMatchesRepository implements MatchesRepository {
   final left = <String>[];
   final cancelled = <String>[];
   final results = <String, String>{};
+  final resultOutcomes = <String, String>{};
 
   PadelMatch _find(String id) {
     if (error != null) throw error!;
@@ -205,11 +206,20 @@ class FakeMatchesRepository implements MatchesRepository {
   }
 
   @override
-  Future<PadelMatch> submitResult(String matchId, String score) async {
+  Future<PadelMatch> submitResult(
+    String matchId,
+    String? score, {
+    String resultOutcome = 'normal',
+  }) async {
     final match = _find(matchId);
-    results[matchId] = score;
+    if (score != null) results[matchId] = score;
+    resultOutcomes[matchId] = resultOutcome;
     return _replace(
-      match.copyWith(scoreTeam1: score, status: MatchStatus.completed),
+      match.copyWith(
+        scoreTeam1: score,
+        resultOutcome: resultOutcome,
+        status: MatchStatus.completed,
+      ),
     );
   }
 

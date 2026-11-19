@@ -11,6 +11,9 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 );
 
 abstract interface class ProfileRepository {
+  Future<RankingMatchSummary> rankingMatchSummary();
+  Future<MostPlayedRankingResult> mostPlayedLeaderboard();
+
   /// Prime posizioni della classifica ufficiale del circolo.
   Future<List<PlayerRanking>> leaderboard({int limit = 10});
 
@@ -20,6 +23,9 @@ abstract interface class ProfileRepository {
 
   /// Statistiche dell'utente in classifica.
   Future<ProfileStats> stats({required String userId, required String email});
+
+  /// Statistiche sportive pubbliche di un giocatore della classifica.
+  Future<ProfileStats> publicStats({required PlayerRanking player});
 
   /// Ultime prenotazioni dell'utente, in ogni stato, dalla più recente.
   Future<List<Booking>> bookingHistory({required String email});
@@ -39,6 +45,27 @@ abstract interface class ProfileRepository {
 class ApiProfileRepository implements ProfileRepository {
   ApiProfileRepository(this._api);
   final ApiClient _api;
+
+  @override
+  Future<MostPlayedRankingResult> mostPlayedLeaderboard() async {
+    final response = await _api.get('/rankings/most-played');
+    final body = response.data as Map<String, dynamic>;
+    return MostPlayedRankingResult(
+      since: (body['meta'] as Map<String, dynamic>)['since'] as String,
+      players: (body['data'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map(MostPlayedPlayer.fromJson)
+          .toList(),
+    );
+  }
+
+  @override
+  Future<RankingMatchSummary> rankingMatchSummary() async {
+    final response = await _api.get('/rankings/match-summary');
+    return RankingMatchSummary.fromJson(
+      (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>,
+    );
+  }
 
   /// Il server restituisce al massimo 200 righe di classifica.
   static const _leaderboardLimit = 200;
@@ -147,17 +174,43 @@ class ApiProfileRepository implements ProfileRepository {
               as Map<String, dynamic>?;
     }
     if (own == null && index < 0 && detail == null) return const ProfileStats();
-    final totals = detail?['totals'] as Map<String, dynamic>? ?? const {};
+    // Le statistiche sportive devono descrivere solo le partite delle quali
+    // esiste uno storico nel sistema. `totals` include anche i contatori
+    // iniziali importati nel ranking, mentre `period` viene ricostruito dalle
+    // partite realmente registrate.
+    final totals =
+        detail?['period'] as Map<String, dynamic>? ??
+        detail?['totals'] as Map<String, dynamic>? ??
+        const {};
     final rankingAlertsJson =
         detail?['ranking_alerts'] as Map<String, dynamic>? ?? const {};
-    final matches = (detail?['matches'] as List<dynamic>? ?? const [])
-        .cast<Map<String, dynamic>>()
+    final highlights =
+        detail?['highlights'] as Map<String, dynamic>? ?? const {};
+    final streak =
+        highlights['current_streak'] as Map<String, dynamic>? ?? const {};
+    final history = (detail?['matches'] as List<dynamic>? ?? const [])
+        .cast<Map<String, dynamic>>();
+    final matches = history
         .where(
           (match) =>
-              match['status'] == 'completed' && match['winner_team'] != null,
+              match['status'] == 'completed' &&
+              (match['winner_team'] != null ||
+                  match['result_outcome'] == 'time_expired'),
         )
         .take(5)
         .toList();
+    final rankingScoreDeltas = matches
+        .where((match) => match['ranking_score_delta'] != null)
+        .map((match) => _double(match['ranking_score_delta']))
+        .toList();
+    final rankingScoreEarned = rankingScoreDeltas.fold<double>(
+      0,
+      (total, value) => total + value,
+    );
+    final recentHistory = _recentHistory(
+      matches,
+      self?['full_name'] as String? ?? '',
+    );
     final recentWins = matches.where((match) {
       final ownTeam = ((match['position'] as num?)?.toInt() ?? 0) < 2
           ? 'team1'
@@ -171,7 +224,12 @@ class ApiProfileRepository implements ProfileRepository {
           own?.matchesPlayed ??
           0,
       matchesWon: (totals['wins'] as num?)?.toInt() ?? own?.matchesWon ?? 0,
-      matchesLost: (totals['losses'] as num?)?.toInt() ?? 0,
+      matchesLost:
+          (totals['losses'] as num?)?.toInt() ??
+          ((own?.matchesPlayed ?? 0) - (own?.matchesWon ?? 0)).clamp(
+            0,
+            1 << 30,
+          ),
       undecided: (totals['undecided'] as num?)?.toInt() ?? 0,
       rankingMatches: (totals['ranking_matches'] as num?)?.toInt() ?? 0,
       friendlyMatches: (totals['friendly_matches'] as num?)?.toInt() ?? 0,
@@ -180,20 +238,134 @@ class ApiProfileRepository implements ProfileRepository {
       setsLost: (totals['sets_lost'] as num?)?.toInt() ?? 0,
       gamesWon: (totals['games_won'] as num?)?.toInt() ?? 0,
       gamesLost: (totals['games_lost'] as num?)?.toInt() ?? 0,
+      tiebreaksPlayed: (totals['tiebreaks_played'] as num?)?.toInt() ?? 0,
+      tiebreaksWon: (totals['tiebreaks_won'] as num?)?.toInt() ?? 0,
       underdogMatches: (totals['underdog_matches'] as num?)?.toInt() ?? 0,
       underdogWins: (totals['underdog_wins'] as num?)?.toInt() ?? 0,
       favoriteMatches: (totals['favorite_matches'] as num?)?.toInt() ?? 0,
       favoriteWins: (totals['favorite_wins'] as num?)?.toInt() ?? 0,
       rankingPointsEarned: _double(totals['ranking_points_earned']),
       rankingPointsAverage: _double(totals['ranking_points_average']),
+      rankingScoreEarned: rankingScoreEarned,
+      rankingScoreAverage: rankingScoreDeltas.isEmpty
+          ? 0
+          : rankingScoreEarned / rankingScoreDeltas.length,
+      currentRankingScore: own?.eloScore ?? 0,
       recentMatches: matches.length,
       recentWins: recentWins,
+      recentHistory: recentHistory,
+      currentStreakType: streak['type'] as String?,
+      currentStreakCount: (streak['count'] as num?)?.toInt() ?? 0,
+      bestPartner: _highlightPerson(highlights['best_partner']),
+      mostFacedOpponent: _highlightPerson(highlights['most_faced_opponent']),
+      badges: (highlights['badges'] as List<dynamic>? ?? const [])
+          .map((badge) => badge.toString())
+          .toList(growable: false),
       bandName: own?.rankingBandName,
       bandColor: own?.rankingBandColor,
       rankingAlerts: RankingAlerts.fromJson(rankingAlertsJson),
       photoUrl: self?['photo_url'] as String?,
       photoStorageId: self?['photo_storage_id'] as String?,
       photoPublicConsent: self?['photo_public_consent'] == true,
+    );
+  }
+
+  @override
+  Future<ProfileStats> publicStats({required PlayerRanking player}) async {
+    final reference = player.playerRef;
+    if (reference == null || reference.isEmpty) {
+      throw StateError('Riferimento giocatore non disponibile');
+    }
+    final response = await _api.get(
+      '/players/$reference/statistics',
+      query: {'public_view': true},
+    );
+    final detail =
+        (response.data as Map<String, dynamic>)['data']
+            as Map<String, dynamic>? ??
+        const <String, dynamic>{};
+    final totals =
+        detail['period'] as Map<String, dynamic>? ??
+        detail['totals'] as Map<String, dynamic>? ??
+        const {};
+    final history = (detail['matches'] as List<dynamic>? ?? const [])
+        .cast<Map<String, dynamic>>();
+    final highlights =
+        detail['highlights'] as Map<String, dynamic>? ?? const {};
+    final streak =
+        highlights['current_streak'] as Map<String, dynamic>? ?? const {};
+    final rankingScoreDeltas = history
+        .where(
+          (match) =>
+              match['status'] == 'completed' &&
+              match['ranking_score_delta'] != null,
+        )
+        .take(5)
+        .map((match) => _double(match['ranking_score_delta']))
+        .toList();
+    final rankingScoreEarned = rankingScoreDeltas.fold<double>(
+      0,
+      (total, value) => total + value,
+    );
+    final matches = history
+        .where(
+          (match) =>
+              match['status'] == 'completed' &&
+              (match['winner_team'] != null ||
+                  match['result_outcome'] == 'time_expired'),
+        )
+        .take(5)
+        .toList();
+    final recentHistory = _recentHistory(matches, player.playerName);
+    final recentWins = matches.where((match) {
+      final ownTeam = ((match['position'] as num?)?.toInt() ?? 0) < 2
+          ? 'team1'
+          : 'team2';
+      return match['winner_team'] == ownTeam;
+    }).length;
+    return ProfileStats(
+      position: player.position > 0 ? player.position : null,
+      matchesPlayed:
+          (totals['matches_played'] as num?)?.toInt() ?? player.matchesPlayed,
+      matchesWon: (totals['wins'] as num?)?.toInt() ?? player.matchesWon,
+      matchesLost:
+          (totals['losses'] as num?)?.toInt() ??
+          (player.matchesPlayed - player.matchesWon).clamp(0, 1 << 30),
+      undecided: (totals['undecided'] as num?)?.toInt() ?? 0,
+      rankingMatches: (totals['ranking_matches'] as num?)?.toInt() ?? 0,
+      friendlyMatches: (totals['friendly_matches'] as num?)?.toInt() ?? 0,
+      tournamentMatches: (totals['tournament_matches'] as num?)?.toInt() ?? 0,
+      setsWon: (totals['sets_won'] as num?)?.toInt() ?? 0,
+      setsLost: (totals['sets_lost'] as num?)?.toInt() ?? 0,
+      gamesWon: (totals['games_won'] as num?)?.toInt() ?? 0,
+      gamesLost: (totals['games_lost'] as num?)?.toInt() ?? 0,
+      tiebreaksPlayed: (totals['tiebreaks_played'] as num?)?.toInt() ?? 0,
+      tiebreaksWon: (totals['tiebreaks_won'] as num?)?.toInt() ?? 0,
+      underdogMatches: (totals['underdog_matches'] as num?)?.toInt() ?? 0,
+      underdogWins: (totals['underdog_wins'] as num?)?.toInt() ?? 0,
+      favoriteMatches: (totals['favorite_matches'] as num?)?.toInt() ?? 0,
+      favoriteWins: (totals['favorite_wins'] as num?)?.toInt() ?? 0,
+      rankingPointsEarned: _double(totals['ranking_points_earned']),
+      rankingPointsAverage: _double(totals['ranking_points_average']),
+      rankingScoreEarned: rankingScoreEarned,
+      rankingScoreAverage: rankingScoreDeltas.isEmpty
+          ? 0
+          : rankingScoreEarned / rankingScoreDeltas.length,
+      currentRankingScore: player.eloScore,
+      recentMatches: matches.length,
+      recentWins: recentWins,
+      recentHistory: recentHistory,
+      currentStreakType: streak['type'] as String?,
+      currentStreakCount: (streak['count'] as num?)?.toInt() ?? 0,
+      bestPartner: _highlightPerson(highlights['best_partner']),
+      mostFacedOpponent: _highlightPerson(highlights['most_faced_opponent']),
+      badges: (highlights['badges'] as List<dynamic>? ?? const [])
+          .map((badge) => badge.toString())
+          .toList(growable: false),
+      bandName: player.rankingBandName,
+      bandColor: player.rankingBandColor,
+      photoUrl: player.playerPhotoUrl,
+      photoPublicConsent: player.playerPhotoUrl != null,
     );
   }
 
@@ -258,3 +430,50 @@ double _double(Object? value) => switch (value) {
   String text => double.tryParse(text) ?? 0,
   _ => 0,
 };
+
+PlayerHighlightPerson? _highlightPerson(Object? value) {
+  if (value is! Map) return null;
+  return PlayerHighlightPerson.fromJson(Map<String, dynamic>.from(value));
+}
+
+List<RecentPlayerMatch> _recentHistory(
+  List<Map<String, dynamic>> matches,
+  String playerName,
+) => matches.map((match) {
+  final position = (match['position'] as num?)?.toInt() ?? 0;
+  final ownTeam = position < 2 ? 'A' : 'B';
+  final playerTeam = position < 2 ? 'team1' : 'team2';
+  final timeExpired = match['result_outcome'] == 'time_expired';
+  final won = match['winner_team'] == playerTeam;
+  final players = (match['players'] as List<dynamic>? ?? const [])
+      .cast<Map<String, dynamic>>();
+  List<String> namesFor(String team) => players
+      .where((candidate) => candidate['team'] == team)
+      .map((candidate) => candidate['name'] as String? ?? '')
+      .where((name) => name.isNotEmpty && name != playerName)
+      .toList();
+  return RecentPlayerMatch(
+    id: match['id'] as String? ?? '',
+    date: match['date'] as String? ?? '',
+    timeSlot: match['time_slot'] as String? ?? '',
+    courtName: match['court_name'] as String? ?? '',
+    // The API score is always team A first; history shows the player's team first.
+    score: position < 2
+        ? match['score_team1'] as String? ?? ''
+        : (match['score_team1'] as String? ?? '').replaceAllMapped(
+            RegExp(r'(\d+)\s*-\s*(\d+)'),
+            (set) => '${set[2]}-${set[1]}',
+          ),
+    resultLabel: timeExpired
+        ? 'Tempo scaduto'
+        : won
+        ? 'Vittoria'
+        : 'Sconfitta',
+    won: won,
+    teamMates: namesFor(ownTeam),
+    opponents: namesFor(ownTeam == 'A' ? 'B' : 'A'),
+    rankingScoreDelta: match['ranking_score_delta'] == null
+        ? null
+        : _double(match['ranking_score_delta']),
+  );
+}).toList();

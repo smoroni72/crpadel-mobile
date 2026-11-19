@@ -55,7 +55,11 @@ abstract interface class MatchesRepository {
   Future<PadelMatch> cancel(String matchId);
 
   /// L'organizzatore inserisce il risultato finale, es. `"6-4 6-3"`.
-  Future<PadelMatch> submitResult(String matchId, String score);
+  Future<PadelMatch> submitResult(
+    String matchId,
+    String? score, {
+    String resultOutcome = 'normal',
+  });
 }
 
 class ApiMatchesRepository implements MatchesRepository {
@@ -154,11 +158,20 @@ class ApiMatchesRepository implements MatchesRepository {
   );
 
   @override
-  Future<PadelMatch> submitResult(String matchId, String score) async => _one(
+  Future<PadelMatch> submitResult(
+    String matchId,
+    String? score, {
+    String resultOutcome = 'normal',
+  }) async => _one(
     (await _api.patch(
       '/matches/$matchId',
       // Il sito salva lo stesso punteggio in entrambi i campi.
-      data: {'score_team1': score, 'score_team2': score, 'status': 'completed'},
+      data: {
+        'score_team1': score,
+        'score_team2': score,
+        'result_outcome': resultOutcome,
+        'status': 'completed',
+      },
     )).data,
   );
 

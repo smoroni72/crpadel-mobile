@@ -67,10 +67,23 @@ void main() {
         expect(request.data, {
           'score_team1': '6-4 6-3',
           'score_team2': '6-4 6-3',
+          'result_outcome': 'normal',
           'status': 'completed',
         });
       },
     );
+
+    test('tempo scaduto: parziale facoltativo e doppia sconfitta', () async {
+      await repository.submitResult('m1', null, resultOutcome: 'time_expired');
+      final request = adapter.requests.single;
+      expect(request.method, 'PATCH');
+      expect(request.data, {
+        'score_team1': null,
+        'score_team2': null,
+        'result_outcome': 'time_expired',
+        'status': 'completed',
+      });
+    });
   });
 
   group('azioni', () {
@@ -129,6 +142,21 @@ void main() {
       expect(await actions().submitResult('mia', '6-4 6-3'), isNull);
       final mia = await container.read(matchDetailProvider('mia').future);
       expect(mia.status, MatchStatus.completed);
+    });
+
+    test('tempo scaduto conserva l’esito nel dettaglio', () async {
+      expect(
+        await actions().submitResult(
+          'mia',
+          null,
+          resultOutcome: 'time_expired',
+        ),
+        isNull,
+      );
+      final mia = await container.read(matchDetailProvider('mia').future);
+      expect(mia.status, MatchStatus.completed);
+      expect(mia.endedByTimeLimit, isTrue);
+      expect(backend.matches.resultOutcomes['mia'], 'time_expired');
     });
   });
 }

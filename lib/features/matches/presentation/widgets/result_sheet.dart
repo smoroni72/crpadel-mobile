@@ -4,10 +4,17 @@ import 'package:flutter/services.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/match_score.dart';
 
-/// Pannello per inserire il risultato (fino a 3 set). Restituisce il
-/// punteggio nel formato dell'API, es. `"6-4 3-6 TB 10-8"`.
-Future<String?> showResultSheet(BuildContext context) =>
-    showModalBottomSheet<String>(
+class MatchResultSubmission {
+  const MatchResultSubmission({this.score, this.resultOutcome = 'normal'});
+
+  final String? score;
+  final String resultOutcome;
+}
+
+/// Pannello per inserire il risultato oppure chiudere una partita per tempo
+/// scaduto, con parziale facoltativo.
+Future<MatchResultSubmission?> showResultSheet(BuildContext context) =>
+    showModalBottomSheet<MatchResultSubmission>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
@@ -24,6 +31,7 @@ class _ResultSheet extends StatefulWidget {
 class _ResultSheetState extends State<_ResultSheet> {
   final _games = List.generate(6, (_) => TextEditingController());
   var _third = ThirdSet.none;
+  var _timeExpired = false;
   String? _error;
 
   @override
@@ -37,6 +45,29 @@ class _ResultSheetState extends State<_ResultSheet> {
   int? _value(int i) => int.tryParse(_games[i].text);
 
   void _save() {
+    if (_timeExpired) {
+      final parts = <String>[];
+      for (var i = 0; i < 6; i += 2) {
+        final left = _games[i].text.trim();
+        final right = _games[i + 1].text.trim();
+        if ((left.isEmpty) != (right.isEmpty)) {
+          setState(
+            () => _error =
+                'Completa entrambi i valori del parziale oppure lasciali vuoti',
+          );
+          return;
+        }
+        if (left.isNotEmpty) parts.add('$left-$right');
+      }
+      Navigator.pop(
+        context,
+        MatchResultSubmission(
+          score: parts.isEmpty ? null : parts.join(' '),
+          resultOutcome: 'time_expired',
+        ),
+      );
+      return;
+    }
     final score = MatchScore(
       set1: (_value(0), _value(1)),
       set2: (_value(2), _value(3)),
@@ -48,7 +79,7 @@ class _ResultSheetState extends State<_ResultSheet> {
       setState(() => _error = error);
       return;
     }
-    Navigator.pop(context, score.value);
+    Navigator.pop(context, MatchResultSubmission(score: score.value));
   }
 
   Widget _setRow(String label, int first) {
@@ -107,6 +138,26 @@ class _ResultSheetState extends State<_ResultSheet> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
+            SegmentedButton<bool>(
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(value: false, label: Text('Terminata')),
+                ButtonSegment(value: true, label: Text('Tempo scaduto')),
+              ],
+              selected: {_timeExpired},
+              onSelectionChanged: (selection) => setState(() {
+                _timeExpired = selection.first;
+                _error = null;
+              }),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _timeExpired
+                  ? 'Non terminata per mancanza di tempo: il parziale è facoltativo e tutti e quattro risultano sconfitti nel ranking.'
+                  : 'Il punteggio determina vincitori e sconfitti.',
+              style: TextStyle(fontSize: 12, color: colors.textSecondary),
+            ),
+            const SizedBox(height: 8),
             _setRow('1° set', 0),
             _setRow('2° set', 2),
             Text(

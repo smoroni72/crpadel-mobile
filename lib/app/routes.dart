@@ -16,6 +16,7 @@ abstract final class AppRoutes {
   static const profile = 'profilo';
   static const settings = 'impostazioni';
   static const changePassword = 'cambia-password';
+  static const changeEmail = 'cambia-email';
   static const subscriptionDetail = 'abbonamento';
   static const notifications = 'notifiche';
   static const exploreMenu = 'menu';
@@ -54,6 +55,7 @@ abstract final class AppPaths {
   static const profile = '/profilo';
   static const settings = 'impostazioni';
   static const changePassword = 'password';
+  static const changeEmail = 'email';
   static const subscriptionDetail = '/abbonamento/:id';
   static const notifications = '/notifiche';
   static const exploreMenu = '/menu';

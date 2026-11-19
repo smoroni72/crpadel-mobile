@@ -48,23 +48,25 @@ void main() {
     expect(password().obscureText, isTrue);
   });
 
-  testWidgets('la data di nascita si scrive con la maschera', (tester) async {
+  testWidgets('la data di nascita facoltativa si scrive con la maschera', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
-    await tester.enterText(field('Data di nascita'), '02121990');
+    await tester.enterText(field('Data di nascita (facoltativa)'), '02121990');
     expect(find.text('02/12/1990'), findsOneWidget);
   });
 
   testWidgets('una data inesistente viene segnalata', (tester) async {
     await pumpScreen(tester);
 
-    await tester.enterText(field('Data di nascita'), '31021990');
+    await tester.enterText(field('Data di nascita (facoltativa)'), '31021990');
     await tester.tap(find.text('Registrati'));
     await tester.pump();
     expect(find.text('Usa il formato gg/mm/aaaa'), findsOneWidget);
   });
 
-  testWidgets('con dati validi la registrazione va a buon fine', (
+  testWidgets('la registrazione riesce senza data di nascita e sesso', (
     tester,
   ) async {
     await pumpScreen(tester);
@@ -72,11 +74,6 @@ void main() {
     await tester.enterText(field('Nome e cognome'), 'Mario Rossi');
     await tester.enterText(field('Email'), 'mario@example.com');
     await tester.enterText(field('Password'), 'una-password-lunga');
-    await tester.enterText(field('Data di nascita'), '02121990');
-    await tester.tap(find.text('Sesso'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Maschile').last);
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Registrati'));
     await tester.pumpAndSettle();
 

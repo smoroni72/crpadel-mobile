@@ -62,8 +62,8 @@ void main() {
     expect(find.text('giocatore@example.com'), findsOneWidget);
     expect(find.text('Fascia Oro'), findsOneWidget);
     expect(find.text('12°'), findsOneWidget);
-    expect(find.text('24'), findsOneWidget);
-    expect(find.text('15'), findsOneWidget);
+    expect(find.text('STORICO DISPONIBILE · 24 TOTALI'), findsOneWidget);
+    expect(find.text('15 vittorie · 9 sconfitte'), findsOneWidget);
     expect(find.text('63%'), findsWidgets);
   });
 
@@ -83,7 +83,6 @@ void main() {
     await scrollTo(tester, find.text('Da sfavorito'));
     expect(find.text('Partite: 5\nVittorie: 1'), findsOneWidget);
     expect(find.text('Partite: 3\nVittorie: 2'), findsOneWidget);
-    expect(find.textContaining('·'), findsNothing);
   });
 
   testWidgets('profilo mostra i due indicatori delle regole ranking', (
@@ -303,5 +302,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Password attuale non valida'), findsOneWidget);
+  });
+
+  testWidgets('cambio email richiede password e attende la verifica', (
+    tester,
+  ) async {
+    await openProfile(tester, FakeBackend());
+    await tester.tap(find.byTooltip('Impostazioni'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cambia email'));
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'nuova@example.com');
+    await tester.enterText(fields.at(1), 'password');
+    await tester.tap(find.text('Invia link di verifica'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Controlla il nuovo indirizzo email per confermare la modifica.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byType(LoginScreen), findsNothing);
   });
 }

@@ -47,9 +47,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   static final _firstBirthDate = DateTime(1920);
 
   String? _validateBirthDate(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'La data di nascita è obbligatoria';
-    }
+    if (value == null || value.isEmpty) return null;
     final date = Dates.parseNumeric(value);
     if (date == null) return 'Usa il formato gg/mm/aaaa';
     if (date.isBefore(_firstBirthDate) || date.isAfter(DateTime.now())) {
@@ -68,8 +66,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             email: _email.text,
             password: _password.text,
             fullName: _name.text,
-            birthDate: Dates.parseNumeric(_birthDate.text)!,
-            gender: _gender!,
+            birthDate: Dates.parseNumeric(_birthDate.text),
+            gender: _gender,
           );
       if (!mounted) return;
       await showDialog<void>(
@@ -156,7 +154,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const DateInputFormatter(),
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Data di nascita',
+                  labelText: 'Data di nascita (facoltativa)',
                   hintText: 'gg/mm/aaaa',
                   suffixIcon: IconButton(
                     onPressed: _pickDate,
@@ -170,7 +168,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               DropdownButtonFormField<String>(
                 initialValue: _gender,
                 isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Sesso'),
+                decoration: const InputDecoration(
+                  labelText: 'Sesso (facoltativo)',
+                  helperText: 'Puoi lasciare questo campo vuoto',
+                ),
                 items: const [
                   DropdownMenuItem(value: 'male', child: Text('Maschile')),
                   DropdownMenuItem(value: 'female', child: Text('Femminile')),
@@ -180,8 +181,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ],
                 onChanged: (value) => setState(() => _gender = value),
-                validator: (value) =>
-                    value == null ? 'Il sesso è obbligatorio' : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(

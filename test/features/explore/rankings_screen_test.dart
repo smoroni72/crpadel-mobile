@@ -12,10 +12,171 @@ import 'package:intl/intl.dart';
 void main() {
   setUpAll(() => initializeDateFormatting('it_IT'));
 
+  testWidgets(
+    'classifica presenze mostra storico ed esiti su schermo telefono',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repository = FakeProfileRepository(
+        matchSummary: const RankingMatchSummary(
+          totalPlayed: 470,
+          since: '2026-06-01',
+        ),
+        mostPlayed: const MostPlayedRankingResult(
+          since: '2026-06-01',
+          players: [
+            MostPlayedPlayer(
+              position: 1,
+              playerRef: 'directory-1',
+              ranking: PlayerRanking(
+                playerRef: 'user-1',
+                playerName: 'Giocatore Storico',
+                eloScore: 1187.25,
+              ),
+              name: 'Giocatore Storico',
+              matchesPlayed: 97,
+              wins: 79,
+              losses: 18,
+              tiebreaksPlayed: 7,
+              tiebreaksWon: 5,
+              setsWon: 29,
+              setsLost: 4,
+              gamesWon: 177,
+              gamesLost: 105,
+              matchesWithScore: 15,
+              difficultyLevel: 'Altissimo',
+              underdogMatches: 12,
+              underdogWins: 8,
+              underdogMatchPercentage: 80,
+              matchesWithCoefficients: 15,
+            ),
+            MostPlayedPlayer(
+              position: 8,
+              playerRef: 'directory-2',
+              name: 'Altro Giocatore',
+              matchesPlayed: 10,
+              wins: 4,
+              losses: 6,
+              setsWon: 7,
+              setsLost: 12,
+              gamesWon: 60,
+              gamesLost: 90,
+              matchesWithScore: 10,
+              difficultyLevel: 'Bassissimo',
+              underdogMatchPercentage: 0,
+              matchesWithCoefficients: 10,
+            ),
+            MostPlayedPlayer(
+              position: 9,
+              playerRef: 'directory-3',
+              name: 'Coefficienti assenti',
+              matchesPlayed: 4,
+              wins: 0,
+              losses: 4,
+              setsWon: 0,
+              setsLost: 0,
+              gamesWon: 0,
+              gamesLost: 0,
+              matchesWithScore: 1,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            locale: const Locale('it', 'IT'),
+            home: const RankingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('470'), findsOneWidget);
+      expect(find.textContaining('Dal 1 giugno 2026'), findsOneWidget);
+      await tester.tap(find.text('Chi ha giocato di più'));
+      await tester.pumpAndSettle();
+      expect(find.text('Classifica presenze Ranking'), findsOneWidget);
+      expect(find.text('Giocatore Storico'), findsOneWidget);
+      expect(find.text('97'), findsOneWidget);
+      expect(find.text('Vittorie  79'), findsOneWidget);
+      expect(find.text('Sconfitte  18'), findsOneWidget);
+      expect(find.text('Set vinti  29'), findsOneWidget);
+      expect(find.text('Set persi  4'), findsOneWidget);
+      expect(find.text('Game vinti  177'), findsOneWidget);
+      expect(find.text('Game persi  105'), findsOneWidget);
+      expect(find.text('Tie-break giocati  7'), findsOneWidget);
+      expect(find.text('Tie-break vinti  5'), findsOneWidget);
+      expect(
+        find.text('Set, game e tie-break: 15 partite con dettaglio'),
+        findsOneWidget,
+      );
+      expect(find.text('80% — Altissimo'), findsOneWidget);
+      expect(
+        find.text('12 da sfavorito su 15 partite con coefficienti'),
+        findsOneWidget,
+      );
+      expect(find.text('Non disponibile'), findsOneWidget);
+      expect(find.text('0% — Bassissimo'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      final search = find.byKey(const ValueKey('attendance-player-search'));
+      await tester.enterText(search, 'altro');
+      await tester.pumpAndSettle();
+      expect(find.text('Altro Giocatore'), findsOneWidget);
+      expect(find.text('Giocatore Storico'), findsNothing);
+      expect(find.text('8°'), findsOneWidget);
+      await tester.enterText(search, 'nessun-nome');
+      await tester.pumpAndSettle();
+      expect(find.text('Nessun giocatore trovato'), findsOneWidget);
+      await tester.tap(find.byTooltip('Cancella ricerca'));
+      await tester.pumpAndSettle();
+      expect(find.text('Altro Giocatore'), findsOneWidget);
+      expect(find.text('Giocatore Storico'), findsOneWidget);
+      await tester.enterText(search, '  storico GIOCATORE ');
+      await tester.pumpAndSettle();
+      expect(find.text('Altro Giocatore'), findsNothing);
+      await tester.ensureVisible(find.text('Giocatore Storico'));
+      await tester.tap(find.text('Giocatore Storico'));
+      await tester.pumpAndSettle();
+      expect(find.text('Statistiche giocatore'), findsOneWidget);
+      expect(find.text('1187.25'), findsOneWidget);
+      expect(repository.publicStatsRequests.single.playerRef, 'directory-1');
+      expect(repository.publicStatsRequests.single.position, 0);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('  storico GIOCATORE '), findsOneWidget);
+      expect(find.text('Altro Giocatore'), findsNothing);
+      await tester.ensureVisible(search);
+      await tester.tap(find.byTooltip('Cancella ricerca'));
+      await tester.pumpAndSettle();
+      final sort = find.byKey(const ValueKey('attendance-sort'));
+      await tester.ensureVisible(sort);
+      await tester.tap(sort);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Da sfavorito: % più bassa').last);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopLeft(find.text('Altro Giocatore')).dy,
+        lessThan(tester.getTopLeft(find.text('Giocatore Storico')).dy),
+      );
+      await tester.enterText(search, 'storico');
+      await tester.pumpAndSettle();
+      expect(find.text('2°'), findsOneWidget);
+      expect(find.text('Altro Giocatore'), findsNothing);
+    },
+  );
+
   testWidgets('permette di scegliere classifica generale, mensile e decadi', (
     tester,
   ) async {
     final repository = FakeProfileRepository(
+      matchSummary: const RankingMatchSummary(
+        totalPlayed: 132,
+        since: '2026-10-01',
+      ),
       rankings: const [
         PlayerRanking(
           playerRef: 'p1',
@@ -24,6 +185,7 @@ void main() {
           eloScore: 1180,
           matchesPlayed: 12,
           matchesWon: 8,
+          recentForm: ['V', 'S', 'V', 'V', 'S'],
         ),
       ],
       monthlyRankings: const MonthlyRankingResult(
@@ -88,6 +250,19 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    expect(find.text('PARTITE GIOCATE'), findsOneWidget);
+    expect(find.text('132'), findsOneWidget);
+    expect(find.textContaining('Dal 1 ottobre 2026'), findsOneWidget);
+    repository.matchSummary = const RankingMatchSummary(
+      totalPlayed: 133,
+      since: '2026-10-01',
+    );
+    await tester.drag(find.byType(ListView).first, const Offset(0, 400));
+    await tester.pumpAndSettle();
+    expect(find.text('133'), findsOneWidget);
+    expect(find.text('Ultime 5'), findsOneWidget);
+    expect(find.text('V'), findsNWidgets(3));
+    expect(find.text('S'), findsNWidgets(2));
 
     expect(find.text('Generale'), findsOneWidget);
     expect(find.text('Mensile'), findsOneWidget);
@@ -95,6 +270,21 @@ void main() {
     expect(find.text('Classifica generale'), findsOneWidget);
     expect(find.text('1180.0'), findsOneWidget);
     expect(find.text('Classifica mensile'), findsNothing);
+
+    await tester.tap(find.text('Mario Rossi'));
+    await tester.pumpAndSettle();
+    expect(find.text('Statistiche giocatore'), findsOneWidget);
+    expect(find.text('Rendimento'), findsOneWidget);
+    await tester.drag(find.byType(ListView).last, const Offset(0, -1300));
+    await tester.pumpAndSettle();
+    expect(find.text('Analisi ranking'), findsOneWidget);
+    expect(find.textContaining('Punti classifica'), findsNothing);
+    expect(find.textContaining('Media classifica'), findsNothing);
+    await tester.drag(find.byType(ListView).last, const Offset(0, -1300));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('pagamenti'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Mensile'));
     await tester.pumpAndSettle();

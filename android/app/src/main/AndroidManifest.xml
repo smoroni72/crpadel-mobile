@@ -26,6 +26,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- image_cropper: schermata nativa aperta dopo la conferma della
+             fotocamera o la selezione dalla galleria. -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Ucrop.CropTheme" />
         <!-- Icona e colore delle notifiche FCM: lo stemma CRPadel a una tinta,
              generato da tool/make_launcher_icon.dart. -->
         <meta-data

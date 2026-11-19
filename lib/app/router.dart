@@ -28,6 +28,7 @@ import '../features/explore/presentation/tournaments_screen.dart';
 import '../features/matches/presentation/match_detail_screen.dart';
 import '../features/matches/presentation/matches_screen.dart';
 import '../features/profile/presentation/change_password_screen.dart';
+import '../features/profile/presentation/change_email_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/settings_screen.dart';
 import '../features/subscriptions/presentation/subscription_detail_screen.dart';
@@ -264,6 +265,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                         path: AppPaths.changePassword,
                         name: AppRoutes.changePassword,
                         builder: (_, _) => const ChangePasswordScreen(),
+                      ),
+                      GoRoute(
+                        path: AppPaths.changeEmail,
+                        name: AppRoutes.changeEmail,
+                        builder: (_, _) => const ChangeEmailScreen(),
                       ),
                     ],
                   ),

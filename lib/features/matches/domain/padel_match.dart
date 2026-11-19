@@ -76,6 +76,7 @@ abstract class PadelMatch with _$PadelMatch {
     /// Punteggio dal punto di vista della squadra A, es. `"6-4 6-3"`.
     String? scoreTeam1,
     String? winnerTeam,
+    @Default('normal') String resultOutcome,
     @JsonKey(fromJson: nullableDoubleFromJson)
     double? rankingTeamACoefficientAtResult,
     @JsonKey(fromJson: nullableDoubleFromJson)
@@ -121,6 +122,8 @@ abstract class PadelMatch with _$PadelMatch {
   bool isOrganizer(String userId) => organizerRef == userId;
 
   bool isParticipant(String userId) => players.any((p) => p.userId == userId);
+
+  bool get endedByTimeLimit => resultOutcome == 'time_expired';
 
   /// Coefficiente mostrato sulla partita. Per una partita conclusa usa il
   /// valore congelato al momento del risultato; prima usa le fasce correnti.

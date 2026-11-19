@@ -117,7 +117,32 @@ class _Body extends ConsumerWidget {
       _Teams(match: match, me: me),
     ];
 
-    if (match.status == MatchStatus.completed &&
+    if (match.status == MatchStatus.completed && match.endedByTimeLimit) {
+      children.addAll([
+        const SizedBox(height: 16),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Partita non terminata per mancanza di tempo',
+                  style: theme.textTheme.titleSmall,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  match.scoreTeam1?.isNotEmpty == true
+                      ? 'Parziale: ${match.scoreTeam1}. Entrambe le squadre risultano sconfitte nel ranking.'
+                      : 'Nessun parziale registrato. Entrambe le squadre risultano sconfitte nel ranking.',
+                  style: TextStyle(color: colors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ]);
+    } else if (match.status == MatchStatus.completed &&
         (match.scoreTeam1?.isNotEmpty ?? false)) {
       children.addAll([
         const SizedBox(height: 16),
@@ -199,9 +224,13 @@ class _Body extends ConsumerWidget {
       buttons.add(
         ElevatedButton(
           onPressed: () async {
-            final score = await showResultSheet(context);
-            if (score == null || !context.mounted) return;
-            final error = await actions.submitResult(match.id, score);
+            final result = await showResultSheet(context);
+            if (result == null || !context.mounted) return;
+            final error = await actions.submitResult(
+              match.id,
+              result.score,
+              resultOutcome: result.resultOutcome,
+            );
             if (context.mounted) {
               await _show(context, error, 'Risultato salvato');
             }

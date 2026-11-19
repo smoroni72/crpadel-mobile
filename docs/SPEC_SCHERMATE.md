@@ -126,3 +126,12 @@ Non è presente il selettore «Ordina per». Restano la selezione del mese e il 
 ## Admin — dettaglio giocatore
 
 Nell’elenco Giocatori il tocco apre il dettaglio con nome, contatti, dati ranking e statistiche. Lo storico personale usa `GET /players/:id/statistics`, senza il limite dell’elenco generale delle partite. Ogni partita apre il relativo dettaglio; tornando indietro resta la ricerca dei giocatori. Sono presenti aggiornamento, errore con Riprova e storico vuoto.
+
+## Statistiche giocatore — aggiornamento dopo importazioni
+
+La scheda pubblica raggiunta da classifica generale, presenze o decadi rilegge
+le statistiche a ogni apertura. Le risposte non restano memorizzate dopo la
+chiusura della scheda, anche se lo stesso giocatore viene raggiunto tramite
+identificativo account o anagrafica. Tornando nell’app dal background la
+scheda aperta aggiorna i dati; resta disponibile il trascinamento verso il basso.
+Punti e risultati salvati non vengono modificati dall’aggiornamento.

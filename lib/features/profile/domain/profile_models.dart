@@ -19,6 +19,7 @@ abstract class PlayerRanking with _$PlayerRanking {
     double eloScore,
     @Default(0) int matchesPlayed,
     @Default(0) int matchesWon,
+    @Default(<String>[]) List<String> recentForm,
   }) = _PlayerRanking;
 
   factory PlayerRanking.fromJson(Map<String, dynamic> json) =>
@@ -98,6 +99,176 @@ class RankingAlerts {
   );
 }
 
+class MostPlayedRankingResult {
+  const MostPlayedRankingResult({this.since = '', this.players = const []});
+  final String since;
+  final List<MostPlayedPlayer> players;
+}
+
+enum MostPlayedSort { matchesPlayed, underdogDescending, underdogAscending }
+
+List<MostPlayedPlayer> sortMostPlayedPlayers(
+  List<MostPlayedPlayer> players,
+  MostPlayedSort order,
+) {
+  if (order == MostPlayedSort.matchesPlayed) return [...players];
+  return [...players]..sort((a, b) {
+    final left = a.underdogMatchPercentage;
+    final right = b.underdogMatchPercentage;
+    if (left == null && right != null) return 1;
+    if (left != null && right == null) return -1;
+    if (left != null && right != null && left != right) {
+      return order == MostPlayedSort.underdogAscending
+          ? left.compareTo(right)
+          : right.compareTo(left);
+    }
+    final byMatches = b.matchesPlayed.compareTo(a.matchesPlayed);
+    if (byMatches != 0) return byMatches;
+    final byWins = b.wins.compareTo(a.wins);
+    if (byWins != 0) return byWins;
+    final byName = a.name.compareTo(b.name);
+    return byName != 0
+        ? byName
+        : (a.playerRef ?? '').compareTo(b.playerRef ?? '');
+  });
+}
+
+class MostPlayedPlayer {
+  const MostPlayedPlayer({
+    required this.position,
+    required this.name,
+    required this.matchesPlayed,
+    required this.wins,
+    required this.losses,
+    required this.setsWon,
+    required this.setsLost,
+    required this.gamesWon,
+    required this.gamesLost,
+    required this.matchesWithScore,
+    this.photoUrl,
+    this.playerRef,
+    this.ranking,
+    this.difficultyLevel,
+    this.tiebreaksPlayed = 0,
+    this.tiebreaksWon = 0,
+    this.underdogMatches = 0,
+    this.underdogWins = 0,
+    this.underdogMatchPercentage,
+    this.matchesWithCoefficients = 0,
+  });
+  final int position,
+      matchesPlayed,
+      wins,
+      losses,
+      setsWon,
+      setsLost,
+      gamesWon,
+      gamesLost,
+      matchesWithScore;
+  final String name;
+  final String? photoUrl;
+  final String? playerRef;
+  final PlayerRanking? ranking;
+  final String? difficultyLevel;
+  final int tiebreaksPlayed, tiebreaksWon;
+  final int underdogMatches, underdogWins, matchesWithCoefficients;
+  final double? underdogMatchPercentage;
+
+  factory MostPlayedPlayer.fromJson(Map<String, dynamic> json) =>
+      MostPlayedPlayer(
+        position: (json['position'] as num).toInt(),
+        name: json['player_name'] as String,
+        photoUrl: json['player_photo_url'] as String?,
+        playerRef: json['player_ref'] as String?,
+        ranking: json['ranking'] is Map<String, dynamic>
+            ? PlayerRanking.fromJson(json['ranking'] as Map<String, dynamic>)
+            : null,
+        matchesPlayed: (json['matches_played'] as num).toInt(),
+        wins: (json['wins'] as num).toInt(),
+        losses: (json['losses'] as num).toInt(),
+        setsWon: (json['sets_won'] as num).toInt(),
+        setsLost: (json['sets_lost'] as num).toInt(),
+        gamesWon: (json['games_won'] as num).toInt(),
+        gamesLost: (json['games_lost'] as num).toInt(),
+        matchesWithScore: (json['matches_with_score'] as num).toInt(),
+        difficultyLevel: json['difficulty_level'] as String?,
+        tiebreaksPlayed: (json['tiebreaks_played'] as num?)?.toInt() ?? 0,
+        tiebreaksWon: (json['tiebreaks_won'] as num?)?.toInt() ?? 0,
+        underdogMatches: (json['underdog_matches'] as num?)?.toInt() ?? 0,
+        underdogWins: (json['underdog_wins'] as num?)?.toInt() ?? 0,
+        underdogMatchPercentage: (json['underdog_match_percentage'] as num?)
+            ?.toDouble(),
+        matchesWithCoefficients:
+            (json['matches_with_coefficients'] as num?)?.toInt() ?? 0,
+      );
+}
+
+class RankingMatchSummary {
+  const RankingMatchSummary({required this.totalPlayed, required this.since});
+
+  final int totalPlayed;
+  final String since;
+
+  factory RankingMatchSummary.fromJson(Map<String, dynamic> json) =>
+      RankingMatchSummary(
+        totalPlayed: (json['total_played'] as num).toInt(),
+        since: json['since'] as String,
+      );
+}
+
+class RecentPlayerMatch {
+  const RecentPlayerMatch({
+    required this.id,
+    required this.date,
+    required this.timeSlot,
+    required this.courtName,
+    required this.score,
+    required this.resultLabel,
+    required this.won,
+    required this.teamMates,
+    required this.opponents,
+    required this.rankingScoreDelta,
+  });
+
+  final String id;
+  final String date;
+  final String timeSlot;
+  final String courtName;
+
+  /// Set scores with the player's team first, including the match tie-break.
+  final String score;
+  final String resultLabel;
+  final bool won;
+  final List<String> teamMates;
+  final List<String> opponents;
+  final double? rankingScoreDelta;
+}
+
+class PlayerHighlightPerson {
+  const PlayerHighlightPerson({
+    required this.name,
+    this.matches = 0,
+    this.wins = 0,
+    this.losses = 0,
+    this.winRate = 0,
+  });
+
+  final String name;
+  final int matches;
+  final int wins;
+  final int losses;
+  final double winRate;
+
+  factory PlayerHighlightPerson.fromJson(Map<String, dynamic> json) =>
+      PlayerHighlightPerson(
+        name: json['name'] as String? ?? '',
+        matches: (json['matches'] as num?)?.toInt() ?? 0,
+        wins: (json['wins'] as num?)?.toInt() ?? 0,
+        losses: (json['losses'] as num?)?.toInt() ?? 0,
+        winRate: _number(json['win_rate']),
+      );
+}
+
 /// Statistiche del Profilo, come i 4 riquadri del sito.
 class ProfileStats {
   const ProfileStats({
@@ -115,14 +286,25 @@ class ProfileStats {
     this.setsLost = 0,
     this.gamesWon = 0,
     this.gamesLost = 0,
+    this.tiebreaksPlayed = 0,
+    this.tiebreaksWon = 0,
     this.underdogMatches = 0,
     this.underdogWins = 0,
     this.favoriteMatches = 0,
     this.favoriteWins = 0,
     this.rankingPointsEarned = 0,
     this.rankingPointsAverage = 0,
+    this.rankingScoreEarned = 0,
+    this.rankingScoreAverage = 0,
+    this.currentRankingScore = 0,
     this.recentMatches = 0,
     this.recentWins = 0,
+    this.recentHistory = const [],
+    this.currentStreakType,
+    this.currentStreakCount = 0,
+    this.bestPartner,
+    this.mostFacedOpponent,
+    this.badges = const [],
     this.rankingAlerts = const RankingAlerts(),
     this.photoUrl,
     this.photoStorageId,
@@ -144,25 +326,37 @@ class ProfileStats {
   final int setsLost;
   final int gamesWon;
   final int gamesLost;
+  final int tiebreaksPlayed;
+  final int tiebreaksWon;
   final int underdogMatches;
   final int underdogWins;
   final int favoriteMatches;
   final int favoriteWins;
   final double rankingPointsEarned;
   final double rankingPointsAverage;
+  final double rankingScoreEarned;
+  final double rankingScoreAverage;
+  final double currentRankingScore;
   final int recentMatches;
   final int recentWins;
+  final List<RecentPlayerMatch> recentHistory;
+  final String? currentStreakType;
+  final int currentStreakCount;
+  final PlayerHighlightPerson? bestPartner;
+  final PlayerHighlightPerson? mostFacedOpponent;
+  final List<String> badges;
   final RankingAlerts rankingAlerts;
   final String? photoUrl;
   final String? photoStorageId;
   final bool photoPublicConsent;
 
-  /// Percentuale di vittorie arrotondata, come sul sito.
+  /// Le partite senza esito non assegnano vittorie o sconfitte.
+  int get decidedMatches => matchesWon + matchesLost;
   int get winRate =>
-      matchesPlayed == 0 ? 0 : (matchesWon * 100 / matchesPlayed).round();
+      decidedMatches == 0 ? 0 : (matchesWon * 100 / decidedMatches).round();
 
   int get lossRate =>
-      matchesPlayed == 0 ? 0 : (matchesLost * 100 / matchesPlayed).round();
+      decidedMatches == 0 ? 0 : (matchesLost * 100 / decidedMatches).round();
 
   int get setWinRate => setsWon + setsLost == 0
       ? 0

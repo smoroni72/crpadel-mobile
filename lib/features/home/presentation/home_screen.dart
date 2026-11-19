@@ -26,6 +26,7 @@ import '../../notifications/presentation/notifications_provider.dart';
 import '../../profile/domain/profile_models.dart';
 import '../../profile/presentation/widgets/player_avatar.dart';
 import '../../profile/presentation/profile_providers.dart';
+import '../../explore/presentation/public_player_stats_screen.dart';
 import '../domain/home_news.dart';
 import 'home_providers.dart';
 import 'package:intl/intl.dart';
@@ -49,6 +50,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subscriptions = ref.watch(usableSubscriptionsProvider);
+    final menuConfiguration = ref.watch(appMenuConfigurationProvider).value;
+    final bookingsEnabled = menuConfiguration?.bookings ?? false;
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -74,8 +77,10 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               const _NewsSection(),
               const SizedBox(height: 24),
-              const _BookingsSection(),
-              const SizedBox(height: 20),
+              if (bookingsEnabled) ...[
+                const _BookingsSection(),
+                const SizedBox(height: 20),
+              ],
               const _DayMatchesSection(),
             ],
           ),
@@ -83,6 +88,15 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+void _openPlayerStats(BuildContext context, PlayerRanking player) {
+  if (player.playerRef == null || player.playerRef!.isEmpty) return;
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => PublicPlayerStatsScreen(player: player),
+    ),
+  );
 }
 
 class _RankingAlertBanner extends ConsumerWidget {
@@ -291,37 +305,53 @@ class _PodiumCard extends StatelessWidget {
       2 => const Color(0xFF8490A3),
       _ => const Color(0xFFB96A3D),
     };
-    return Container(
-      constraints: BoxConstraints(minHeight: featured ? 142 : 164),
-      padding: EdgeInsets.all(featured ? 18 : 14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colors.navy,
-            Color.alphaBlend(accent.withValues(alpha: .32), colors.navy),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: accent.withValues(alpha: .55)),
-      ),
-      child: featured
-          ? Row(
-              children: [
-                _PlaceBadge(place: place, color: accent, large: true),
-                const SizedBox(width: 16),
-                Expanded(child: _PodiumDetails(player: player, light: true)),
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _PlaceBadge(place: place, color: accent),
-                const SizedBox(height: 12),
-                _PodiumDetails(player: player, light: true),
+    return Semantics(
+      button: true,
+      label: 'Apri le statistiche di ${player.playerName}',
+      child: GestureDetector(
+        onTap: () => _openPlayerStats(context, player),
+        child: Container(
+          constraints: BoxConstraints(minHeight: featured ? 142 : 164),
+          padding: EdgeInsets.all(featured ? 18 : 14),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                colors.navy,
+                Color.alphaBlend(accent.withValues(alpha: .32), colors.navy),
               ],
             ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: accent.withValues(alpha: .55)),
+          ),
+          child: featured
+              ? Row(
+                  children: [
+                    _PlaceBadge(place: place, color: accent, large: true),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _PodiumDetails(player: player, light: true),
+                    ),
+                    const Icon(Icons.chevron_right, color: Colors.white70),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _PlaceBadge(place: place, color: accent),
+                        const Icon(Icons.chevron_right, color: Colors.white70),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _PodiumDetails(player: player, light: true),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 }
@@ -407,6 +437,10 @@ class _PodiumDetails extends StatelessWidget {
           '${_score(player.eloScore)} punti · ${player.matchesWon} vittorie',
           style: TextStyle(fontSize: 11, color: secondary),
         ),
+        if (player.recentForm.isNotEmpty) ...[
+          const SizedBox(height: 7),
+          _HomeRecentForm(results: player.recentForm, light: light),
+        ],
       ],
     );
   }
@@ -425,65 +459,130 @@ class _RankingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-      decoration: BoxDecoration(
-        border: last ? null : Border(bottom: BorderSide(color: colors.divider)),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 32,
-            child: Text(
-              '$place',
-              style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+    return InkWell(
+      onTap: () => _openPlayerStats(context, player),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          border: last
+              ? null
+              : Border(bottom: BorderSide(color: colors.divider)),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 32,
+              child: Text(
+                '$place',
+                style: context.fonts.monoStyle(fontWeight: FontWeight.w700),
+              ),
             ),
-          ),
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: parseHexColor(player.rankingBandColor) ?? colors.divider,
+                border: Border.all(color: colors.border),
+              ),
+            ),
+            const SizedBox(width: 9),
+            PlayerAvatar(
+              name: player.playerName,
+              photoUrl: player.playerPhotoUrl,
+              size: 32,
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    player.playerName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    '${player.matchesWon} vittorie su ${player.matchesPlayed}',
+                    style: TextStyle(fontSize: 11, color: colors.textSecondary),
+                  ),
+                  if (player.recentForm.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    _HomeRecentForm(results: player.recentForm),
+                  ],
+                ],
+              ),
+            ),
+            Text(
+              _score(player.eloScore),
+              style: context.fonts.monoStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right, size: 18, color: colors.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeRecentForm extends StatelessWidget {
+  const _HomeRecentForm({required this.results, this.light = false});
+
+  final List<String> results;
+  final bool light;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = results
+        .where((result) => result == 'V' || result == 'S')
+        .take(5)
+        .toList();
+    final labelColor = light ? Colors.white70 : context.colors.textSecondary;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('Forma', style: TextStyle(fontSize: 9, color: labelColor)),
+        const SizedBox(width: 4),
+        for (final result in visible) ...[
           Container(
-            width: 12,
-            height: 12,
+            width: 17,
+            height: 17,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: parseHexColor(player.rankingBandColor) ?? colors.divider,
-              border: Border.all(color: colors.border),
+              color: result == 'V'
+                  ? Colors.green.withValues(alpha: light ? .3 : .14)
+                  : Colors.red.withValues(alpha: light ? .3 : .12),
+              border: Border.all(
+                color: result == 'V'
+                    ? Colors.greenAccent.withValues(alpha: .7)
+                    : Colors.redAccent.withValues(alpha: .7),
+              ),
+            ),
+            child: Text(
+              result,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                color: light
+                    ? Colors.white
+                    : result == 'V'
+                    ? Colors.green
+                    : Colors.red,
+              ),
             ),
           ),
-          const SizedBox(width: 9),
-          PlayerAvatar(
-            name: player.playerName,
-            photoUrl: player.playerPhotoUrl,
-            size: 32,
-          ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  player.playerName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  '${player.matchesWon} vittorie su ${player.matchesPlayed}',
-                  style: TextStyle(fontSize: 11, color: colors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            _score(player.eloScore),
-            style: context.fonts.monoStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          const SizedBox(width: 2),
         ],
-      ),
+      ],
     );
   }
 }

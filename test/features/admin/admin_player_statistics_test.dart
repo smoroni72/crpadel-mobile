@@ -13,6 +13,8 @@ void main() {
         'ranking_matches': 10,
         'friendly_matches': 1,
         'tournament_matches': 1,
+        'tiebreaks_played': 5,
+        'tiebreaks_won': 2,
         'sets_won': 16,
         'sets_lost': 12,
         'games_won': 90,
@@ -37,6 +39,8 @@ void main() {
       ],
     });
 
+    expect(statistics.tiebreaksPlayed, 5);
+    expect(statistics.tiebreaksWon, 2);
     expect(statistics.matchesPlayed, 12);
     expect(statistics.winRate, 58);
     expect(statistics.favoriteStreak, 3);
