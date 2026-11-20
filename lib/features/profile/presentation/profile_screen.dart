@@ -31,6 +31,8 @@ import 'profile_labels.dart';
 import 'profile_providers.dart';
 import 'widgets/player_mood_avatar.dart';
 import 'widgets/player_pairings_table.dart';
+import 'widgets/player_expected_performance.dart';
+import 'widgets/player_card_button.dart';
 import 'widgets/player_avatar.dart';
 
 /// Profilo uguale a quello del sito: card, 4 riquadri, schede, Esci ed
@@ -918,42 +920,12 @@ class _PlayerPerformance extends ConsumerWidget {
                     'Senza coefficienti',
                     '${stats.rankingMatchesWithoutCoefficients} · fuori dal confronto',
                   ),
-                (
-                  'PR conquistati',
-                  intl.NumberFormat(
-                    '0.0#',
-                    'it_IT',
-                  ).format(stats.rankingPointsEarned),
-                ),
-                (
-                  'Media PR',
-                  intl.NumberFormat(
-                    '0.0#',
-                    'it_IT',
-                  ).format(stats.rankingPointsAverage),
-                ),
               ],
             ),
-            if (showRankingDetails) ...[
-              const SizedBox(height: 14),
-              _MetricGroup(
-                title: stats.recentHistory.isEmpty
-                    ? 'Classifica recente'
-                    : 'Classifica ultime ${stats.recentHistory.length}',
-                icon: Icons.add_chart_rounded,
-                color: Colors.purple,
-                metrics: [
-                  (
-                    'Punti classifica',
-                    _signedProfileScore(stats.rankingScoreEarned),
-                  ),
-                  (
-                    'Media per partita',
-                    _signedProfileScore(stats.rankingScoreAverage),
-                  ),
-                ],
-              ),
-            ],
+            const SizedBox(height: 14),
+            PlayerExpectedPerformance(value: stats.performanceExpectation),
+            const SizedBox(height: 14),
+            const PlayerCardButton(),
             const SizedBox(height: 18),
             const Divider(),
             const SizedBox(height: 14),

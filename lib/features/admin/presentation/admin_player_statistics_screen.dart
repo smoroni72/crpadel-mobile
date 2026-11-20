@@ -6,6 +6,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../data/admin_repository.dart';
 import 'admin_menu_button.dart';
+import '../../profile/presentation/widgets/player_expected_performance.dart';
+import '../../profile/presentation/widgets/player_card_button.dart';
 import 'admin_providers.dart';
 
 class AdminPlayerStatisticsScreen extends ConsumerWidget {
@@ -19,7 +21,10 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistiche giocatore'),
-        actions: const [AdminMenuButton()],
+        actions: [
+          PlayerCardButton(playerId: player.id, compact: true),
+          const AdminMenuButton(),
+        ],
       ),
       body: AsyncValueView(
         value: statistics,
@@ -143,20 +148,10 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
                     '${data.unfinishedRankingMatches}',
                     Icons.pause_circle_outline,
                   ),
-                  _Metric(
-                    'Punti reali',
-                    data.rankingPoints.toStringAsFixed(2),
-                    Icons.add_chart,
-                  ),
-                  _Metric(
-                    'Media punti reali',
-                    data.averageRankingPoints.toStringAsFixed(2),
-                    Icons.analytics_outlined,
-                  ),
                 ],
               ),
               const SizedBox(height: 14),
-              _Warnings(data: data),
+              PlayerExpectedPerformance(value: data.performanceExpectation),
               const SizedBox(height: 18),
               Text(
                 'Storico partite',
@@ -212,58 +207,6 @@ class _Metric extends StatelessWidget {
   );
 }
 
-class _Warnings extends StatelessWidget {
-  const _Warnings({required this.data});
-  final AdminPlayerStatistics data;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Situazione ranking',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 10),
-          _line(
-            context,
-            'Partite consecutive da favorito',
-            '${data.favoriteStreak}',
-            data.favoriteStreak >= 3,
-          ),
-          const Divider(height: 22),
-          _line(
-            context,
-            'Correzioni per decadi senza partite',
-            data.decadeAdjustmentPoints.toStringAsFixed(2),
-            data.decadeAdjustmentPoints < 0,
-          ),
-        ],
-      ),
-    ),
-  );
-
-  Widget _line(
-    BuildContext context,
-    String label,
-    String value,
-    bool warning,
-  ) => Row(
-    children: [
-      Icon(
-        warning ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-        color: warning ? Colors.orange : Colors.green,
-      ),
-      const SizedBox(width: 10),
-      Expanded(child: Text(label)),
-      Text(value, style: Theme.of(context).textTheme.titleMedium),
-    ],
-  );
-}
-
 class _MatchCard extends StatelessWidget {
   const _MatchCard({required this.match});
   final AdminPlayerMatchStatistic match;
@@ -302,17 +245,12 @@ class _MatchCard extends StatelessWidget {
             match.court,
             style: TextStyle(color: context.colors.textSecondary),
           ),
-          if (match.rankingPoints != null ||
-              match.rankingScoreDelta != null) ...[
+          if (match.rankingScoreDelta != null) ...[
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 6,
               children: [
-                if (match.rankingPoints != null)
-                  Chip(
-                    label: Text('Punti reali ${_signed(match.rankingPoints!)}'),
-                  ),
                 if (match.rankingScoreDelta != null)
                   Chip(
                     label: Text(
