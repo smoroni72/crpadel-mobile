@@ -158,3 +158,10 @@ Il rendimento distingue presenze registrate e partite valutate e offre il dettag
 Attività, Analisi Ranking e carta PDF mostrano Non concluse, con dettaglio senza esito e tempo scaduto. Il totale include entrambi gli stati senza modificare quelli salvati: tempo scaduto conserva la sconfitta Ranking, senza esito non assegna V/S. Sono sottoinsiemi delle presenze, non partite aggiuntive. Il rendimento continua a considerare soltanto incontri con vincitore; l’indice di sfida conserva l’inclusione del tempo scaduto con coefficienti validi. Conteggio una volta per ID solo su partite completed; sottoconteggio Ranking separato da amichevoli/tornei.
 
 Le tessere hanno righe di altezza adattabile per mostrare le didascalie; verificati profilo alla dimensione iPhone e griglia isolata stretta con testo ingrandito. Caso Del Giovane: 20 presenze, 14 vittorie, 6 sconfitte, 1 non conclusa (0 senza esito / 1 tempo scaduto), 19 valutate nel rendimento. Build 22 per installazione diretta, nessun caricamento TestFlight autorizzato.
+
+
+## Carta PDF: grafica del modello web anche nell’app — 20 novembre 2026
+
+Su richiesta utente, la carta generata nell’app riprende la grafica approvata della carta web: copertina blu, fascia colorata, foto/iniziali in cerchio, caratteri Space Grotesk e JetBrains Mono, riquadri su sfondo chiaro, grafico circolare vittorie, animaletto grande con barra e ultime cinque V/S. Le altre pagine hanno testata blu e lo stesso sfondo. Restano tre pagine per i casi normali; i compagni a pari merito possono richiedere proseguimenti.
+
+Non ripristinare i vecchi PR/bonus/decade o le spiegazioni sperimentali: tutti i dati aggiornati, rendimento rispetto alle attese e conteggio Non concluse restano presenti. Nessuna modifica a punti, classifica, esiti o API. Copertina separata in player_card_cover.dart e font/immagini opzionali iniettati per QA. Build 23 destinata all’installazione diretta autorizzata; nessuna distribuzione TestFlight.

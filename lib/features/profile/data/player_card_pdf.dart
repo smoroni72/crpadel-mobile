@@ -1,3 +1,4 @@
+import 'player_card_cover.dart';
 import '../domain/performance_details.dart';
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
@@ -82,6 +83,8 @@ Future<Uint8List> createPlayerCardPdf(Map<String, dynamic> data) async {
     data,
     font: await rootBundle.load('assets/fonts/Inter-Regular.ttf'),
     bold: await rootBundle.load('assets/fonts/Inter-SemiBold.ttf'),
+    heading: await rootBundle.load('assets/fonts/SpaceGrotesk-Bold.ttf'),
+    mono: await rootBundle.load('assets/fonts/JetBrainsMono-Medium.ttf'),
     logo: (await rootBundle.load(
       'assets/brand/crpadel_logo.png',
     )).buffer.asUint8List(),
@@ -94,6 +97,8 @@ Future<Uint8List> buildPlayerCardPdf(
   Map<String, dynamic> data, {
   required ByteData font,
   required ByteData bold,
+  ByteData? heading,
+  ByteData? mono,
   Uint8List? logo,
   Uint8List? photo,
   Uint8List? animal,
@@ -103,18 +108,13 @@ Future<Uint8List> buildPlayerCardPdf(
   if (player['name'] == null) {
     throw StateError('Carta giocatore non disponibile');
   }
-  final ranking = _map(card['ranking']);
   final stats = _map(data['period'] ?? data['totals']);
   final h = _map(data['highlights']);
   final e = _map(_map(data['performance_expectation'])['period']);
-  final expired = countTimeExpired(data['matches'] as List? ?? []);
   final expiredRanking = countTimeExpired(
     data['matches'] as List? ?? [],
     rankingOnly: true,
   );
-  final undecided =
-      (stats['undecided'] as num? ?? stats['unfinished_matches'] as num? ?? 0)
-          .toInt();
   final unfinishedRanking = (stats['unfinished_ranking_matches'] as num? ?? 0)
       .toInt();
   final navy = PdfColor.fromHex('#111d32');
@@ -144,7 +144,14 @@ Future<Uint8List> buildPlayerCardPdf(
   );
   pw.Widget title(String s) => pw.Padding(
     padding: const pw.EdgeInsets.only(top: 10, bottom: 7),
-    child: txt(s, 16, navy, true),
+    child: pw.Text(
+      s,
+      style: pw.TextStyle(
+        font: pw.Font.ttf(heading ?? bold),
+        fontSize: 16,
+        color: navy,
+      ),
+    ),
   );
   pw.Widget panel(List<pw.Widget> children, {PdfColor? color}) => pw.Container(
     width: double.infinity,
@@ -180,21 +187,22 @@ Future<Uint8List> buildPlayerCardPdf(
     ],
   );
   pw.Widget header(pw.Context _) => pw.Container(
-    padding: const pw.EdgeInsets.only(bottom: 14),
+    height: 56,
+    margin: const pw.EdgeInsets.only(bottom: 10),
     child: pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        if (logo != null) ...[
-          pw.Image(pw.MemoryImage(logo), width: 23, height: 32),
-          pw.SizedBox(width: 10),
-        ],
-        txt('CRPADEL / CARTA GIOCATORE', 10, navy, true),
-        pw.Spacer(),
+        txt('CRPADEL / CARTA GIOCATORE', 9, PdfColors.white, true),
         pw.SizedBox(
-          width: 230,
+          width: 270,
           child: pw.Text(
             '${player['name']}',
             textAlign: pw.TextAlign.right,
-            style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+            style: pw.TextStyle(
+              fontSize: 10,
+              color: PdfColors.white,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
         ),
       ],
@@ -209,148 +217,47 @@ Future<Uint8List> buildPlayerCardPdf(
   );
   void page(List<pw.Widget> children) => doc.addPage(
     pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.all(32),
-      theme: theme,
+      pageTheme: pw.PageTheme(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.fromLTRB(32, 16, 32, 24),
+        theme: theme,
+        buildBackground: (_) => pw.FullPage(
+          ignoreMargins: true,
+          child: pw.Stack(
+            children: [
+              pw.Positioned.fill(
+                child: pw.Container(color: PdfColor.fromHex('#f5f6f9')),
+              ),
+              pw.Positioned(
+                left: 0,
+                top: 0,
+                right: 0,
+                child: pw.SizedBox(
+                  height: 80,
+                  child: pw.Container(color: navy),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       header: header,
       footer: footer,
       build: (_) => children,
     ),
   );
-  final name = '${player['name']}';
-  page([
-    panel([
-      pw.Row(
-        children: [
-          pw.Expanded(
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                txt(name.toUpperCase(), 27, navy, true),
-                pw.SizedBox(height: 12),
-                txt(
-                  'Fascia ${ranking['band_name'] ?? 'non assegnata'}',
-                  12,
-                  muted,
-                ),
-              ],
-            ),
-          ),
-          pw.SizedBox(
-            width: 90,
-            height: 90,
-            child: photo != null
-                ? pw.ClipOval(
-                    child: pw.Image(
-                      pw.MemoryImage(photo),
-                      fit: pw.BoxFit.cover,
-                    ),
-                  )
-                : pw.Center(
-                    child: txt(
-                      name
-                          .split(' ')
-                          .take(2)
-                          .map((s) => s.isEmpty ? '' : s[0])
-                          .join(),
-                      28,
-                      navy,
-                      true,
-                    ),
-                  ),
-          ),
-        ],
-      ),
-      pw.SizedBox(height: 18),
-      metrics([
-        (
-          'Posizione',
-          ranking['position'] == null ? '-' : '${ranking['position']}°',
-        ),
-        ('Punti classifica', _number(ranking['points'], 2)),
-        ('Coefficiente', _number(ranking['coefficient'], 2)),
-      ]),
-    ]),
-    panel([
-      txt('DATI DEL GIOCATORE', 9, muted, true),
-      pw.SizedBox(height: 10),
-      txt(
-        'Nascita da verificare: ${player['personal_data_visible'] == true ? _date(player['birth_date']) : 'Non pubblicata'}',
-        9,
-      ),
-      pw.SizedBox(height: 5),
-      txt(
-        'Lato di gioco: ${{'DX': 'Destra', 'SX': 'Sinistra'}[player['preferred_side']] ?? 'Non indicato'}',
-        9,
-      ),
-    ]),
-    title('Il bilancio'),
-    panel([
-      metrics([
-        ('Partite', _number(stats['matches_played'])),
-        ('Vittorie', _number(stats['wins'])),
-        ('Sconfitte', _number(stats['losses'])),
-        ('Non concluse', _number(undecided + expired)),
-      ]),
-    ]),
-    if (expired + undecided > 0)
-      txt(
-        'Non concluse: $undecided senza esito / $expired tempo scaduto. Già incluse nelle presenze.',
-        8,
-        muted,
-      ),
-    title('Indice di sfida'),
-    panel([
-      pw.Row(
-        children: [
-          if (animal != null) ...[
-            pw.Image(pw.MemoryImage(animal), width: 70, height: 70),
-            pw.SizedBox(width: 16),
-          ],
-          pw.Expanded(
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                txt(
-                  playerAnimals.containsKey(stats['challenge_animal'])
-                      ? stats['challenge_animal']
-                      : 'Da definire',
-                  24,
-                  navy,
-                  true,
-                ),
-                txt('${_number(stats['challenge_index'], 2)}/100', 25),
-                txt(
-                  '${stats['challenge_matches'] ?? 0} partite Ranking valutate',
-                  9,
-                  muted,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      pw.SizedBox(height: 8),
-      txt(
-        'Leone 95-100 / Tigre 90-<95 / Lupo 85-<90 / Volpe 80-<85 / Gatto 70-<80 / Coniglio <70',
-        8,
-        muted,
-      ),
-    ], color: PdfColor.fromHex('#fff7e4')),
-    title('Forma recente'),
-    panel([
-      txt(
-        (_map(h['current_streak'])['count'] ?? 0) == 0
-            ? 'Nessuna serie disponibile'
-            : '${_map(h['current_streak'])['count']} ${_map(h['current_streak'])['type'] == 'win' ? 'vittorie' : 'sconfitte'} consecutive',
-        12,
-        navy,
-        true,
-      ),
-      pw.SizedBox(height: 8),
-      txt((h['badges'] as List? ?? []).join(' / '), 9, muted),
-    ]),
-  ]);
+  doc.addPage(
+    playerCardCover(
+      data,
+      theme: theme,
+      heading: pw.Font.ttf(heading ?? bold),
+      mono: pw.Font.ttf(mono ?? bold),
+      footer: footer,
+      logo: logo,
+      photo: photo,
+      animal: animal,
+    ),
+  );
   final ready = e['status'] == 'ready';
   final raw = (e['extra_wins_per_10'] as num?)?.toDouble();
   final delta = raw != null && raw.abs() < .005 ? 0.0 : raw;

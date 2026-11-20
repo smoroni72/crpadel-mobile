@@ -94,6 +94,14 @@ void main() {
           data,
           font: await rootBundle.load('assets/fonts/Inter-Regular.ttf'),
           bold: await rootBundle.load('assets/fonts/Inter-SemiBold.ttf'),
+          heading: await rootBundle.load('assets/fonts/SpaceGrotesk-Bold.ttf'),
+          mono: await rootBundle.load('assets/fonts/JetBrainsMono-Medium.ttf'),
+          animal: data['qa_animal_path'] == null
+              ? null
+              : await File(data['qa_animal_path'] as String).readAsBytes(),
+          photo: data['qa_photo_path'] == null
+              ? null
+              : await File(data['qa_photo_path'] as String).readAsBytes(),
           logo: (await rootBundle.load(
             'assets/brand/crpadel_logo.png',
           )).buffer.asUint8List(),
