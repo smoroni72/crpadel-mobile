@@ -135,3 +135,12 @@ chiusura della scheda, anche se lo stesso giocatore viene raggiunto tramite
 identificativo account o anagrafica. Tornando nell’app dal background la
 scheda aperta aggiorna i dati; resta disponibile il trascinamento verso il basso.
 Punti e risultati salvati non vengono modificati dall’aggiornamento.
+
+
+## Carta giocatore PDF e rendimento — 20 novembre 2026
+
+Profilo personale, scheda giocatore pubblica e statistiche amministratore offrono Carta giocatore PDF. L’anteprima nativa permette stampa e condivisione/salvataggio tramite il sistema operativo. Lettura fresca da statistics con include_card e public_view, conservando autorizzazioni e privacy del backend; foto solo dallo storage dello stesso server, ripiego alle iniziali. Font e logo locali, animaletto rasterizzato dal sistema.
+
+Il rendimento rispetto alle attese sostituisce PR conquistati/media PR e il riepilogo rettifiche nella scheda: differenza di vittorie ogni dieci incontri, partite valutate, vittorie ottenute e attese. Nessuna etichetta o spiegazione Sperimentale/Provvisorio. Stati senza dati non inventano un punteggio zero. Punti correnti di classifica e strumenti amministrativi restano disponibili. Nessuna modifica alle regole o ai calcoli API.
+
+La stampa usa pdf 3.13 e printing 5.15, compatibili con la libreria image esistente. Toolchain CI allineata alla Flutter 3.47.7 stabile utilizzata per la build iOS; SDK Dart minimo 3.12. Nessun downgrade delle dipendenze immagini.

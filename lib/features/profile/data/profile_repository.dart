@@ -251,6 +251,10 @@ class ApiProfileRepository implements ProfileRepository {
           0,
       favoriteMatches: (totals['favorite_matches'] as num?)?.toInt() ?? 0,
       favoriteWins: (totals['favorite_wins'] as num?)?.toInt() ?? 0,
+      performanceExpectation:
+          (detail?['performance_expectation']
+                  as Map<String, dynamic>?)?['period']
+              as Map<String, dynamic>?,
       rankingPointsEarned: _double(totals['ranking_points_earned']),
       rankingPointsAverage: _double(totals['ranking_points_average']),
       rankingScoreEarned: rankingScoreEarned,
@@ -367,6 +371,10 @@ class ApiProfileRepository implements ProfileRepository {
           0,
       favoriteMatches: (totals['favorite_matches'] as num?)?.toInt() ?? 0,
       favoriteWins: (totals['favorite_wins'] as num?)?.toInt() ?? 0,
+      performanceExpectation:
+          (detail['performance_expectation']
+                  as Map<String, dynamic>?)?['period']
+              as Map<String, dynamic>?,
       rankingPointsEarned: _double(totals['ranking_points_earned']),
       rankingPointsAverage: _double(totals['ranking_points_average']),
       rankingScoreEarned: rankingScoreEarned,

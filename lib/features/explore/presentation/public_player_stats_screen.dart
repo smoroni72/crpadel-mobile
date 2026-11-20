@@ -11,6 +11,8 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../profile/domain/profile_models.dart';
 import '../../profile/presentation/widgets/player_avatar.dart';
 import '../../profile/presentation/widgets/player_pairings_table.dart';
+import '../../profile/presentation/widgets/player_expected_performance.dart';
+import '../../profile/presentation/widgets/player_card_button.dart';
 import 'explore_providers.dart';
 
 class PublicPlayerStatsScreen extends ConsumerStatefulWidget {
@@ -50,7 +52,10 @@ class _PublicPlayerStatsScreenState
     final showRankingDetails =
         ref.watch(authControllerProvider).value?.isAdmin ?? false;
     return Scaffold(
-      appBar: AppBar(title: const Text('Statistiche giocatore')),
+      appBar: AppBar(
+        title: const Text('Statistiche giocatore'),
+        actions: [PlayerCardButton(playerId: player.playerRef, compact: true)],
+      ),
       body: AsyncValueView(
         value: ref.watch(publicPlayerStatsProvider(player)),
         errorText: 'Non riesco a caricare le statistiche del giocatore',
@@ -119,6 +124,8 @@ class _PublicPlayerStatsScreenState
                     ? const _EmptyState(label: 'Nessun risultato disponibile')
                     : _TrendChart(matches: stats.recentHistory),
               ),
+              const SizedBox(height: 16),
+              PlayerExpectedPerformance(value: stats.performanceExpectation),
               const SizedBox(height: 16),
               PlayerPairingsTable(stats: stats),
               if (_hasHighlights(stats)) ...[

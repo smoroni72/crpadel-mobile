@@ -267,6 +267,7 @@ class AdminPlayerStatistics {
     this.unfinishedRankingMatches = 0,
     required this.favoriteMatches,
     required this.favoriteWins,
+    this.performanceExpectation,
     required this.rankingPoints,
     required this.averageRankingPoints,
     required this.favoriteStreak,
@@ -293,6 +294,7 @@ class AdminPlayerStatistics {
   final int unfinishedRankingMatches;
   final int favoriteMatches;
   final int favoriteWins;
+  final Map<String, dynamic>? performanceExpectation;
   final double rankingPoints;
   final double averageRankingPoints;
   final int favoriteStreak;
@@ -328,6 +330,9 @@ class AdminPlayerStatistics {
       unfinishedRankingMatches: _intValue(totals['unfinished_ranking_matches']),
       favoriteMatches: _intValue(totals['favorite_matches']),
       favoriteWins: _intValue(totals['favorite_wins']),
+      performanceExpectation:
+          (json['performance_expectation'] as Map<String, dynamic>?)?['period']
+              as Map<String, dynamic>?,
       rankingPoints: _doubleValue(totals['ranking_points_earned']),
       averageRankingPoints: _doubleValue(totals['ranking_points_average']),
       favoriteStreak: _intValue(json['current_favorite_streak']),

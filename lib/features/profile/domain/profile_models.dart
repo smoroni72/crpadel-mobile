@@ -296,6 +296,7 @@ class ProfileStats {
     this.rankingMatchesWithoutCoefficients = 0,
     this.favoriteMatches = 0,
     this.favoriteWins = 0,
+    this.performanceExpectation,
     this.rankingPointsEarned = 0,
     this.rankingPointsAverage = 0,
     this.rankingScoreEarned = 0,
@@ -344,6 +345,7 @@ class ProfileStats {
   final int rankingMatchesWithoutCoefficients;
   final int favoriteMatches;
   final int favoriteWins;
+  final Map<String, dynamic>? performanceExpectation;
   final double rankingPointsEarned;
   final double rankingPointsAverage;
   final double rankingScoreEarned;
