@@ -1,3 +1,4 @@
+import '../domain/performance_details.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:typed_data';
 
@@ -157,15 +158,35 @@ class ApiProfileRepository implements ProfileRepository {
       ),
       _api.get('/players/directory'),
     ).wait;
-    final own = _list(mine.data).map(PlayerRanking.fromJson).firstOrNull;
+    final filteredOwn = _list(
+      mine.data,
+    ).map(PlayerRanking.fromJson).firstOrNull;
     // Con il filtro per giocatore il server calcola la posizione solo sul
     // risultato filtrato (sempre 1): la prendiamo dalla classifica completa,
     // come fa il sito.
-    final leaderboard = _list(board.data).map(PlayerRanking.fromJson);
-    final index = leaderboard.toList().indexWhere((r) => r.playerRef == userId);
+    final leaderboard = _list(board.data).map(PlayerRanking.fromJson).toList();
     final self = _list(
       directory.data,
     ).where((player) => player['is_self'] == true).firstOrNull;
+    var index = leaderboard.indexWhere((r) => r.playerRef == userId);
+    if (index < 0 && self != null) {
+      index = leaderboard.indexWhere((r) => r.playerRef == self['id']);
+    }
+    final own = index >= 0
+        ? leaderboard[index]
+        : filteredOwn ??
+              (self?['ranking_score'] != null
+                  ? PlayerRanking(
+                      playerRef: self!['id'] as String?,
+                      playerName: self['full_name'] as String? ?? '',
+                      eloScore: nullableRankingScoreFromJson(
+                        self['ranking_score'],
+                      ),
+                      rankingBandName: self['ranking_band_name'] as String?,
+                      rankingBandColor: self['ranking_band_color'] as String?,
+                    )
+                  : null);
+
     Map<String, dynamic>? detail;
     if (self != null) {
       final response = await _api.get('/players/${self['id']}/statistics');
@@ -251,10 +272,7 @@ class ApiProfileRepository implements ProfileRepository {
           0,
       favoriteMatches: (totals['favorite_matches'] as num?)?.toInt() ?? 0,
       favoriteWins: (totals['favorite_wins'] as num?)?.toInt() ?? 0,
-      performanceExpectation:
-          (detail?['performance_expectation']
-                  as Map<String, dynamic>?)?['period']
-              as Map<String, dynamic>?,
+      performanceExpectation: performanceDetails(detail),
       rankingPointsEarned: _double(totals['ranking_points_earned']),
       rankingPointsAverage: _double(totals['ranking_points_average']),
       rankingScoreEarned: rankingScoreEarned,
@@ -371,10 +389,7 @@ class ApiProfileRepository implements ProfileRepository {
           0,
       favoriteMatches: (totals['favorite_matches'] as num?)?.toInt() ?? 0,
       favoriteWins: (totals['favorite_wins'] as num?)?.toInt() ?? 0,
-      performanceExpectation:
-          (detail['performance_expectation']
-                  as Map<String, dynamic>?)?['period']
-              as Map<String, dynamic>?,
+      performanceExpectation: performanceDetails(detail),
       rankingPointsEarned: _double(totals['ranking_points_earned']),
       rankingPointsAverage: _double(totals['ranking_points_average']),
       rankingScoreEarned: rankingScoreEarned,

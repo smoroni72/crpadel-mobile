@@ -62,7 +62,10 @@ void main() {
       final stats = await repo.publicStats(
         player: const PlayerRanking(playerRef: 'p', playerName: 'Giocatore'),
       );
-      expect(stats.performanceExpectation, expectation);
+      expect(stats.performanceExpectation, {
+        ...expectation,
+        'excluded_details': [],
+      });
     },
   );
   test(
