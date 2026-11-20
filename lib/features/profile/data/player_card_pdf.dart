@@ -1,3 +1,4 @@
+import '../domain/performance_details.dart';
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show TextPainter, TextSpan, TextStyle;
@@ -106,6 +107,16 @@ Future<Uint8List> buildPlayerCardPdf(
   final stats = _map(data['period'] ?? data['totals']);
   final h = _map(data['highlights']);
   final e = _map(_map(data['performance_expectation'])['period']);
+  final expired = countTimeExpired(data['matches'] as List? ?? []);
+  final expiredRanking = countTimeExpired(
+    data['matches'] as List? ?? [],
+    rankingOnly: true,
+  );
+  final undecided =
+      (stats['undecided'] as num? ?? stats['unfinished_matches'] as num? ?? 0)
+          .toInt();
+  final unfinishedRanking = (stats['unfinished_ranking_matches'] as num? ?? 0)
+      .toInt();
   final navy = PdfColor.fromHex('#111d32');
   final muted = PdfColor.fromHex('#6b778b');
   final green = PdfColor.fromHex('#239b65');
@@ -279,9 +290,15 @@ Future<Uint8List> buildPlayerCardPdf(
         ('Partite', _number(stats['matches_played'])),
         ('Vittorie', _number(stats['wins'])),
         ('Sconfitte', _number(stats['losses'])),
-        ('Non terminate', _number(stats['unfinished_matches'])),
+        ('Non concluse', _number(undecided + expired)),
       ]),
     ]),
+    if (expired + undecided > 0)
+      txt(
+        'Non concluse: $undecided senza esito / $expired tempo scaduto. Già incluse nelle presenze.',
+        8,
+        muted,
+      ),
     title('Indice di sfida'),
     panel([
       pw.Row(
@@ -366,7 +383,7 @@ Future<Uint8List> buildPlayerCardPdf(
         ('Da sfavorito', _number(stats['underdog_matches'])),
         ('Da favorito', _number(stats['favorite_matches'])),
         ('A parità', _number(stats['equal_matches'])),
-        ('Non terminate', _number(stats['unfinished_ranking_matches'])),
+        ('Non concluse', _number(unfinishedRanking + expiredRanking)),
       ]),
     ]),
     title('Rendimento rispetto alle attese'),

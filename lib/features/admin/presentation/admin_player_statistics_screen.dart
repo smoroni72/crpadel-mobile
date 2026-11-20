@@ -1,3 +1,4 @@
+import '../../../core/widgets/adaptive_metrics_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -69,13 +70,8 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
               const SizedBox(height: 14),
               Text('Rendimento', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 1.55,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
+              AdaptiveMetricsGrid(
+                aspectRatio: 1.25,
                 children: [
                   _Metric(
                     'Partite',
@@ -92,11 +88,13 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
                     '${data.winRate}%',
                     Icons.trending_up,
                   ),
-                  if (data.undecided > 0)
+                  if (data.nonConcludedMatches > 0)
                     _Metric(
-                      'Non terminate',
-                      '${data.undecided}',
+                      'Non concluse',
+                      '${data.nonConcludedMatches}',
                       Icons.timelapse_rounded,
+                      caption:
+                          '${data.undecided} senza esito · ${data.timeExpiredMatches} tempo scaduto',
                     ),
                   _Metric(
                     'Ranking',
@@ -144,9 +142,11 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
                     Icons.balance,
                   ),
                   _Metric(
-                    'Ranking non terminate',
-                    '${data.unfinishedRankingMatches}',
+                    'Ranking non concluse',
+                    '${data.nonConcludedRankingMatches}',
                     Icons.pause_circle_outline,
+                    caption:
+                        '${data.unfinishedRankingMatches} senza esito · ${data.timeExpiredRankingMatches} tempo scaduto',
                   ),
                 ],
               ),
@@ -179,11 +179,12 @@ class AdminPlayerStatisticsScreen extends ConsumerWidget {
 }
 
 class _Metric extends StatelessWidget {
-  const _Metric(this.label, this.value, this.icon);
+  const _Metric(this.label, this.value, this.icon, {this.caption});
 
   final String label;
   final String value;
   final IconData icon;
+  final String? caption;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -201,6 +202,12 @@ class _Metric extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(color: context.colors.textSecondary),
           ),
+          if (caption != null)
+            Text(
+              caption!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 10),
+            ),
         ],
       ),
     ),

@@ -151,3 +151,10 @@ La stampa usa pdf 3.13 e printing 5.15, compatibili con la libreria image esiste
 Punti, fascia e posizione del profilo usano la stessa riga collegata tramite ID utente/anagrafica. La ricerca per email è un ripiego; non si abbinano persone per nome. Fuori dalla classifica qualificata si può mostrare il punteggio salvato nell’anagrafica propria senza inventare una posizione.
 
 Il rendimento distingue presenze registrate e partite valutate e offre il dettaglio delle esclusioni con data, orario e motivo. Un tempo scaduto mantiene la sconfitta Ranking ma, non avendo vincitore, non entra nella stima delle vittorie attese. Esempio Del Giovane: 20 presenze, 19 valutate, esclusa l’11 novembre 12:30. Corretta anche la dicitura al singolare della serie attuale. Build 21 destinata all’installazione diretta sull’iPhone dell’utente; nessuna distribuzione TestFlight autorizzata.
+
+
+## Partite non concluse — 20 novembre 2026
+
+Attività, Analisi Ranking e carta PDF mostrano Non concluse, con dettaglio senza esito e tempo scaduto. Il totale include entrambi gli stati senza modificare quelli salvati: tempo scaduto conserva la sconfitta Ranking, senza esito non assegna V/S. Sono sottoinsiemi delle presenze, non partite aggiuntive. Il rendimento continua a considerare soltanto incontri con vincitore; l’indice di sfida conserva l’inclusione del tempo scaduto con coefficienti validi. Conteggio una volta per ID solo su partite completed; sottoconteggio Ranking separato da amichevoli/tornei.
+
+Le tessere hanno righe di altezza adattabile per mostrare le didascalie; verificati profilo alla dimensione iPhone e griglia isolata stretta con testo ingrandito. Caso Del Giovane: 20 presenze, 14 vittorie, 6 sconfitte, 1 non conclusa (0 senza esito / 1 tempo scaduto), 19 valutate nel rendimento. Build 22 per installazione diretta, nessun caricamento TestFlight autorizzato.

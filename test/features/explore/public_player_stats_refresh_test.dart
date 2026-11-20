@@ -179,11 +179,11 @@ void main() {
       expect(find.text('S'), findsOneWidget);
       expect(find.text('76%'), findsWidgets);
       await tester.scrollUntilVisible(
-        find.text('Non terminate'),
+        find.text('Non concluse'),
         300,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('Non terminate'), findsOneWidget);
+      expect(find.text('Non concluse'), findsOneWidget);
       expect(find.text('Con esito'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
@@ -233,7 +233,7 @@ void main() {
         'Da sfavorito',
         'Da favorito',
         'A parità',
-        'Non terminate',
+        'Non concluse',
       ]) {
         expect(
           find.descendant(of: section, matching: find.text(label)),
@@ -249,7 +249,10 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(of: section, matching: find.text('Senza esito')),
+        find.descendant(
+          of: section,
+          matching: find.text('1 senza esito · 0 tempo scaduto'),
+        ),
         findsOneWidget,
       );
       await tester.scrollUntilVisible(

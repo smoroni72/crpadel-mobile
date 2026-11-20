@@ -1,3 +1,4 @@
+import '../../../core/widgets/adaptive_metrics_grid.dart';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -868,13 +869,14 @@ class _PlayerPerformance extends ConsumerWidget {
             const SizedBox(height: 10),
             _MetricGroup(
               title: 'Attività',
+              captions: {'Non concluse': stats.nonConcludedDetails},
               icon: Icons.sports_tennis_outlined,
               color: Colors.orange,
               metrics: [
                 ('Ranking', '${stats.rankingMatches}'),
                 ('Amichevoli', '${stats.friendlyMatches}'),
                 ('Tornei', '${stats.tournamentMatches}'),
-                ('Senza esito', '${stats.undecided}'),
+                ('Non concluse', '${stats.nonConcludedMatches}'),
               ],
             ),
             const SizedBox(height: 14),
@@ -894,6 +896,7 @@ class _PlayerPerformance extends ConsumerWidget {
             const SizedBox(height: 14),
             _MetricGroup(
               title: 'Ranking',
+              captions: {'Non concluse': stats.nonConcludedRankingDetails},
               icon: Icons.workspace_premium_outlined,
               color: context.colors.primary,
               metrics: [
@@ -911,10 +914,7 @@ class _PlayerPerformance extends ConsumerWidget {
                   'A parità',
                   'Partite: ${stats.equalMatches}\nVittorie: ${stats.equalWins}',
                 ),
-                (
-                  'Non terminate',
-                  '${stats.unfinishedRankingMatches} · senza esito',
-                ),
+                ('Non concluse', '${stats.nonConcludedRankingMatches}'),
                 if (stats.rankingMatchesWithoutCoefficients > 0)
                   (
                     'Senza coefficienti',
@@ -1425,12 +1425,14 @@ class _MetricGroup extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.metrics,
+    this.captions = const {},
   });
 
   final String title;
   final IconData icon;
   final Color color;
   final List<(String, String)> metrics;
+  final Map<String, String> captions;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -1457,19 +1459,13 @@ class _MetricGroup extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 10),
-      GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: metrics.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: metrics.any((metric) => metric.$2.contains('\n'))
-              ? 1.35
-              : 2.35,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-        ),
-        itemBuilder: (context, index) {
+      AdaptiveMetricsGrid(
+        aspectRatio:
+            captions.isNotEmpty ||
+                metrics.any((metric) => metric.$2.contains('\n'))
+            ? 1.35
+            : 2.35,
+        children: List.generate(metrics.length, (index) {
           final metric = metrics[index];
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1500,10 +1496,18 @@ class _MetricGroup extends StatelessWidget {
                       )
                       .copyWith(height: metric.$2.contains('\n') ? 1.35 : null),
                 ),
+                if (captions[metric.$1] != null)
+                  Text(
+                    captions[metric.$1]!,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
               ],
             ),
           );
-        },
+        }),
       ),
     ],
   );

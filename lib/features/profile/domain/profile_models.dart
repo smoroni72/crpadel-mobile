@@ -279,6 +279,8 @@ class ProfileStats {
     this.bandColor,
     this.matchesLost = 0,
     this.undecided = 0,
+    this.timeExpiredMatches = 0,
+    this.timeExpiredRankingMatches = 0,
     this.rankingMatches = 0,
     this.friendlyMatches = 0,
     this.tournamentMatches = 0,
@@ -328,6 +330,16 @@ class ProfileStats {
   final String? bandColor;
   final int matchesLost;
   final int undecided;
+  final int timeExpiredMatches;
+  final int timeExpiredRankingMatches;
+
+  int get nonConcludedMatches => undecided + timeExpiredMatches;
+  int get nonConcludedRankingMatches =>
+      unfinishedRankingMatches + timeExpiredRankingMatches;
+  String get nonConcludedDetails =>
+      '$undecided senza esito · $timeExpiredMatches tempo scaduto';
+  String get nonConcludedRankingDetails =>
+      '$unfinishedRankingMatches senza esito · $timeExpiredRankingMatches tempo scaduto';
   final int rankingMatches;
   final int friendlyMatches;
   final int tournamentMatches;
