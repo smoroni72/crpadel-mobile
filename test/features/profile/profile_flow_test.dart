@@ -67,6 +67,27 @@ void main() {
     expect(find.text('63%'), findsWidgets);
   });
 
+  testWidgets(
+    'activity includes time expired with a readable separate breakdown',
+    (tester) async {
+      final profile = FakeProfileRepository(
+        profileStats: const ProfileStats(
+          matchesPlayed: 20,
+          matchesWon: 14,
+          matchesLost: 6,
+          rankingMatches: 20,
+          timeExpiredMatches: 1,
+          timeExpiredRankingMatches: 1,
+        ),
+      );
+      await openProfile(tester, FakeBackend(profile: profile));
+      await tester.pumpAndSettle();
+      await scrollTo(tester, find.text('Non concluse').first);
+      expect(find.text('0 senza esito · 1 tempo scaduto'), findsWidgets);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('ranking distingue chiaramente partite e vittorie', (
     tester,
   ) async {

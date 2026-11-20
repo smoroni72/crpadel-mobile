@@ -4,8 +4,59 @@ import 'package:crpadel_mobile/features/profile/domain/performance_details.dart'
 import 'package:crpadel_mobile/features/profile/data/profile_repository.dart';
 import 'package:crpadel_mobile/features/profile/presentation/widgets/player_expected_performance.dart';
 import '../../helpers/fake_http.dart';
+import 'package:crpadel_mobile/features/profile/domain/profile_models.dart';
 
 void main() {
+  test(
+    'time expired remains a ranking loss and also appears as a non-concluded match',
+    () async {
+      final expired = {
+        'id': 'expired',
+        'status': 'completed',
+        'match_type': 'ranking',
+        'result_outcome': 'time_expired',
+      };
+      expect(
+        countTimeExpired([
+          expired,
+          expired,
+          {...expired, 'id': 'pending', 'status': 'pending_result'},
+          {...expired, 'id': 'unfinished', 'result_outcome': 'unfinished'},
+        ]),
+        1,
+      );
+      final repo = ApiProfileRepository(
+        fakeApiClient(
+          FakeAdapter(
+            (_) => (
+              200,
+              {
+                'data': {
+                  'period': {
+                    'matches_played': 20,
+                    'wins': 14,
+                    'losses': 6,
+                    'undecided': 0,
+                    'unfinished_ranking_matches': 0,
+                  },
+                  'matches': [expired],
+                },
+              },
+            ),
+          ),
+        ),
+      );
+      final stats = await repo.publicStats(
+        player: const PlayerRanking(playerName: 'Stefano', playerRef: 'p'),
+      );
+      expect(stats.matchesPlayed, 20);
+      expect(stats.matchesLost, 6);
+      expect(stats.undecided, 0);
+      expect(stats.nonConcludedMatches, 1);
+      expect(stats.nonConcludedRankingMatches, 1);
+      expect(stats.nonConcludedDetails, '0 senza esito · 1 tempo scaduto');
+    },
+  );
   test(
     'linked user ranking supplies score and band when email lookup returns no row',
     () async {

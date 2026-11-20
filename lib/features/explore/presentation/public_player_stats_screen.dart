@@ -1,3 +1,4 @@
+import '../../../core/widgets/adaptive_metrics_grid.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -98,11 +99,12 @@ class _PublicPlayerStatsScreenState
                       label: 'Win rate',
                       value: '${stats.winRate}%',
                     ),
-                    if (stats.undecided > 0) ...[
+                    if (stats.nonConcludedMatches > 0) ...[
                       _Metric(
                         icon: Icons.timelapse_rounded,
-                        label: 'Non terminate',
-                        value: '${stats.undecided}',
+                        label: 'Non concluse',
+                        value: '${stats.nonConcludedMatches}',
+                        detail: stats.nonConcludedDetails,
                       ),
                       _Metric(
                         icon: Icons.check_circle_outline,
@@ -203,9 +205,9 @@ class _PublicPlayerStatsScreenState
                     ),
                     _Metric(
                       icon: Icons.pause_circle_outline_rounded,
-                      label: 'Non terminate',
-                      value: '${stats.unfinishedRankingMatches}',
-                      detail: 'Senza esito',
+                      label: 'Non concluse',
+                      value: '${stats.nonConcludedRankingMatches}',
+                      detail: stats.nonConcludedRankingDetails,
                     ),
                     if (showRankingDetails) ...[
                       _Metric(
@@ -694,15 +696,8 @@ class _MetricsGrid extends StatelessWidget {
   final List<Widget> children;
   final double ratio;
   @override
-  Widget build(BuildContext context) => GridView.count(
-    crossAxisCount: 2,
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    childAspectRatio: ratio,
-    mainAxisSpacing: 10,
-    crossAxisSpacing: 10,
-    children: children,
-  );
+  Widget build(BuildContext context) =>
+      AdaptiveMetricsGrid(aspectRatio: ratio, spacing: 10, children: children);
 }
 
 class _Metric extends StatelessWidget {

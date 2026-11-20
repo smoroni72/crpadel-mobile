@@ -252,6 +252,8 @@ class ApiProfileRepository implements ProfileRepository {
             1 << 30,
           ),
       undecided: (totals['undecided'] as num?)?.toInt() ?? 0,
+      timeExpiredMatches: countTimeExpired(history),
+      timeExpiredRankingMatches: countTimeExpired(history, rankingOnly: true),
       rankingMatches: (totals['ranking_matches'] as num?)?.toInt() ?? 0,
       friendlyMatches: (totals['friendly_matches'] as num?)?.toInt() ?? 0,
       tournamentMatches: (totals['tournament_matches'] as num?)?.toInt() ?? 0,
@@ -369,6 +371,8 @@ class ApiProfileRepository implements ProfileRepository {
           (totals['losses'] as num?)?.toInt() ??
           (player.matchesPlayed - player.matchesWon).clamp(0, 1 << 30),
       undecided: (totals['undecided'] as num?)?.toInt() ?? 0,
+      timeExpiredMatches: countTimeExpired(history),
+      timeExpiredRankingMatches: countTimeExpired(history, rankingOnly: true),
       rankingMatches: (totals['ranking_matches'] as num?)?.toInt() ?? 0,
       friendlyMatches: (totals['friendly_matches'] as num?)?.toInt() ?? 0,
       tournamentMatches: (totals['tournament_matches'] as num?)?.toInt() ?? 0,

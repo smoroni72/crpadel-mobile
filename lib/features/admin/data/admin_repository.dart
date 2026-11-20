@@ -266,6 +266,8 @@ class AdminPlayerStatistics {
     this.equalMatches = 0,
     this.equalWins = 0,
     this.unfinishedRankingMatches = 0,
+    this.timeExpiredMatches = 0,
+    this.timeExpiredRankingMatches = 0,
     required this.favoriteMatches,
     required this.favoriteWins,
     this.performanceExpectation,
@@ -293,6 +295,11 @@ class AdminPlayerStatistics {
   final int equalMatches;
   final int equalWins;
   final int unfinishedRankingMatches;
+  final int timeExpiredMatches;
+  final int timeExpiredRankingMatches;
+  int get nonConcludedMatches => undecided + timeExpiredMatches;
+  int get nonConcludedRankingMatches =>
+      unfinishedRankingMatches + timeExpiredRankingMatches;
   final int favoriteMatches;
   final int favoriteWins;
   final Map<String, dynamic>? performanceExpectation;
@@ -329,6 +336,11 @@ class AdminPlayerStatistics {
       equalMatches: _intValue(totals['equal_matches']),
       equalWins: _intValue(totals['equal_wins']),
       unfinishedRankingMatches: _intValue(totals['unfinished_ranking_matches']),
+      timeExpiredMatches: countTimeExpired(json['matches'] as List? ?? []),
+      timeExpiredRankingMatches: countTimeExpired(
+        json['matches'] as List? ?? [],
+        rankingOnly: true,
+      ),
       favoriteMatches: _intValue(totals['favorite_matches']),
       favoriteWins: _intValue(totals['favorite_wins']),
       performanceExpectation: performanceDetails(json),
