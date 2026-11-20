@@ -10,6 +10,7 @@ import '../../profile/domain/profile_models.dart';
 import '../../profile/presentation/widgets/player_avatar.dart';
 import 'explore_providers.dart';
 import 'public_player_stats_screen.dart';
+import 'published_statistics.dart';
 
 class RankingsScreen extends ConsumerStatefulWidget {
   const RankingsScreen({super.key});
@@ -70,6 +71,10 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
     // nei primi giorni del mese non viene mostrata una classifica ancora vuota.
     _month = DateTime(now.year, now.month - 1);
     _summaryRefresh = Timer.periodic(const Duration(minutes: 1), (_) {
+      ref.invalidate(statisticPublicationProvider);
+      for (final key in ['tiebreaks', 'final_tiebreaks', 'challenge']) {
+        ref.invalidate(publishedStatisticProvider(key));
+      }
       ref.invalidate(rankingMatchSummaryProvider);
       if (_view == _RankingView.mostPlayed) {
         ref.invalidate(mostPlayedRankingsProvider);
@@ -87,6 +92,10 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   String get _monthKey => DateFormat('yyyy-MM').format(_month);
 
   Future<void> _refresh() async {
+    ref.invalidate(statisticPublicationProvider);
+    for (final key in ['tiebreaks', 'final_tiebreaks', 'challenge']) {
+      ref.invalidate(publishedStatisticProvider(key));
+    }
     ref.invalidate(rankingMatchSummaryProvider);
     switch (_view) {
       case _RankingView.general:
@@ -213,186 +222,237 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Classifiche')),
-    body: RefreshIndicator(
-      onRefresh: _refresh,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-        children: [
-          const _PlayedMatchesTotal(),
-          const SizedBox(height: 16),
-          SegmentedButton<_RankingView>(
-            emptySelectionAllowed: true,
-            showSelectedIcon: false,
-            segments: const [
-              ButtonSegment(
-                value: _RankingView.general,
-                icon: Icon(Icons.format_list_numbered, size: 18),
-                label: Text('Generale'),
+  Widget build(BuildContext context) {
+    final visible =
+        ref.watch(statisticPublicationProvider).asData?.value ??
+        <String, bool>{};
+    const keys = {
+      _RankingView.general: 'general',
+      _RankingView.monthly: 'monthly',
+      _RankingView.decades: 'decades',
+      _RankingView.mostPlayed: 'attendance',
+    };
+    final available = keys.keys
+        .where((key) => visible[keys[key]] == true)
+        .toList();
+    final view = available.contains(_view)
+        ? _view
+        : (available.isEmpty ? _view : available.first);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Classifiche')),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+          children: [
+            const _PlayedMatchesTotal(),
+            const PublishedStatistics(),
+            const SizedBox(height: 16),
+            if (available.any((v) => v != _RankingView.mostPlayed))
+              SegmentedButton<_RankingView>(
+                emptySelectionAllowed: true,
+                showSelectedIcon: false,
+                segments: [
+                  if (visible['general'] == true)
+                    const ButtonSegment(
+                      value: _RankingView.general,
+                      icon: Icon(Icons.format_list_numbered, size: 18),
+                      label: Text('Generale'),
+                    ),
+                  if (visible['monthly'] == true)
+                    const ButtonSegment(
+                      value: _RankingView.monthly,
+                      icon: Icon(Icons.calendar_month_outlined, size: 18),
+                      label: Text('Mensile'),
+                    ),
+                  if (visible['decades'] == true)
+                    const ButtonSegment(
+                      value: _RankingView.decades,
+                      icon: Icon(Icons.history, size: 18),
+                      label: Text('Decadi'),
+                    ),
+                ],
+                selected: view == _RankingView.mostPlayed ? {} : {view},
+                onSelectionChanged: (selection) => selection.isEmpty
+                    ? null
+                    : setState(() => _view = selection.single),
               ),
-              ButtonSegment(
-                value: _RankingView.monthly,
-                icon: Icon(Icons.calendar_month_outlined, size: 18),
-                label: Text('Mensile'),
+            const SizedBox(height: 8),
+            if (visible['attendance'] == true)
+              OutlinedButton.icon(
+                onPressed: () =>
+                    setState(() => _view = _RankingView.mostPlayed),
+                icon: const Icon(Icons.emoji_events_outlined),
+                label: const Text('Chi ha giocato di più'),
+                style: view == _RankingView.mostPlayed
+                    ? OutlinedButton.styleFrom(
+                        backgroundColor: context.colors.primary.withValues(
+                          alpha: .1,
+                        ),
+                        foregroundColor: context.colors.primaryText,
+                        side: BorderSide(color: context.colors.primary),
+                      )
+                    : null,
               ),
-              ButtonSegment(
-                value: _RankingView.decades,
-                icon: Icon(Icons.history, size: 18),
-                label: Text('Decadi'),
+            const SizedBox(height: 20),
+            if (view == _RankingView.general) ...[
+              StatisticVisibility(
+                reportKey: 'general',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Classifica generale',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Graduatoria ufficiale aggiornata',
+                      style: TextStyle(color: context.colors.textSecondary),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      key: const ValueKey('general-player-search'),
+                      controller: _generalSearch,
+                      autocorrect: false,
+                      textInputAction: TextInputAction.search,
+                      onChanged: (value) =>
+                          setState(() => _generalQuery = value),
+                      onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                      decoration: InputDecoration(
+                        labelText: 'Cerca giocatore',
+                        hintText: 'Nome o cognome',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _generalQuery.isEmpty
+                            ? null
+                            : IconButton(
+                                tooltip: 'Cancella ricerca giocatore',
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  _generalSearch.clear();
+                                  setState(() => _generalQuery = '');
+                                },
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    AsyncValueView(
+                      value: ref.watch(fullRankingsProvider),
+                      errorText: 'Non riesco a caricare la classifica',
+                      onRetry: () => ref.invalidate(fullRankingsProvider),
+                      data: (players) {
+                        final terms = _rankingSearchText(_generalQuery)
+                            .trim()
+                            .split(RegExp(r'\s+'))
+                            .where((term) => term.isNotEmpty);
+                        final matches = players.indexed
+                            .where(
+                              (entry) => terms.every(
+                                (term) => _rankingSearchText(
+                                  entry.$2.playerName,
+                                ).contains(term),
+                              ),
+                            )
+                            .toList();
+                        if (players.isEmpty) {
+                          return const Center(
+                            child: Text('Nessun giocatore in classifica'),
+                          );
+                        }
+                        if (matches.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Text(
+                              'Nessun giocatore trovato. Prova un altro nome o cognome.',
+                            ),
+                          );
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (terms.isNotEmpty) ...[
+                              Text(
+                                '${matches.length} di ${players.length} giocatori',
+                                style: TextStyle(
+                                  color: context.colors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            for (final entry in matches) ...[
+                              _RankingRow(
+                                player: entry.$2,
+                                position: entry.$2.position > 0
+                                    ? entry.$2.position
+                                    : entry.$1 + 1,
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (view == _RankingView.monthly) ...[
+              StatisticVisibility(
+                reportKey: 'monthly',
+                child: Column(
+                  children: [
+                    _MonthlyHeader(month: _month, onSelectMonth: _selectMonth),
+                    const SizedBox(height: 12),
+                    _MonthlyFilters(
+                      onlyEligible: _onlyEligible,
+                      onOnlyEligibleChanged: (value) =>
+                          setState(() => _onlyEligible = value),
+                    ),
+                    const SizedBox(height: 12),
+                    AsyncValueView(
+                      value: ref.watch(monthlyRankingsProvider(_monthKey)),
+                      errorText: 'Non riesco a caricare la classifica mensile',
+                      onRetry: () =>
+                          ref.invalidate(monthlyRankingsProvider(_monthKey)),
+                      data: (result) => _MonthlyRankingSection(
+                        result: result,
+                        onlyEligible: _onlyEligible,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (view == _RankingView.mostPlayed) ...[
+              StatisticVisibility(
+                reportKey: 'attendance',
+                child: AsyncValueView(
+                  value: ref.watch(mostPlayedRankingsProvider),
+                  errorText: 'Non riesco a caricare le presenze Ranking',
+                  onRetry: () => ref.invalidate(mostPlayedRankingsProvider),
+                  data: (result) => _MostPlayedSection(result: result),
+                ),
+              ),
+            ] else ...[
+              StatisticVisibility(
+                reportKey: 'decades',
+                child: AsyncValueView(
+                  value: ref.watch(decadeRankingsProvider(_decadeStart)),
+                  errorText:
+                      'Non riesco a caricare le classifiche delle decadi',
+                  onRetry: () =>
+                      ref.invalidate(decadeRankingsProvider(_decadeStart)),
+                  data: (result) => _DecadeRankingSection(
+                    result: result,
+                    onSelectPeriod: () => _selectDecade(result),
+                  ),
+                ),
               ),
             ],
-            selected: _view == _RankingView.mostPlayed ? {} : {_view},
-            onSelectionChanged: (selection) => selection.isEmpty
-                ? null
-                : setState(() => _view = selection.single),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () => setState(() => _view = _RankingView.mostPlayed),
-            icon: const Icon(Icons.emoji_events_outlined),
-            label: const Text('Chi ha giocato di più'),
-            style: _view == _RankingView.mostPlayed
-                ? OutlinedButton.styleFrom(
-                    backgroundColor: context.colors.primary.withValues(
-                      alpha: .1,
-                    ),
-                    foregroundColor: context.colors.primaryText,
-                    side: BorderSide(color: context.colors.primary),
-                  )
-                : null,
-          ),
-          const SizedBox(height: 20),
-          if (_view == _RankingView.general) ...[
-            Text(
-              'Classifica generale',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Graduatoria ufficiale aggiornata',
-              style: TextStyle(color: context.colors.textSecondary),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const ValueKey('general-player-search'),
-              controller: _generalSearch,
-              autocorrect: false,
-              textInputAction: TextInputAction.search,
-              onChanged: (value) => setState(() => _generalQuery = value),
-              onSubmitted: (_) => FocusScope.of(context).unfocus(),
-              decoration: InputDecoration(
-                labelText: 'Cerca giocatore',
-                hintText: 'Nome o cognome',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _generalQuery.isEmpty
-                    ? null
-                    : IconButton(
-                        tooltip: 'Cancella ricerca giocatore',
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          _generalSearch.clear();
-                          setState(() => _generalQuery = '');
-                        },
-                      ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            AsyncValueView(
-              value: ref.watch(fullRankingsProvider),
-              errorText: 'Non riesco a caricare la classifica',
-              onRetry: () => ref.invalidate(fullRankingsProvider),
-              data: (players) {
-                final terms = _rankingSearchText(
-                  _generalQuery,
-                ).trim().split(RegExp(r'\s+')).where((term) => term.isNotEmpty);
-                final matches = players.indexed
-                    .where(
-                      (entry) => terms.every(
-                        (term) => _rankingSearchText(
-                          entry.$2.playerName,
-                        ).contains(term),
-                      ),
-                    )
-                    .toList();
-                if (players.isEmpty) {
-                  return const Center(
-                    child: Text('Nessun giocatore in classifica'),
-                  );
-                }
-                if (matches.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Text(
-                      'Nessun giocatore trovato. Prova un altro nome o cognome.',
-                    ),
-                  );
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (terms.isNotEmpty) ...[
-                      Text(
-                        '${matches.length} di ${players.length} giocatori',
-                        style: TextStyle(color: context.colors.textSecondary),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    for (final entry in matches) ...[
-                      _RankingRow(
-                        player: entry.$2,
-                        position: entry.$2.position > 0
-                            ? entry.$2.position
-                            : entry.$1 + 1,
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                  ],
-                );
-              },
-            ),
-          ] else if (_view == _RankingView.monthly) ...[
-            _MonthlyHeader(month: _month, onSelectMonth: _selectMonth),
-            const SizedBox(height: 12),
-            _MonthlyFilters(
-              onlyEligible: _onlyEligible,
-              onOnlyEligibleChanged: (value) =>
-                  setState(() => _onlyEligible = value),
-            ),
-            const SizedBox(height: 12),
-            AsyncValueView(
-              value: ref.watch(monthlyRankingsProvider(_monthKey)),
-              errorText: 'Non riesco a caricare la classifica mensile',
-              onRetry: () => ref.invalidate(monthlyRankingsProvider(_monthKey)),
-              data: (result) => _MonthlyRankingSection(
-                result: result,
-                onlyEligible: _onlyEligible,
-              ),
-            ),
-          ] else if (_view == _RankingView.mostPlayed) ...[
-            AsyncValueView(
-              value: ref.watch(mostPlayedRankingsProvider),
-              errorText: 'Non riesco a caricare le presenze Ranking',
-              onRetry: () => ref.invalidate(mostPlayedRankingsProvider),
-              data: (result) => _MostPlayedSection(result: result),
-            ),
-          ] else ...[
-            AsyncValueView(
-              value: ref.watch(decadeRankingsProvider(_decadeStart)),
-              errorText: 'Non riesco a caricare le classifiche delle decadi',
-              onRetry: () =>
-                  ref.invalidate(decadeRankingsProvider(_decadeStart)),
-              data: (result) => _DecadeRankingSection(
-                result: result,
-                onSelectPeriod: () => _selectDecade(result),
-              ),
-            ),
           ],
-        ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _MostPlayedSection extends ConsumerStatefulWidget {

@@ -130,3 +130,7 @@ senza vittoria; 0-0 è escluso. Il dato conta i tie-break, non le partite.
 I client precedenti restano compatibili; se i nuovi campi sono assenti
 l'app usa zero. Le schede in classifica, il profilo personale e il dettaglio
 giocatore mostrano i due contatori. Nessuna modifica ai punti ranking.
+
+## 20 novembre 2026 — Pubblicazione statistiche
+
+GET `/statistics/configuration` restituisce `data[reportKey].app` e `.web`: l'app usa esclusivamente `app`. Nuovi report `tiebreaks`, `final_tiebreaks`, `challenge` privati per default. GET `/statistics/reports/:key?channel=app` richiede login e pubblicazione app; 404 se non pubblicato. Le quattro viste legacy `general`, `monthly`, `decades`, `attendance` mantengono visibilità predefinita. Su server precedenti (configuration 404), solo queste quattro restano disponibili. Errori diversi da 404 non abilitano report. API nuove implementate nel backend web, nessuna migrazione.

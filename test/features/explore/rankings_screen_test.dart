@@ -1,3 +1,4 @@
+import 'package:crpadel_mobile/features/explore/presentation/published_statistics.dart';
 import 'package:crpadel_mobile/features/explore/presentation/rankings_screen.dart';
 import 'package:crpadel_mobile/core/theme/app_theme.dart';
 import 'package:crpadel_mobile/features/profile/data/fake_profile_repository.dart';
@@ -43,7 +44,12 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+          overrides: [
+            statisticPublicationProvider.overrideWith(
+              (ref) async => {for (final key in legacyStatisticKeys) key: true},
+            ),
+            profileRepositoryProvider.overrideWithValue(repository),
+          ],
           child: MaterialApp(
             theme: AppTheme.light(),
             locale: const Locale('it', 'IT'),
@@ -153,7 +159,12 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+          overrides: [
+            profileRepositoryProvider.overrideWithValue(repository),
+            statisticPublicationProvider.overrideWith(
+              (ref) async => {for (final key in legacyStatisticKeys) key: true},
+            ),
+          ],
           child: MaterialApp(
             theme: AppTheme.light(),
             locale: const Locale('it', 'IT'),
@@ -308,7 +319,12 @@ void main() {
     );
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+        overrides: [
+          profileRepositoryProvider.overrideWithValue(repository),
+          statisticPublicationProvider.overrideWith(
+            (ref) async => {for (final key in legacyStatisticKeys) key: true},
+          ),
+        ],
         child: MaterialApp(
           theme: AppTheme.light(),
           locale: const Locale('it', 'IT'),
@@ -425,7 +441,12 @@ void main() {
     );
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+        overrides: [
+          profileRepositoryProvider.overrideWithValue(repository),
+          statisticPublicationProvider.overrideWith(
+            (ref) async => {for (final key in legacyStatisticKeys) key: true},
+          ),
+        ],
         child: MaterialApp(
           theme: AppTheme.light(),
           home: const RankingsScreen(),

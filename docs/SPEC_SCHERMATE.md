@@ -183,3 +183,6 @@ nessun accesso all’elenco amministrativo o modifica ai criteri di idoneità.
 Versione1.0.7 build24; nessun caricamento TestFlight/App Store.
 Verifiche: generazione senza modifiche, formattazione, analyze e198 test verdi;
 widget iPhone per ricerca inversa, maiuscole, accenti, vuoto e ripristino.
+## 20 novembre 2026 — Statistiche pubblicate
+
+La schermata Classifiche segue i toggle App del laboratorio amministrativo web. Le tre nuove sezioni mostrano podio e tabella estendibile; restano nascoste finché abilitate. Generale, mensile, decadi e presenze sono anch'esse controllabili. Nessuna modifica alle schede individuali. Refresh manuale/periodico aggiorna configurazione e report. Nessuna distribuzione iOS in questa attività.

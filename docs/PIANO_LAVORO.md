@@ -91,3 +91,7 @@ Progetto Firebase `crpadel-e82f1` (lo stesso delle notifiche web del sito).
 ## Lacune backend da seguire
 
 Elenco completo in `docs/API_BACKEND.md`. Le modifiche al backend si fanno nel repository CrPadel, con una sessione e una PR separate.
+
+## 20 novembre 2026 — Visibilità statistiche
+
+Implementati canale App indipendente dal Web, report TB/finali/indice e controllo delle quattro sezioni preesistenti. Analyze e suite completa 201 test superati. Branch codex/statistics-publication, in attesa di autorizzazione pubblicazione codice/PR. Nessuna nuova build né invio TestFlight/App Store.
