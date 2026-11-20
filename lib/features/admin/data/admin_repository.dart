@@ -1,3 +1,4 @@
+import '../../profile/domain/performance_details.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
@@ -330,9 +331,7 @@ class AdminPlayerStatistics {
       unfinishedRankingMatches: _intValue(totals['unfinished_ranking_matches']),
       favoriteMatches: _intValue(totals['favorite_matches']),
       favoriteWins: _intValue(totals['favorite_wins']),
-      performanceExpectation:
-          (json['performance_expectation'] as Map<String, dynamic>?)?['period']
-              as Map<String, dynamic>?,
+      performanceExpectation: performanceDetails(json),
       rankingPoints: _doubleValue(totals['ranking_points_earned']),
       averageRankingPoints: _doubleValue(totals['ranking_points_average']),
       favoriteStreak: _intValue(json['current_favorite_streak']),

@@ -144,3 +144,10 @@ Profilo personale, scheda giocatore pubblica e statistiche amministratore offron
 Il rendimento rispetto alle attese sostituisce PR conquistati/media PR e il riepilogo rettifiche nella scheda: differenza di vittorie ogni dieci incontri, partite valutate, vittorie ottenute e attese. Nessuna etichetta o spiegazione Sperimentale/Provvisorio. Stati senza dati non inventano un punteggio zero. Punti correnti di classifica e strumenti amministrativi restano disponibili. Nessuna modifica alle regole o ai calcoli API.
 
 La stampa usa pdf 3.13 e printing 5.15, compatibili con la libreria image esistente. Toolchain CI allineata alla Flutter 3.47.7 stabile utilizzata per la build iOS; SDK Dart minimo 3.12. Nessun downgrade delle dipendenze immagini.
+
+
+## Correzione identità Ranking ed esclusioni — 20 novembre 2026
+
+Punti, fascia e posizione del profilo usano la stessa riga collegata tramite ID utente/anagrafica. La ricerca per email è un ripiego; non si abbinano persone per nome. Fuori dalla classifica qualificata si può mostrare il punteggio salvato nell’anagrafica propria senza inventare una posizione.
+
+Il rendimento distingue presenze registrate e partite valutate e offre il dettaglio delle esclusioni con data, orario e motivo. Un tempo scaduto mantiene la sconfitta Ranking ma, non avendo vincitore, non entra nella stima delle vittorie attese. Esempio Del Giovane: 20 presenze, 19 valutate, esclusa l’11 novembre 12:30. Corretta anche la dicitura al singolare della serie attuale. Build 21 destinata all’installazione diretta sull’iPhone dell’utente; nessuna distribuzione TestFlight autorizzata.

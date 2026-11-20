@@ -368,6 +368,9 @@ class ProfileStats {
   final String? photoStorageId;
   final bool photoPublicConsent;
 
+  String get currentStreakLabel =>
+      '$currentStreakCount ${currentStreakType == 'win' ? (currentStreakCount == 1 ? 'vittoria' : 'vittorie') : (currentStreakCount == 1 ? 'sconfitta' : 'sconfitte')}';
+
   /// Le partite senza esito non assegnano vittorie o sconfitte.
   int get decidedMatches => matchesWon + matchesLost;
   int get winRate =>

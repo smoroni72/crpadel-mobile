@@ -68,6 +68,30 @@ class PlayerExpectedPerformance extends StatelessWidget {
               const Text(
                 'Un valore positivo indica più vittorie del previsto; un valore negativo, meno vittorie del previsto.',
               ),
+              if ((e['excluded_matches'] as num? ?? 0) > 0) ...[
+                const SizedBox(height: 12),
+                Text(
+                  '${(e['matches_played'] as num? ?? 0) + (e['excluded_matches'] as num? ?? 0)} partite Ranking registrate · ${e['matches_played']} valutate',
+                ),
+                Text(
+                  '${e['excluded_matches']} ${(e['excluded_matches'] as num) == 1 ? 'partita esclusa' : 'partite escluse'}: il rendimento considera solo incontri con vincitore e coefficienti completi.',
+                ),
+                if ((e['excluded_details'] as List? ?? []).isNotEmpty)
+                  ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    title: const Text('Vedi le partite escluse'),
+                    children: [
+                      for (final m in e['excluded_details'] as List)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            '${m['date']?.split('-').reversed.join('/')} · ${m['time'] ?? 'Orario non indicato'}',
+                          ),
+                          subtitle: Text('${m['reason']}'),
+                        ),
+                    ],
+                  ),
+              ],
             ] else
               Text(
                 e['status'] == 'no_matches'

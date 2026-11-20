@@ -1037,8 +1037,7 @@ class _PersonalHighlights extends StatelessWidget {
           _PersonalHighlightTile(
             icon: Icons.local_fire_department_rounded,
             title: 'Serie attuale',
-            value:
-                '${stats.currentStreakCount} ${stats.currentStreakType == 'win' ? 'vittorie' : 'sconfitte'}',
+            value: stats.currentStreakLabel,
           ),
         ],
       ],

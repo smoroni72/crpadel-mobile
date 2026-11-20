@@ -249,7 +249,7 @@ void main() {
           'data': [
             _row('a', 'Primo'),
             _row('b', 'Secondo'),
-            _row('user-1', 'Mario Rossi'),
+            _row('user-1', 'Mario Rossi', played: 24, won: 15),
           ],
         },
       );

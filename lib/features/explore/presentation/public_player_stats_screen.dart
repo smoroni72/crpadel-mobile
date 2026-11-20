@@ -340,8 +340,7 @@ class _PlayerHighlights extends StatelessWidget {
                   ? Icons.local_fire_department_rounded
                   : Icons.refresh_rounded,
               title: 'Serie attuale',
-              value:
-                  '${stats.currentStreakCount} ${stats.currentStreakType == 'win' ? 'vittorie' : 'sconfitte'}',
+              value: stats.currentStreakLabel,
               detail: stats.currentStreakType == 'win'
                   ? 'Momento positivo'
                   : 'Pronto a ripartire',
