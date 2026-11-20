@@ -527,8 +527,8 @@ pw.Page playerCardCover(
               width: 386,
               child: text(
                 challenge == null
-                    ? 'L’indice di sfida sarà disponibile quando saranno registrati i coefficienti delle coppie.'
-                    : 'Media su ${number(t['challenge_matches'])} partite Ranking. Pari/sfavorito: 100; favorito: 100 x (1 - vantaggio / 6,5), minimo 0. Inclusi Bianchi e tempi scaduti; escluse le partite senza esito.',
+                    ? 'Media coefficiente di difficoltà non disponibile.'
+                    : 'Media coefficiente di difficoltà calcolata su ${number(t['challenge_matches'])} ${t['challenge_matches'] == 1 ? 'partita' : 'partite'}.',
                 7.3,
               ),
             ),
