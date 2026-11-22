@@ -29,6 +29,21 @@ class RankingsScreen extends ConsumerStatefulWidget {
 
 enum _RankingView { general, monthly, decades, mostPlayed }
 
+String _rankingSearchText(String value) {
+  var normalized = value.toLowerCase();
+  for (final entry in const {
+    'a': '[àáâäãå]',
+    'e': '[èéêë]',
+    'i': '[ìíîï]',
+    'o': '[òóôöõ]',
+    'u': '[ùúûü]',
+    'c': '[ç]',
+  }.entries) {
+    normalized = normalized.replaceAll(RegExp(entry.value), entry.key);
+  }
+  return normalized;
+}
+
 void _openPlayerStats(BuildContext context, PlayerRanking player) {
   if (player.playerRef == null || player.playerRef!.isEmpty) return;
   Navigator.of(context).push(
@@ -44,6 +59,8 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   bool _onlyEligible = false;
   String? _decadeStart;
   Timer? _summaryRefresh;
+  final _generalSearch = TextEditingController();
+  String _generalQuery = '';
 
   @override
   void initState() {
@@ -63,6 +80,7 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
   @override
   void dispose() {
     _summaryRefresh?.cancel();
+    _generalSearch.dispose();
     super.dispose();
   }
 
@@ -257,30 +275,82 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
               style: TextStyle(color: context.colors.textSecondary),
             ),
             const SizedBox(height: 12),
+            TextField(
+              key: const ValueKey('general-player-search'),
+              controller: _generalSearch,
+              autocorrect: false,
+              textInputAction: TextInputAction.search,
+              onChanged: (value) => setState(() => _generalQuery = value),
+              onSubmitted: (_) => FocusScope.of(context).unfocus(),
+              decoration: InputDecoration(
+                labelText: 'Cerca giocatore',
+                hintText: 'Nome o cognome',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _generalQuery.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Cancella ricerca giocatore',
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          _generalSearch.clear();
+                          setState(() => _generalQuery = '');
+                        },
+                      ),
+              ),
+            ),
+            const SizedBox(height: 12),
             AsyncValueView(
               value: ref.watch(fullRankingsProvider),
               errorText: 'Non riesco a caricare la classifica',
               onRetry: () => ref.invalidate(fullRankingsProvider),
-              data: (players) => players.isEmpty
-                  ? const Center(child: Text('Nessun giocatore in classifica'))
-                  : Column(
-                      children: [
-                        for (
-                          var index = 0;
-                          index < players.length;
-                          index++
-                        ) ...[
-                          _RankingRow(
-                            player: players[index],
-                            position: players[index].position > 0
-                                ? players[index].position
-                                : index + 1,
-                          ),
-                          if (index < players.length - 1)
-                            const SizedBox(height: 8),
-                        ],
-                      ],
+              data: (players) {
+                final terms = _rankingSearchText(
+                  _generalQuery,
+                ).trim().split(RegExp(r'\s+')).where((term) => term.isNotEmpty);
+                final matches = players.indexed
+                    .where(
+                      (entry) => terms.every(
+                        (term) => _rankingSearchText(
+                          entry.$2.playerName,
+                        ).contains(term),
+                      ),
+                    )
+                    .toList();
+                if (players.isEmpty) {
+                  return const Center(
+                    child: Text('Nessun giocatore in classifica'),
+                  );
+                }
+                if (matches.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text(
+                      'Nessun giocatore trovato. Prova un altro nome o cognome.',
                     ),
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (terms.isNotEmpty) ...[
+                      Text(
+                        '${matches.length} di ${players.length} giocatori',
+                        style: TextStyle(color: context.colors.textSecondary),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    for (final entry in matches) ...[
+                      _RankingRow(
+                        player: entry.$2,
+                        position: entry.$2.position > 0
+                            ? entry.$2.position
+                            : entry.$1 + 1,
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ],
+                );
+              },
             ),
           ] else if (_view == _RankingView.monthly) ...[
             _MonthlyHeader(month: _month, onSelectMonth: _selectMonth),
