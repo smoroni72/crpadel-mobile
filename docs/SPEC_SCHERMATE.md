@@ -186,3 +186,11 @@ widget iPhone per ricerca inversa, maiuscole, accenti, vuoto e ripristino.
 ## 20 novembre 2026 — Statistiche pubblicate
 
 La schermata Classifiche segue i toggle App del laboratorio amministrativo web. Le tre nuove sezioni mostrano podio e tabella estendibile; restano nascoste finché abilitate. Generale, mensile, decadi e presenze sono anch'esse controllabili. Nessuna modifica alle schede individuali. Refresh manuale/periodico aggiorna configurazione e report. Nessuna distribuzione iOS in questa attività.
+
+
+## Rilascio completo store - 22 novembre 2026
+
+L’utente autorizza la pubblicazione pubblica su Apple App Store e Google Play.
+Build 25 comprende ricerca generale, carta PDF aggiornata, rendimento, partite
+non concluse e statistiche controllate dai toggle App dell’amministratore.
+La build 24 già caricata su Apple è superata da questa integrazione.
