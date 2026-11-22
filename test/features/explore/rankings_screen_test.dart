@@ -13,6 +13,73 @@ void main() {
   setUpAll(() => initializeDateFormatting('it_IT'));
 
   testWidgets(
+    'ricerca generale per nome e cognome conserva posizione e punteggio',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repository = FakeProfileRepository(
+        rankings: const [
+          PlayerRanking(
+            playerName: 'ROSSI MARIO',
+            playerRef: 'p1',
+            position: 1,
+            eloScore: 1183.5,
+          ),
+          PlayerRanking(
+            playerName: 'BIANCHI LUCA',
+            playerRef: 'p5',
+            position: 5,
+            eloScore: 1177.0,
+          ),
+          PlayerRanking(
+            playerName: 'VERDI NICOLÒ',
+            playerRef: 'p12',
+            position: 12,
+            eloScore: 1170.0,
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            locale: const Locale('it', 'IT'),
+            home: const RankingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final field = find.byKey(const ValueKey('general-player-search'));
+      await tester.ensureVisible(field);
+      await tester.enterText(field, '  luCA   bianchi ');
+      await tester.pumpAndSettle();
+      expect(find.text('BIANCHI LUCA'), findsOneWidget);
+      expect(find.text('ROSSI MARIO'), findsNothing);
+      expect(find.text('#5'), findsOneWidget);
+      expect(find.text('#1'), findsNothing);
+      expect(find.text('1 di 3 giocatori'), findsOneWidget);
+      await tester.enterText(field, 'nicolo');
+      await tester.pumpAndSettle();
+      expect(find.text('VERDI NICOLÒ'), findsOneWidget);
+      expect(find.text('#12'), findsOneWidget);
+      await tester.enterText(field, 'inesistente');
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Nessun giocatore trovato'), findsOneWidget);
+      await tester.tap(find.byTooltip('Cancella ricerca giocatore'));
+      await tester.pumpAndSettle();
+      expect(find.text('ROSSI MARIO'), findsOneWidget);
+      expect(find.text('BIANCHI LUCA'), findsOneWidget);
+      expect(find.textContaining('Nessun giocatore trovato'), findsNothing);
+      expect(repository.rankings[1].position, 5);
+      expect(repository.rankings[1].eloScore, 1177.0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'classifica presenze mostra storico ed esiti su schermo telefono',
     (tester) async {
       tester.view.physicalSize = const Size(390, 844);

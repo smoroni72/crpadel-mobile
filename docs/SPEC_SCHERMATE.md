@@ -165,3 +165,21 @@ Le tessere hanno righe di altezza adattabile per mostrare le didascalie; verific
 Su richiesta utente, la carta generata nell’app riprende la grafica approvata della carta web: copertina blu, fascia colorata, foto/iniziali in cerchio, caratteri Space Grotesk e JetBrains Mono, riquadri su sfondo chiaro, grafico circolare vittorie, animaletto grande con barra e ultime cinque V/S. Le altre pagine hanno testata blu e lo stesso sfondo. Restano tre pagine per i casi normali; i compagni a pari merito possono richiedere proseguimenti.
 
 Non ripristinare i vecchi PR/bonus/decade o le spiegazioni sperimentali: tutti i dati aggiornati, rendimento rispetto alle attese e conteggio Non concluse restano presenti. Nessuna modifica a punti, classifica, esiti o API. Copertina separata in player_card_cover.dart e font/immagini opzionali iniettati per QA. Build 23 destinata all’installazione diretta autorizzata; nessuna distribuzione TestFlight.
+
+
+## Ricerca nella classifica generale — 22 novembre 2026
+
+Campo “Cerca giocatore” tra il sottotitolo della generale e l’elenco. Filtra in
+locale la classifica ufficiale già caricata per nome/cognome, con più termini
+in qualsiasi ordine, senza distinzione tra maiuscole o accenti. Conteggio dei
+risultati, pulsante “Cancella ricerca giocatore”, messaggio se nessun nome
+corrisponde; tasto Cerca della tastiera chiude la tastiera.
+
+Conserva posizione ufficiale, punteggio, colore, foto e accesso alla scheda del
+giocatore; il ripiego per posizione assente usa l’indice originario, mai quello
+filtrato. La ricerca rimane tornando alla Generale durante la stessa apertura
+della schermata. Il controller è rilasciato alla chiusura. Nessuna nuova API,
+nessun accesso all’elenco amministrativo o modifica ai criteri di idoneità.
+Versione1.0.7 build24; nessun caricamento TestFlight/App Store.
+Verifiche: generazione senza modifiche, formattazione, analyze e198 test verdi;
+widget iPhone per ricerca inversa, maiuscole, accenti, vuoto e ripristino.
