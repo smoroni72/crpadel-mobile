@@ -67,6 +67,18 @@ void main() {
     expect(find.text('63%'), findsWidgets);
   });
 
+  testWidgets('personal PDF is visible immediately even when stats fail', (
+    tester,
+  ) async {
+    final profile = FakeProfileRepository()
+      ..error = StateError('Stats unavailable');
+    await openProfile(tester, FakeBackend(profile: profile));
+    final button = find.text('Carta giocatore PDF · stampa e condividi');
+    expect(button, findsOneWidget);
+    expect(button.hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'activity includes time expired with a readable separate breakdown',
     (tester) async {

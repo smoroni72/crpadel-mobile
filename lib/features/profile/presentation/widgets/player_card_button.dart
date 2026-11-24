@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 
 import '../../../../core/providers.dart';
 import '../../data/player_card_pdf.dart';
+import '../../data/player_card_repository.dart';
 
 class PlayerCardButton extends ConsumerStatefulWidget {
   const PlayerCardButton({super.key, this.playerId, this.compact = false});
@@ -20,22 +21,7 @@ class _PlayerCardButtonState extends ConsumerState<PlayerCardButton> {
     setState(() => _loading = true);
     try {
       final api = ref.read(apiClientProvider);
-      var id = widget.playerId;
-      if (id == null) {
-        final r = await api.get('/players/directory');
-        final players = ((r.data as Map)['data'] as List).cast<Map>();
-        id =
-            players.where((p) => p['is_self'] == true).firstOrNull?['id']
-                as String?;
-      }
-      if (id == null || id.isEmpty) {
-        throw StateError('Giocatore non disponibile');
-      }
-      final r = await api.get(
-        '/players/$id/statistics',
-        query: {'public_view': true, 'include_card': true},
-      );
-      final data = Map<String, dynamic>.from((r.data as Map)['data'] as Map);
+      final data = await loadPlayerCardData(api, playerId: widget.playerId);
       final bytes = await createPlayerCardPdf(data);
       if (!mounted) return;
       final name = ((data['card'] as Map)['player'] as Map)['name'] as String;
